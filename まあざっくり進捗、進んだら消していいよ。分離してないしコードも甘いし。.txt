@@ -1,0 +1,218 @@
+まあざっくり進捗、進んだら消していいよ。分離してないしコードも甘いし。
+import React, { useState, useEffect } from 'react';
+
+const SUITS = ['♠', '♥', '♦', '♣'];
+const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const JOKERS = ['JOKER1', 'JOKER2'];
+
+function createDeck() {
+  let deck = [];
+  SUITS.forEach(suit => {
+    RANKS.forEach(rank => {
+      deck.push({ suit, rank });
+    });
+  });
+  JOKERS.forEach(joker => {
+    deck.push({ suit: null, rank: joker });
+  });
+  return deck;
+}
+
+function shuffleDeck(deck) {
+  let array = [...deck];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function PlayerHand({ playerName, cards, onCardClick, disabled }) {
+  return (
+    <div>
+      <h3>{playerName}</h3>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {cards.map((card, idx) => (
+          <div
+            key={idx}
+            onClick={() => !disabled && onCardClick(idx)}
+            style={{
+              padding: '8px',
+              border: '1px solid black',
+              minWidth: '40px',
+              textAlign: 'center',
+              cursor: disabled ? 'not-allowed' : 'pointer',
+              userSelect: 'none',
+              opacity: disabled ? 0.5 : 1,
+            }}
+          >
+            {card.suit ? `${card.rank}${card.suit}` : card.rank}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  const [deck, setDeck] = useState([]);
+  const [players, setPlayers] = useState([
+    { name: 'Player 1', hand: [] },
+    { name: 'Player 2', hand: [] },
+    { name: 'Player 3', hand: [] },
+  ]);
+  const [fieldCards, setFieldCards] = useState([]); // 場に出たカード
+  const [turnCount, setTurnCount] = useState(0);
+
+  // 初期デッキ生成＆配布
+  useEffect(() => {
+    let newDeck = createDeck();
+    newDeck = shuffleDeck(newDeck);
+    setDeck(newDeck);
+
+    // 配布処理
+    const hands = [[], [], []];
+    for (let i = 0; i < 15; i++) {
+      hands[i % 3].push(newDeck[i]);
+    }
+    setPlayers(players.map((p, i) => ({ ...p, hand: hands[i] })));
+    setDeck(newDeck.slice(15));
+  }, []);
+
+  const [lastRoundWarning, setLastRoundWarning] = useState(false);
+const [roundResult, setRoundResult] = useState(null);
+
+
+
+  function rankToValue(card) {
+  if (!card.rank) return 0;
+  if (card.rank === 'JOKER1' || card.rank === 'JOKER2') return 15;
+  const order = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  return order.indexOf(card.rank) + 1;
+}
+
+  // プレイヤーがカードを1枚ずつ出す処理
+  function handleCardPlay(playerIndex, cardIndex) {
+    // 既に場に出していたら無視（1ターンに1回だけ出す）
+    if (fieldCards.some(fc => fc.playerIndex === playerIndex)) return;
+
+    const card = players[playerIndex].hand[cardIndex];
+    if (!card) return;
+
+    // 1. 場にカードを追加
+    setFieldCards([...fieldCards, { ...card, playerIndex }]);
+
+    // 2. 手札からカードを削除
+    const newHand = [...players[playerIndex].hand];
+    newHand.splice(cardIndex, 1);
+
+    const newPlayers = [...players];
+    newPlayers[playerIndex] = { ...players[playerIndex], hand: newHand };
+    setPlayers(newPlayers);
+  }
+
+  // 場に3枚揃ったら焼却（場クリア）＋ターンカウント増加
+  useEffect(() => {
+  if (fieldCards.length === 3) {
+    // 勝者を計算
+    const values = fieldCards.map(card => rankToValue(card));
+    const maxValue = Math.max(...values);
+    const winnerIndexes = fieldCards
+      .map((card, idx) => ({ idx, value: rankToValue(card), playerIndex: card.playerIndex }))
+      .filter(obj => obj.value === maxValue)
+      .map(obj => obj.playerIndex);
+
+    let resultText = '';
+    if (winnerIndexes.length === 1) {
+      resultText = `このターンの勝者: Player ${winnerIndexes[0] + 1}`;
+    } else {
+      resultText = `このターンは引き分け（${winnerIndexes.map(i => `Player ${i + 1}`).join(' と ')}）`;
+    }
+    setRoundResult(resultText);
+
+    const timer = setTimeout(() => {
+      setFieldCards([]);
+      setTurnCount((count) => count + 1);
+      setRoundResult(null);
+
+      // 手札がない場合のみ補充
+      if (players.every(p => p.hand.length === 0)) {
+        const newPlayers = [...players];
+        const drawCount = 5;
+        let newDeck = [...deck];
+
+        if (newDeck.length < 15) {
+          setLastRoundWarning(true);
+        }
+
+        for (let i = 0; i < newPlayers.length; i++) {
+          const drawNum = Math.min(drawCount, newDeck.length);
+          const drawnCards = newDeck.slice(0, drawNum);
+          newDeck = newDeck.slice(drawNum);
+
+          newPlayers[i] = {
+            ...newPlayers[i],
+            hand: drawnCards,
+          };
+        }
+        setPlayers(newPlayers);
+        setDeck(newDeck);
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }
+}, [fieldCards, players, deck]);
+
+
+  // どのプレイヤーがまだカードを出していないか判定
+  const playersWhoCanPlay = players.map((p, i) => !fieldCards.some(fc => fc.playerIndex === i));
+
+  return (
+    <div>
+      <h1>トランプゲーム（同時に1枚ずつ出すフェーズ）</h1>
+      <p>残り山札: {deck.length}</p>
+      <p>ターン数: {turnCount}</p>
+      {roundResult && (
+  <p style={{ fontWeight: 'bold', color: 'green' }}>{roundResult}</p>
+)}
+
+{lastRoundWarning && (
+  <p style={{ color: 'red', fontWeight: 'bold' }}>
+    ※ 残り山札が15枚未満。次の補充が最後です！
+  </p>
+)}
+
+      <div>
+        {players.map((player, i) => (
+          <PlayerHand
+            key={i}
+            playerName={player.name}
+            cards={player.hand}
+            onCardClick={(cardIdx) => handleCardPlay(i, cardIdx)}
+            disabled={!playersWhoCanPlay[i]}
+          />
+         
+        ))}
+      </div>
+      <div>
+        <h2>場のカード（{fieldCards.length}枚）</h2>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {fieldCards.map((card, idx) => (
+            <div
+              key={idx}
+              style={{
+                padding: '8px',
+                border: '1px solid gray',
+                minWidth: '40px',
+                textAlign: 'center',
+              }}
+            >
+              {card.suit ? `${card.rank}${card.suit}` : card.rank} (P{card.playerIndex + 1})
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
