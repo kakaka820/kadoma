@@ -33,7 +33,8 @@ export const drawCardsForNextTurn = (
   deck: Card[],
   players: Player[],
   createDeck: () => Card[],
-  shuffleDeck: (cards: Card[]) => Card[]
+  shuffleDeck: (cards: Card[]) => Card[],
+  reshuffleForced: boolean = false 
 ) => {
   const allHandsEmpty = players.every(p => p.hand.length === 0);
   if (!allHandsEmpty) {
@@ -42,6 +43,18 @@ export const drawCardsForNextTurn = (
 
   const playerCount = players.length;
   const drawCount = 5;
+
+   // 🔽 reshuffleForced が true のとき、無条件でリセット実行
+  if (reshuffleForced) {
+    const newDeck = shuffleDeck(createDeck());
+    const updatedPlayers = players.map((p, i) => ({
+      ...p,
+      hand: newDeck.slice(i * drawCount, (i + 1) * drawCount),
+    }));
+    const updatedDeck = newDeck.slice(playerCount * drawCount);
+    return { updatedPlayers, updatedDeck, drawStatus: 'reshuffled' };
+  }
+
 
   // 山札 30 枚以上 → 通常配布
   if (deck.length >= 30) {

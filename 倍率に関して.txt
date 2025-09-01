@@ -1,0 +1,75 @@
+倍率に関して
+
+修正対象は主に Game.tsx の useEffect(() => { ... }, [roundResult, players]) です。
+useEffect(() => {
+  if (roundResult !== null) {
+    const timer = setTimeout(() => {
+      console.log('[setTimeout] ターン切り替え処理開始');
+
+      const allHandsEmpty = players.every(p => p.hand.length === 0);
+
+      // ジョーカー条件でのゲーム終了
+      if (allHandsEmpty && jokerCount >= 10) {
+        setGameOver(true);
+        return;
+      }
+
+      // ★ ここで倍率リセット処理
+      if (setTurnIndex === 4) {
+        setNextMultiplier(1); // セット終了時は必ずリセット
+        setSetTurnIndex(0);
+      } else {
+        if (nextMultiplier === 1) {
+          setNextMultiplier(1); // 前回の加算が0 → 1倍維持（リセット）
+        }
+        setSetTurnIndex(i => i + 1);
+      }
+
+      setFieldCards([]);
+      setTurnCount(c => c + 1);
+      setRoundResult(null);
+
+      // 次ターンのカード補充処理
+      setPlayers(prevPlayers => {
+        const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(deck, prevPlayers, createDeck, shuffleDeck);
+        setDeck(updatedDeck);
+        setLastRoundWarning(drawStatus === 'warn');
+        return updatedPlayers;
+      });
+
+    }, WAIT_TIME_MS);
+
+    return () => clearTimeout(timer);
+  }
+}, [roundResult, players]);
+
+
+
+そして重要な修正：calculateNextMultiplier() の返り値チェック
+この処理は useEffect(() => { ... }, [fieldCards]) の中にありますね。
+ここを次のように修正します：
+
+tsx
+コードをコピーする
+
+
+// 倍率の加算値だけ取得
+const addedMultiplier = calculateNextMultiplier(fieldCards);
+
+if (addedMultiplier > 0) {
+  setNextMultiplier(prev => prev + addedMultiplier); // 加算する
+} else {
+  setNextMultiplier(1); // 加算なし → リセット
+}
+
+
+
+
+
+状態整理（重要）
+currentMultiplier: このターンで適用される倍率（表示や得点用）
+
+nextMultiplier: 次のターンで適用する倍率（現在の場で計算された結果）
+
+addedMultiplier: このターンの加算倍率（calculateNextMultiplier の戻り値）
+

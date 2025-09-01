@@ -20,12 +20,13 @@ export default function Game() {
   const [turnCount, setTurnCount] = useState(0);
   const [lastRoundWarning, setLastRoundWarning] = useState(false);
   const [roundResult, setRoundResult] = useState<string | null>(null);
-
   const [jokerCount, setJokerCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
-   const [currentMultiplier, setCurrentMultiplier] = useState(1);
-const [nextMultiplier, setNextMultiplier] = useState(1);
-const [setTurnIndex, setSetTurnIndex] = useState(0); // 0〜4でセット管理
+  const [currentMultiplier, setCurrentMultiplier] = useState(1);
+  const [nextMultiplier, setNextMultiplier] = useState(1);
+  const [setTurnIndex, setSetTurnIndex] = useState(0); // 0〜4でセット管理
+  const [jokerDealtThisSet, setJokerDealtThisSet] = useState(false);
+
 
 
   useEffect(() => {
@@ -121,6 +122,7 @@ useEffect(() => {
   setCurrentMultiplier(1);
   setNextMultiplier(1);
   setSetTurnIndex(0);
+  setJokerDealtThisSet(false);
 } else {setCurrentMultiplier(nextMultiplier);
   setSetTurnIndex(i => i + 1);
         }
@@ -139,12 +141,25 @@ useEffect(() => {
       setRoundResult(null);
 
       setPlayers(prevPlayers => {
-        const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(deck, prevPlayers, createDeck, shuffleDeck);
+        const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(
+          deck,
+          prevPlayers,
+          createDeck,
+          shuffleDeck,
+          jokerDealtThisSet
+        );
+
+        // ✅ 実際に配られた手札を見てジョーカー判定
+        const jokerInNewHands = updatedPlayers.some(p =>
+          p.hand.some(card => card.rank === 'JOKER1' || card.rank === 'JOKER2')
+        );
+        setJokerDealtThisSet(jokerInNewHands);
+
         setDeck(updatedDeck);
         setLastRoundWarning(drawStatus === 'warn');
+
         return updatedPlayers;
       });
-
     }, WAIT_TIME_MS);
 
     return () => clearTimeout(timer);
@@ -158,10 +173,15 @@ useEffect(() => {
 
   return (
     <div>
-      <h1>トランプゲーム（同時に1枚ずつ出すフェーズ）</h1>
+      <h1>トランプ</h1>
       <p>残り山札: {deck.length}</p>
       <p>ターン数: {turnCount}</p>
       <p>現在の倍率: x{currentMultiplier}</p>
+      {jokerDealtThisSet && (
+  <p style={{ color: 'orange', fontWeight: 'bold' }}>
+    ⚠ ジョーカーが配られました！このセット終了後に山札がリセットされます
+  </p>
+)}
 
       {gameOver && (
       <div style={{ color: 'red', fontWeight: 'bold' }}>
