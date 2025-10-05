@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Hand from './Hand';
 import Field from './Field';
 import { createDeck, shuffleDeck, Card, Player } from '../utils/deck';
-import { WAIT_TIME_MS } from '../config';
+import { processTurn } from '../utils/gameLogic';
+import { calculateScore } from '../utils/scoreCalculator';
+import { WAIT_TIME_MS, ANTE } from '../config';
 import { drawCardsForNextTurn} from '../utils/draw';
 import { calculateNextMultiplier } from '../utils/multiplier';
 import { judgeWinner } from '../utils/judgeWinner';
@@ -14,7 +16,7 @@ import { judgeWinner } from '../utils/judgeWinner';
 export default function Game() {
   const [deck, setDeck] = useState<Card[]>([]);
   const [players, setPlayers] = useState(
-    Array.from({ length: 3 }, (_, i) => ({ name: `Player ${i + 1}`, hand: [] as Card[], wins:0,}))
+    Array.from({ length: 3 }, (_, i) => ({ name: `Player ${i + 1}`, hand: [] as Card[], points: 200*ANTE, wins:0,}))
   );
   const [fieldCards, setFieldCards] = useState<(Card & { playerIndex: number })[]>([]);
   const [turnCount, setTurnCount] = useState(0);
@@ -26,6 +28,8 @@ export default function Game() {
   const [nextMultiplier, setNextMultiplier] = useState(1);
   const [setTurnIndex, setSetTurnIndex] = useState(0); // 0〜4でセット管理
   const [jokerDealtThisSet, setJokerDealtThisSet] = useState(false);
+  const [playerScores, setPlayerScores] = useState<number[]>(players.map(player=>player.points));
+
 
 
 
@@ -40,6 +44,7 @@ export default function Game() {
      const newPlayers = Array.from({ length: 3 }, (_, i) => ({
     name: `Player ${i + 1}`,
     hand: hands[i],
+    points: 200 * ANTE,
     wins: 0,
   }));
 
@@ -140,6 +145,19 @@ useEffect(() => {
       setTurnCount(c => c + 1);
       setRoundResult(null);
 
+      // 得点計算をここで行う
+      const card1 = fieldCards[0];  // 1人目のカード
+const card2 = fieldCards[1];  // 2人目のカード
+const card3 = fieldCards[2];  // 3人目のカード
+      // calculateScore 関数の引数に渡すには、カードとプレイヤーのインデックスを渡す
+const newScores = fieldCards.map((card, idx) => {
+  // 逆転処理が必要な場合もあるので、カード同士とプレイヤーを指定してスコアを計算
+  const opponentCard = fieldCards[(idx + 1)% 3];
+  return calculateScore(card, opponentCard, currentMultiplier, false); // ここで正しいカードを渡す
+});
+
+setPlayerScores(newScores);  // 計算した得点をステートにセット
+
       setPlayers(prevPlayers => {
         const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(
           deck,
@@ -164,7 +182,7 @@ useEffect(() => {
 
     return () => clearTimeout(timer);
   }
-}, [roundResult, players]);
+}, [roundResult, players, currentMultiplier, ANTE]);
 
 
 
@@ -202,6 +220,7 @@ useEffect(() => {
             onCardClick={(cardIdx) => handleCardPlay(i, cardIdx)}
             disabled={!playersWhoCanPlay[i]}
             wins={player.wins}
+            playerScore={playerScores[i]}
           />
         ))}
       </div>
