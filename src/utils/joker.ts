@@ -33,6 +33,18 @@ export function checkJokerInHands(players: Player[]): boolean {
   return result;
 }
 
+//1ターン目かどうか；JOKERを出せるかどうか判定
+export function canPlayJoker(card: Card, setTurnIndex: number): boolean {
+  // JOKERでない場合は常に出せる
+  if (!isJoker(card)) {
+    return true;
+  }
+  
+  // JOKERの場合、セットの1ターン目（setTurnIndex === 0）は出せない
+  return setTurnIndex !== 0;
+}
+
+
 /**
  * 場のカードにジョーカーが含まれているかを判定
  */
