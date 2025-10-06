@@ -1,5 +1,9 @@
 // src/components/Hand.tsx
+//プレイヤーの手札表示
+
+
 import React from 'react';
+import {isJoker} from '../utils/joker';
 
 type HandProps = {
   playerName: string;
@@ -7,12 +11,14 @@ type HandProps = {
   onCardClick: (index: number) => void;
   disabled: boolean;
   wins: number;
+  playerScore:number;
+  setTurnIndex: number;
 };
 
-export default function Hand({ playerName, cards, onCardClick, disabled, wins }: HandProps) {
+export default function Hand({ playerName, cards, onCardClick, disabled, wins, playerScore }: HandProps) {
   return (
     <div>
-      <h3>{playerName}（勝利数: {wins}）</h3>
+      <h3>{playerName}（勝利数: {wins}）（得点: {playerScore}）</h3>
       <div style={{ display: 'flex', gap: '8px' }}>
         {cards.map((card, idx) => (
           <div
