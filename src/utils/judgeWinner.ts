@@ -7,6 +7,8 @@ import { isJoker } from './joker';
 type JudgeResult = {
   winnerIndexes: number[];
   isDraw: boolean;
+  isReverse: boolean;
+  originalWinnerIndex?: number;  
 };
 
 function rankToValue(rank: string): number {
@@ -16,7 +18,7 @@ function rankToValue(rank: string): number {
 }
 
 export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeResult {
-  if (cards.length !== 3) return { winnerIndexes: [], isDraw: false };
+  if (cards.length !== 3) return { winnerIndexes: [], isDraw: false, isReverse: false };
 
   // 1. 数字の重複 or ジョーカー同士が出ている場合 → 引き分け
   const rankCounts: Record<string, number> = {};
@@ -29,6 +31,7 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
     return {
       winnerIndexes: cards.map(card => card.playerIndex),
       isDraw: true,
+      isReverse: false,
     };
   }
 
@@ -43,6 +46,10 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
   let winnerIndexes = cardValues
     .filter(c => c.value === maxValue)
     .map(c => c.playerIndex);
+
+    //元の勝者を保持
+    const originalWinnerIndex = winnerIndexes[0];
+    let isReverse = false;
 
 // 3. 絵札（J、Q、K）やJOKERの場合の逆転ルール
   // 勝者のカードが絵札（J、Q、K）またはJOKERなら逆転判定
@@ -59,25 +66,25 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
       // J: 1, 5 で逆転
       if (loserCard && [1, 5].includes(rankToValue(loserCard.card))) {
         winnerIndexes = [loserCard.playerIndex];
-        return { winnerIndexes, isDraw: false };
+        isReverse = true;
       }
     } else if (winnerCard.card === 'Q') {
       // Q: 2, 6 で逆転
       if (loserCard && [2, 6].includes(rankToValue(loserCard.card))) {
         winnerIndexes = [loserCard.playerIndex];
-        return { winnerIndexes, isDraw: false };
+        isReverse = true;
       }
     } else if (winnerCard.card === 'K') {
       // K: 3, 7 で逆転
       if (loserCard && [3, 7].includes(rankToValue(loserCard.card))) {
         winnerIndexes = [loserCard.playerIndex];
-        return { winnerIndexes, isDraw: false };
+        isReverse = true;
       }
     } else if (winnerCard.card.startsWith('JOKER')) {
       // JOKER: 4 で逆転
       if (loserCard && rankToValue(loserCard.card) === 4) {
         winnerIndexes = [loserCard.playerIndex];
-        return { winnerIndexes, isDraw: false };
+        isReverse = true;
       }
     }
   }
@@ -88,5 +95,7 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
   return {
     winnerIndexes,
     isDraw: winnerIndexes.length !== 1,
+    isReverse,
+    originalWinnerIndex: isReverse ? originalWinnerIndex : undefined,
   };
 }
