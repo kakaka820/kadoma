@@ -219,6 +219,8 @@ useEffect(() => {
       setTurnCount(c => c + 1);
       setRoundResult(null);
 
+      const reshuffleForced = jokerDealtThisSet;
+
       setPlayers(prevPlayers => {
         let updated = [...prevPlayers];
         if (winnerIdx !== -1 && loserIdx !== -1 && scoreToAdd > 0) {
@@ -243,7 +245,7 @@ useEffect(() => {
           updated,
           createDeck,
           shuffleDeck,
-          jokerDealtThisSet
+          reshuffleForced
         );
 
         const jokerInNewHands = updatedPlayers.some(p =>
