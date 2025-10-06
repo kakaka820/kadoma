@@ -22,6 +22,7 @@ export default function Field({ fieldCards }: FieldProps) {
       
       <div style={{ display: 'flex', gap: '8px' }}>
         {(fieldCards ?? []).map((card, idx) => (
+          card ? (
           <div
             key={idx}
             style={{
@@ -33,6 +34,7 @@ export default function Field({ fieldCards }: FieldProps) {
           >
             {card.suit ? `${card.rank}${card.suit}` : card.rank} (P{card.playerIndex! + 1})
           </div>
+        ) : null
         ))}
       </div>
     </div>
