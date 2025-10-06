@@ -32,7 +32,7 @@ export default function Field({ fieldCards }: FieldProps) {
               textAlign: 'center',
             }}
           >
-            {card.suit ? `${card.rank}${card.suit}` : card.rank} (P{card.playerIndex! + 1})
+            {card.suit ? `${card.rank}${card.suit}` : card.rank} (P{idx +1 })
           </div>
         ) : null
         ))}
