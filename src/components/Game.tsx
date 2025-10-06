@@ -1,4 +1,5 @@
 // src/components/Game.tsx 
+
 import React, { useState, useEffect } from 'react';
 import Hand from './Hand';
 import Field from './Field';
