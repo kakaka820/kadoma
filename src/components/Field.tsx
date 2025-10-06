@@ -1,3 +1,6 @@
+//場に出されたカード
+
+
 import React from 'react';
 
 // 型定義（必要に応じて共通化可能）
@@ -8,7 +11,7 @@ type Card = {
 };
 
 type FieldProps = {
-  fieldCards?: Card[];  // undefined を許容
+  fieldCards:(Card | null)[];  // null を許容
 };
 
 export default function Field({ fieldCards }: FieldProps) {
