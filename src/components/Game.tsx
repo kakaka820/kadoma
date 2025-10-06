@@ -119,20 +119,11 @@ if (newMultiplier > 0) {
 
 // useEffect②：roundResult が表示されたら WAIT_TIME_MS 後にターンを進める
 useEffect(() => {
-
   if (roundResult !== null) {
     const timer = setTimeout(() => {
-  setCurrentMultiplier(nextMultiplier);
-  if (setTurnIndex === 4) {
-  setCurrentMultiplier(1);
-  setNextMultiplier(1);
-  setSetTurnIndex(0);
-  setJokerDealtThisSet(false);
-} else {setCurrentMultiplier(nextMultiplier);
-  setSetTurnIndex(i => i + 1);
-        }
-  
       console.log('[setTimeout] ターン切り替え処理開始');
+      console.log('fieldCards:', fieldCards.map(fc => `${fc.rank}(player${fc.playerIndex})`));
+      
       const allHandsEmpty = players.every(p => p.hand.length === 0);
 
       // 💡 ゲーム終了判定は「セット終了（全手札が空）かつジョーカー10枚以上」のときのみ
@@ -141,75 +132,134 @@ useEffect(() => {
         return;
       }
 
-     // ✅ 勝者判定を再実行して逆転情報を取得
-      const result = judgeWinner(fieldCards);
-      const { winnerIndexes, isDraw } = result;
-      // ✅ 得点計算は引き分けでない場合のみ
+      // ✅ 勝者判定を再実行して逆転情報を取得
+const result = judgeWinner(fieldCards);
+const { winnerIndexes, isDraw, isReverse, originalWinnerIndex } = result;
+
+// ✅ 得点を計算（setPlayersの外で）
+let scoreToAdd = 0;
+let winnerIdx = -1;
+let loserIdx = -1;
+
 if (!isDraw && winnerIndexes.length === 1) {
   const winnerIndex = winnerIndexes[0];
-  const winnerCard = fieldCards[winnerIndex];
+  const winnerCard = fieldCards.find(fc => fc.playerIndex === winnerIndex);
   
-  // ✅ 最弱のカードを持つプレイヤーを特定（敗者）
-  const cardValues = fieldCards.map(card => ({
-    value: rankToValue(card),
-    playerIndex: card.playerIndex,
-  }));
-  
-  const minValue = Math.min(...cardValues.map(c => c.value));
-  const loserIndex = cardValues.find(c => c.value === minValue)?.playerIndex;
-  
-  if (loserIndex !== undefined) {
-    const loserCard = fieldCards[loserIndex];
-    
-    // ✅ 逆転判定: 勝者のカードと元の最強カードを比較
-    const maxValue = Math.max(...cardValues.map(c => c.value));
-    const originalWinnerIndex = cardValues.find(c => c.value === maxValue)?.playerIndex;
-    const isReverse = originalWinnerIndex !== winnerIndex;
-
-    // ✅ 勝者と敗者の1対1で得点計算
-    const score = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse);
-    
-    setPlayers(prev => {
-      const updated = [...prev];
-      
-      // 敗者から減算、勝者に加算
-      updated[winnerIndex] = {
-        ...updated[winnerIndex],
-        points: updated[winnerIndex].points + score
-      };
-      updated[loserIndex] = {
-        ...updated[loserIndex],
-        points: updated[loserIndex].points - score
-      };
-      
-      return updated;
-    });
+  if (!winnerCard) {
+    console.error('winnerCard not found!');
+    return;
   }
+  
+  // ✅ 敗者の特定
+  let loserIndex: number;
+  
+  if (isReverse && originalWinnerIndex !== undefined) {
+    // 逆転の場合: 元の勝者（絵札/JOKER）が敗者
+    loserIndex = originalWinnerIndex;
+  } else {
+    // 通常の場合: 最弱のカードが敗者
+    const cardValues = fieldCards.map(card => ({
+      value: rankToValue(card),
+      playerIndex: card.playerIndex,
+      rank: card.rank,
+    }));
+    
+    const minValue = Math.min(...cardValues.map(c => c.value));
+    const loserData = cardValues.find(c => c.value === minValue);
+    
+    if (!loserData) {
+      console.error('loserData not found!');
+      return;
+    }
+    
+    loserIndex = loserData.playerIndex;
+  }
+  
+  const loserCard = fieldCards.find(fc => fc.playerIndex === loserIndex);
+  
+  if (!loserCard) {
+    console.error('loserCard not found!');
+    return;
+  }
+
+  // 🔍 デバッグログ追加
+  console.log('=== 得点計算デバッグ ===');
+  console.log('ターン:', turnCount + 1);
+  console.log('勝者カード:', winnerCard.rank, '値:', rankToValue(winnerCard));
+  console.log('敗者カード:', loserCard.rank, '値:', rankToValue(loserCard));
+  console.log('currentMultiplier:', currentMultiplier);
+  console.log('逆転:', isReverse);
+
+  // ✅ 得点計算
+  scoreToAdd = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse);
+  winnerIdx = winnerIndex;
+  loserIdx = loserIndex;
+  
+  console.log('計算された得点:', scoreToAdd);
+  console.log('勝者インデックス:', winnerIdx, '敗者インデックス:', loserIdx);
 }
+
+      // ✅ 得点の後にmultiplierを更新
+      if (setTurnIndex === 4) {
+        setCurrentMultiplier(1);
+        setNextMultiplier(1);
+        setSetTurnIndex(0);
+        setJokerDealtThisSet(false);
+      } else {
+        setCurrentMultiplier(nextMultiplier);
+        setSetTurnIndex(i => i + 1);
+      }
+
       setFieldCards([]);
       setTurnCount(c => c + 1);
       setRoundResult(null);
+
+      // ✅ 得点反映とカード配布を一緒に実行（1回だけ）
       setPlayers(prevPlayers => {
+        // 得点反映
+        let updated = [...prevPlayers];
+        if (winnerIdx !== -1 && loserIdx !== -1 && scoreToAdd > 0) {
+          console.log('更新前 勝者ポイント:', updated[winnerIdx].points);
+          console.log('更新前 敗者ポイント:', updated[loserIdx].points);
+          
+          updated[winnerIdx] = {
+            ...updated[winnerIdx],
+            points: updated[winnerIdx].points + scoreToAdd
+          };
+          updated[loserIdx] = {
+            ...updated[loserIdx],
+            points: updated[loserIdx].points - scoreToAdd
+          };
+          
+          console.log('更新後 勝者ポイント:', updated[winnerIdx].points);
+          console.log('更新後 敗者ポイント:', updated[loserIdx].points);
+        }
+
+        // カード配布
         const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(
           deck,
-          prevPlayers,
+          updated,  // ← 得点反映後のplayersを使う
           createDeck,
           shuffleDeck,
           jokerDealtThisSet
         );
+
         const jokerInNewHands = updatedPlayers.some(p =>
           p.hand.some(card => card.rank === 'JOKER1' || card.rank === 'JOKER2')
         );
         setJokerDealtThisSet(jokerInNewHands);
+
         setDeck(updatedDeck);
         setLastRoundWarning(drawStatus === 'warn');
+
         return updatedPlayers;
       });
     }, WAIT_TIME_MS);
+
     return () => clearTimeout(timer);
   }
-}, [roundResult, players, currentMultiplier, ANTE, deck, jokerDealtThisSet, setTurnIndex]);
-
+  // ✅ 依存配列からplayersを削除（無限ループ防止）
+}, [roundResult, currentMultiplier, nextMultiplier, ANTE, deck, jokerDealtThisSet, setTurnIndex, turnCount, fieldCards, jokerCount]);
 
 
 
