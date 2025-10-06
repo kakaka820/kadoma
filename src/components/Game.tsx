@@ -141,23 +141,54 @@ useEffect(() => {
         return;
       }
 
+     // ✅ 勝者判定を再実行して逆転情報を取得
+      const result = judgeWinner(fieldCards);
+      const { winnerIndexes, isDraw } = result;
+      // ✅ 得点計算は引き分けでない場合のみ
+if (!isDraw && winnerIndexes.length === 1) {
+  const winnerIndex = winnerIndexes[0];
+  const winnerCard = fieldCards[winnerIndex];
+  
+  // ✅ 最弱のカードを持つプレイヤーを特定（敗者）
+  const cardValues = fieldCards.map(card => ({
+    value: rankToValue(card),
+    playerIndex: card.playerIndex,
+  }));
+  
+  const minValue = Math.min(...cardValues.map(c => c.value));
+  const loserIndex = cardValues.find(c => c.value === minValue)?.playerIndex;
+  
+  if (loserIndex !== undefined) {
+    const loserCard = fieldCards[loserIndex];
+    
+    // ✅ 逆転判定: 勝者のカードと元の最強カードを比較
+    const maxValue = Math.max(...cardValues.map(c => c.value));
+    const originalWinnerIndex = cardValues.find(c => c.value === maxValue)?.playerIndex;
+    const isReverse = originalWinnerIndex !== winnerIndex;
+
+    // ✅ 勝者と敗者の1対1で得点計算
+    const score = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse);
+    
+    setPlayers(prev => {
+      const updated = [...prev];
+      
+      // 敗者から減算、勝者に加算
+      updated[winnerIndex] = {
+        ...updated[winnerIndex],
+        points: updated[winnerIndex].points + score
+      };
+      updated[loserIndex] = {
+        ...updated[loserIndex],
+        points: updated[loserIndex].points - score
+      };
+      
+      return updated;
+    });
+  }
+}
       setFieldCards([]);
       setTurnCount(c => c + 1);
       setRoundResult(null);
-
-      // 得点計算をここで行う
-      const card1 = fieldCards[0];  // 1人目のカード
-const card2 = fieldCards[1];  // 2人目のカード
-const card3 = fieldCards[2];  // 3人目のカード
-      // calculateScore 関数の引数に渡すには、カードとプレイヤーのインデックスを渡す
-const newScores = fieldCards.map((card, idx) => {
-  // 逆転処理が必要な場合もあるので、カード同士とプレイヤーを指定してスコアを計算
-  const opponentCard = fieldCards[(idx + 1)% 3];
-  return calculateScore(card, opponentCard, currentMultiplier, false); // ここで正しいカードを渡す
-});
-
-setPlayerScores(newScores);  // 計算した得点をステートにセット
-
       setPlayers(prevPlayers => {
         const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(
           deck,
@@ -166,23 +197,19 @@ setPlayerScores(newScores);  // 計算した得点をステートにセット
           shuffleDeck,
           jokerDealtThisSet
         );
-
-        // ✅ 実際に配られた手札を見てジョーカー判定
         const jokerInNewHands = updatedPlayers.some(p =>
           p.hand.some(card => card.rank === 'JOKER1' || card.rank === 'JOKER2')
         );
         setJokerDealtThisSet(jokerInNewHands);
-
         setDeck(updatedDeck);
         setLastRoundWarning(drawStatus === 'warn');
-
         return updatedPlayers;
       });
     }, WAIT_TIME_MS);
-
     return () => clearTimeout(timer);
   }
-}, [roundResult, players, currentMultiplier, ANTE]);
+}, [roundResult, players, currentMultiplier, ANTE, deck, jokerDealtThisSet, setTurnIndex]);
+
 
 
 
@@ -220,7 +247,7 @@ setPlayerScores(newScores);  // 計算した得点をステートにセット
             onCardClick={(cardIdx) => handleCardPlay(i, cardIdx)}
             disabled={!playersWhoCanPlay[i]}
             wins={player.wins}
-            playerScore={playerScores[i]}
+            playerScore={player.points}
           />
         ))}
       </div>
