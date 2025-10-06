@@ -8,7 +8,7 @@ import { WAIT_TIME_MS, ANTE } from '../config';
 import { drawCardsForNextTurn } from '../utils/draw';
 import { calculateNextMultiplier } from '../utils/multiplier';
 import { judgeWinner } from '../utils/judgeWinner';
-import { checkJokerInHands, shouldEndGame, shouldReshuffleAfterSet } from '../utils/joker';
+import { checkJokerInHands, shouldEndGame, shouldReshuffleAfterSet, canPlayJoker } from '../utils/joker';
 
 export default function Game() {
   const [deck, setDeck] = useState<Card[]>([]);
@@ -69,7 +69,10 @@ setJokerDealtThisSet(hasJokerInInitialHands);
 
     const card = players[playerIndex].hand[cardIndex];
     if (!card) return;
-
+    if (!canPlayJoker(card, setTurnIndex)) {
+    console.log('[handleCardPlay] JOKERはセットの1ターン目に出せません');
+    return;  // 何もしない
+  }
     const newFieldCards = [...fieldCards];
     newFieldCards[playerIndex] = card;
     setFieldCards(newFieldCards);
@@ -317,6 +320,7 @@ setJokerDealtThisSet(hasJokerInInitialHands);
             disabled={!playersWhoCanPlay[i]}
             wins={player.wins}
             playerScore={player.points}
+            setTurnIndex={setTurnIndex}
           />
         ))}
       </div>
