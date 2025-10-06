@@ -1,4 +1,6 @@
 // src/utils/deck.ts
+//デッキ作成・シャッフル機能
+//山札処理修正済（まだ本確認はできてません）
 
 export const SUITS = ['♠', '♥', '♦', '♣'] as const;
 export const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'] as const;
@@ -14,6 +16,7 @@ export type Player = {
   name: string;
   hand: Card[];
   wins: number;
+  points: number;
 };
 
 
