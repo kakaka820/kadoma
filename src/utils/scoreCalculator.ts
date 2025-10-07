@@ -7,13 +7,9 @@
 // src/utils/scoreCalculator.ts
 import { Card } from './deck';
 import { ANTE } from '../config';
+import { rankToValue } from './cardValue';
 
-// カードの数値を返す
-function rankToValue(card: Card): number {
-  const order = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-  if (card.rank === 'JOKER1' || card.rank === 'JOKER2') return 15;
-  return order.indexOf(card.rank) + 1;
-}
+
 
 // 基本的な得点計算
 function calculateBaseScore(winnerCard: Card, loserCard:Card, multiplier: number): number {
