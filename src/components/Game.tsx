@@ -4,11 +4,11 @@ import Hand from './Hand';
 import Field from './Field';
 import { createDeck, shuffleDeck, Card, Player } from '../utils/deck';
 import { calculateScore } from '../utils/scoreCalculator';
-import { WAIT_TIME_MS, ANTE } from '../config';
+import { WAIT_TIME_MS, ANTE, MAX_JOKER_COUNT } from '../config';
 import { drawCardsForNextTurn } from '../utils/draw';
 import { calculateNextMultiplier } from '../utils/multiplier';
 import { judgeWinner } from '../utils/judgeWinner';
-import { checkJokerInHands, shouldEndGame, shouldReshuffleAfterSet, canPlayJoker } from '../utils/joker';
+import { checkJokerInHands, checkGameEnd, shouldReshuffleAfterSet, canPlayJoker } from '../utils/joker';
 
 export default function Game() {
   const [deck, setDeck] = useState<Card[]>([]);
@@ -30,6 +30,7 @@ export default function Game() {
   const [nextMultiplier, setNextMultiplier] = useState(1);
   const [setTurnIndex, setSetTurnIndex] = useState(0);
   const [jokerDealtThisSet, setJokerDealtThisSet] = useState(false);
+  const [gameOverReason, setGameOverReason] = useState<string>('');
 
   useEffect(() => {
     let newDeck = shuffleDeck(createDeck());
@@ -123,168 +124,209 @@ setJokerDealtThisSet(hasJokerInInitialHands);
   }, [fieldCards, roundResult]);
 
   // useEffect②：roundResult が表示されたら WAIT_TIME_MS 後にターンを進める
-  useEffect(() => {
-    if (roundResult !== null) {
-      const timer = setTimeout(() => {
-        console.log('[setTimeout] ターン切り替え処理開始');
-        
-        const allHandsEmpty = players.every(p => p.hand.length === 0);
+useEffect(() => {
+  if (roundResult !== null) {
+    const timer = setTimeout(() => {
+      console.log('[setTimeout] ターン切り替え処理開始');
+      
+      const allHandsEmpty = players.every(p => p.hand.length === 0);
 
-        // ✅ joker.tsの関数を使用
-        if (shouldEndGame(allHandsEmpty, jokerCount)) {
-          setGameOver(true);
+      console.log('[デバッグ] allHandsEmpty:', allHandsEmpty);
+      console.log('[デバッグ] jokerCount:', jokerCount);
+      console.log('[デバッグ] players:', players.map(p => ({ name: p.name, points: p.points })));
+
+      
+
+      const cardsWithIndex = fieldCards.map((card, idx) => ({
+        ...card!,
+        playerIndex: idx
+      }));
+
+      const result = judgeWinner(cardsWithIndex);
+      const { winnerIndexes, isDraw, isReverse, originalWinnerIndex } = result;
+
+      
+      let scoreToAdd = 0;
+      let winnerIdx = -1;
+      let loserIdx = -1;
+
+      if (!isDraw && winnerIndexes.length === 1) {
+        const winnerIndex = winnerIndexes[0];
+        const winnerCard = fieldCards[winnerIndex];
+        
+        if (!winnerCard) {
+          console.error('winnerCard not found!');
+          return;
+        }
+        
+        let loserIndex: number;
+        
+        if (isReverse && originalWinnerIndex !== undefined) {
+          loserIndex = originalWinnerIndex;
+        } else {
+          const cardValues = cardsWithIndex.map(card => ({
+            value: rankToValue(card),
+            playerIndex: card.playerIndex,
+            rank: card.rank,
+          }));
+          
+          const minValue = Math.min(...cardValues.map(c => c.value));
+          const loserData = cardValues.find(c => c.value === minValue);
+          
+          if (!loserData) {
+            console.error('loserData not found!');
+            return;
+          }
+          
+          loserIndex = loserData.playerIndex;
+        }
+        
+        const loserCard = fieldCards[loserIndex];
+        
+        if (!loserCard) {
+          console.error('loserCard not found!');
           return;
         }
 
-        const cardsWithIndex = fieldCards.map((card, idx) => ({
-          ...card!,
-          playerIndex: idx
-        }));
+        console.log('=== 得点計算デバッグ ===');
+        console.log('ターン:', turnCount + 1);
+        console.log('勝者カード:', winnerCard.rank, '値:', rankToValue(winnerCard));
+        console.log('敗者カード:', loserCard.rank, '値:', rankToValue(loserCard));
+        console.log('currentMultiplier:', currentMultiplier);
+        console.log('逆転:', isReverse);
 
-        const result = judgeWinner(cardsWithIndex);
-        const { winnerIndexes, isDraw, isReverse, originalWinnerIndex } = result;
+        scoreToAdd = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse);
+        winnerIdx = winnerIndex;
+        loserIdx = loserIndex;
+        
+        console.log('計算された得点:', scoreToAdd);
+        console.log('勝者インデックス:', winnerIdx, '敗者インデックス:', loserIdx);
+      }
 
-        // 得点計算
-        let scoreToAdd = 0;
-        let winnerIdx = -1;
-        let loserIdx = -1;
+      // ✅ セット終了判定用の変数
+      let isSetEnd = false;
 
-        if (!isDraw && winnerIndexes.length === 1) {
-          const winnerIndex = winnerIndexes[0];
-          const winnerCard = fieldCards[winnerIndex];
+      // セット終了時の処理
+      if (allHandsEmpty) {
+        console.log('[セット管理] 手札が空 - セット終了');
+        console.log('[セット管理] setTurnIndex:', setTurnIndex);
+        console.log('[セット管理] jokerDealtThisSet:', jokerDealtThisSet);
+        
+        if (setTurnIndex === 4) {
+          isSetEnd = true;  // ✅ セット終了フラグを立てる
+          console.log('[セット管理] セット完全終了、isSetEndをtrueに設定');
+          setCurrentMultiplier(1);
+          setNextMultiplier(1);
+          setSetTurnIndex(0);
           
-          if (!winnerCard) {
-            console.error('winnerCard not found!');
-            return;
+          if (shouldReshuffleAfterSet(jokerDealtThisSet)) {
+            console.log('[セット終了] JOKERカウント +1 実行');
+            setJokerCount(prev => {
+              const newCount = prev + 1;
+              console.log('[セット終了]jokerCount更新：prev=', prev, '→new = ', newCount);
+              setTimeout(() => {
+                const gameEndCheck = checkGameEnd(true, newCount, players);
+                if (gameEndCheck.shouldEnd){
+                  console.log('[セット終了後　ゲーム終了]', gameEndCheck.reason);
+                  setGameOver(true);
+                }
+              },0);
+              return newCount;
+            });
+          }else {
+            console.log('[セット終了] JOKERカウント更新なし（jokerDealtThisSet = false）');
           }
           
-          let loserIndex: number;
           
-          if (isReverse && originalWinnerIndex !== undefined) {
-            loserIndex = originalWinnerIndex;
-          } else {
-            const cardValues = cardsWithIndex.map(card => ({
-              value: rankToValue(card),
-              playerIndex: card.playerIndex,
-              rank: card.rank,
-            }));
-            
-            const minValue = Math.min(...cardValues.map(c => c.value));
-            const loserData = cardValues.find(c => c.value === minValue);
-            
-            if (!loserData) {
-              console.error('loserData not found!');
-              return;
-            }
-            
-            loserIndex = loserData.playerIndex;
-          }
-          
-          const loserCard = fieldCards[loserIndex];
-          
-          if (!loserCard) {
-            console.error('loserCard not found!');
-            return;
-          }
-
-          console.log('=== 得点計算デバッグ ===');
-          console.log('ターン:', turnCount + 1);
-          console.log('勝者カード:', winnerCard.rank, '値:', rankToValue(winnerCard));
-          console.log('敗者カード:', loserCard.rank, '値:', rankToValue(loserCard));
-          console.log('currentMultiplier:', currentMultiplier);
-          console.log('逆転:', isReverse);
-
-          scoreToAdd = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse);
-          winnerIdx = winnerIndex;
-          loserIdx = loserIndex;
-          
-          console.log('計算された得点:', scoreToAdd);
-          console.log('勝者インデックス:', winnerIdx, '敗者インデックス:', loserIdx);
-        }
-
-        // セット終了時の処理
-        if (allHandsEmpty) {
-          console.log('[セット管理] 手札が空 - セット終了');
-          console.log('[セット管理] setTurnIndex:', setTurnIndex);
-          console.log('[セット管理] jokerDealtThisSet:', jokerDealtThisSet);
-          if (setTurnIndex === 4) {
-            setCurrentMultiplier(1);
-            setNextMultiplier(1);
-            setSetTurnIndex(0);
-            if (shouldReshuffleAfterSet(jokerDealtThisSet)) {
-              setJokerCount(prev => prev + 1);
-              console.log('[セット終了] JOKERが配られていたため、jokerCount +1');
-            }
-            
-            setJokerDealtThisSet(false);
-          } else {
-            setCurrentMultiplier(nextMultiplier);
-            setSetTurnIndex(i => i + 1);
-          }
         } else {
-          console.log('[セット管理] 手札あり - セット継続');
-          console.log('[セット管理] setTurnIndex:', setTurnIndex);
-          if (setTurnIndex === 4) {
-            console.log('[セット管理] WARNING: setTurnIndexが4だが手札が残っている');
-            setCurrentMultiplier(1);
-            setNextMultiplier(1);
-            setSetTurnIndex(0);
-          } else {
-            setCurrentMultiplier(nextMultiplier);
-            setSetTurnIndex(i => i + 1);
+          console.log('[セット管理] セット途中での手札空（イレギュラー）');
+          setCurrentMultiplier(nextMultiplier);
+          setSetTurnIndex(i => i + 1);
+        }
+      } else {
+        console.log('[セット管理] 手札あり - セット継続');
+        console.log('[セット管理] setTurnIndex:', setTurnIndex);
+        
+        if (setTurnIndex === 4) {
+          console.log('[セット管理] WARNING: setTurnIndexが4だが手札が残っている');
+          setCurrentMultiplier(1);
+          setNextMultiplier(1);
+          setSetTurnIndex(0);
+        } else {
+          setCurrentMultiplier(nextMultiplier);
+          setSetTurnIndex(i => i + 1);
+        }
+      }
+
+      setFieldCards([null, null, null]);
+      setTurnCount(c => c + 1);
+      setRoundResult(null);
+
+      setPlayers(prevPlayers => {
+        let updated = [...prevPlayers];
+        if (winnerIdx !== -1 && loserIdx !== -1 && scoreToAdd > 0) {
+          console.log('更新前 勝者ポイント:', updated[winnerIdx].points);
+          console.log('更新前 敗者ポイント:', updated[loserIdx].points);
+          
+          updated[winnerIdx] = {
+            ...updated[winnerIdx],
+            points: updated[winnerIdx].points + scoreToAdd
+          };
+          updated[loserIdx] = {
+            ...updated[loserIdx],
+            points: updated[loserIdx].points - scoreToAdd
+          };
+          
+          console.log('更新後 勝者ポイント:', updated[winnerIdx].points);
+          console.log('更新後 敗者ポイント:', updated[loserIdx].points);
+
+          const bankruptCheck = checkGameEnd(false, jokerCount, updated);
+          if (bankruptCheck.shouldEnd) {
+          console.log('[得点更新後 ゲーム終了]', bankruptCheck.reason);
+          setGameOver(true);
+          return updated;
           }
+  
         }
 
-        setFieldCards([null, null, null]);
-        setTurnCount(c => c + 1);
-        setRoundResult(null);
+        const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(
+          deck,
+          updated,
+          createDeck,
+          shuffleDeck,
+          jokerDealtThisSet
+        );
 
-        setPlayers(prevPlayers => {
-          let updated = [...prevPlayers];
-          if (winnerIdx !== -1 && loserIdx !== -1 && scoreToAdd > 0) {
-            console.log('更新前 勝者ポイント:', updated[winnerIdx].points);
-            console.log('更新前 敗者ポイント:', updated[loserIdx].points);
-            
-            updated[winnerIdx] = {
-              ...updated[winnerIdx],
-              points: updated[winnerIdx].points + scoreToAdd
-            };
-            updated[loserIdx] = {
-              ...updated[loserIdx],
-              points: updated[loserIdx].points - scoreToAdd
-            };
-            
-            console.log('更新後 勝者ポイント:', updated[winnerIdx].points);
-            console.log('更新後 敗者ポイント:', updated[loserIdx].points);
-          }
+        // ✅ 新しい手札にJOKERがあるか確認
+        const jokerInNewHands = checkJokerInHands(updatedPlayers);
+        console.log('[カード配布後] JOKER判定結果:', jokerInNewHands);
+        console.log('[カード配布後] jokerDealtThisSet更新前:', jokerDealtThisSet);
+        console.log('[カード配布後] isSetEnd:', isSetEnd);
+        
+        // ✅ セット終了時は新しい値で上書き、継続中はOR条件
+        if (isSetEnd) {
+          // セット終了 → 新しいセットなので、新しい判定結果で上書き
+          setJokerDealtThisSet(jokerInNewHands);
+          console.log('[カード配布後] セット終了のため新しい値で上書き:', jokerInNewHands);
+        } else {
+          // セット継続中 → OR条件で累積
+          setJokerDealtThisSet(prev => {
+            const newValue = prev || jokerInNewHands;
+            console.log('[カード配布後] セット継続中のためOR条件: prev =', prev, ', jokerInNewHands =', jokerInNewHands, '→ newValue =', newValue);
+            return newValue;
+          });
+        }
 
-          const { updatedPlayers, updatedDeck, drawStatus } = drawCardsForNextTurn(
-            deck,
-            updated,
-            createDeck,
-            shuffleDeck,
-            jokerDealtThisSet
-          );
+        setDeck(updatedDeck);
+        setLastRoundWarning(drawStatus === 'warn');
 
-          // ✅ joker.tsの関数を使用
-          const jokerInNewHands = checkJokerInHands(updatedPlayers);
-          console.log('[カード配布後] JOKER判定結果:', jokerInNewHands);
-          console.log('[カード配布後] jokerDealtThisSet更新前:', jokerDealtThisSet);
-          if (jokerInNewHands) {
-            setJokerDealtThisSet(true);
-          console.log('[カード配布後] JOKERを検出、フラグをtrueに設定');
-          }
+        return updatedPlayers;
+      });
+    }, WAIT_TIME_MS);
 
-          setDeck(updatedDeck);
-          setLastRoundWarning(drawStatus === 'warn');
-
-          return updatedPlayers;
-        });
-      }, WAIT_TIME_MS);
-
-      return () => clearTimeout(timer);
-    }
-  }, [roundResult, currentMultiplier, nextMultiplier, ANTE, deck, jokerDealtThisSet, setTurnIndex, turnCount, fieldCards, jokerCount]);
+    return () => clearTimeout(timer);
+  }
+}, [roundResult, currentMultiplier, nextMultiplier, ANTE, deck, jokerDealtThisSet, setTurnIndex, turnCount, fieldCards, jokerCount, players]);
 
   const playersWhoCanPlay = fieldCards.map(card => card === null);
 
@@ -302,7 +344,7 @@ setJokerDealtThisSet(hasJokerInInitialHands);
 
       {gameOver && (
         <div style={{ color: 'red', fontWeight: 'bold' }}>
-          🎉 ジョーカーが10回出ました！ゲーム終了！
+          🎉{gameOverReason} ！ゲーム終了！
         </div>
       )}
       {roundResult && <p style={{ fontWeight: 'bold', color: 'green' }}>{roundResult}</p>}
