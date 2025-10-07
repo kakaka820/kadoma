@@ -9,8 +9,8 @@ import { drawCardsForNextTurn } from '../utils/draw';
 import { calculateNextMultiplier } from '../utils/multiplier';
 import { judgeWinner } from '../utils/judgeWinner';
 import { checkJokerInHands, checkGameEnd, shouldReshuffleAfterSet, canPlayJoker } from '../utils/joker';
-import {calculateAllTableFees, PreviousTurnResult} from '../utils/feeCalculator';
-
+import { calculateAllTableFees, PreviousTurnResult} from '../utils/feeCalculator';
+import { rankToValue } from '../utils/cardValue';
 
 export default function Game() {
   const [deck, setDeck] = useState<Card[]>([]);
@@ -101,12 +101,7 @@ export default function Game() {
   setFeeCollected(true);
 }, [turnCount, feeCollected, roundResult, fieldCards, previousTurnResult, players.length]);
 
-  function rankToValue(card: Card): number {
-    if (!card.rank) return 0;
-    if (card.rank === 'JOKER1' || card.rank === 'JOKER2') return 15;
-    const order = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-    return order.indexOf(card.rank) + 1;
-  }
+  
 
   function handleCardPlay(playerIndex: number, cardIndex: number) {
     if (gameOver) return;
