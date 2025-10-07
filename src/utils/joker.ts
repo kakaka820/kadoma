@@ -1,6 +1,7 @@
 // src/utils/joker.ts
 
 import { Card, Player } from './deck';
+import { MAX_JOKER_COUNT, MIN_POINTS } from '../config';
 
 /**
  * ジョーカーかどうかを判定するユーティリティ関数
@@ -33,18 +34,6 @@ export function checkJokerInHands(players: Player[]): boolean {
   return result;
 }
 
-//1ターン目かどうか；JOKERを出せるかどうか判定
-export function canPlayJoker(card: Card, setTurnIndex: number): boolean {
-  // JOKERでない場合は常に出せる
-  if (!isJoker(card)) {
-    return true;
-  }
-  
-  // JOKERの場合、セットの1ターン目（setTurnIndex === 0）は出せない
-  return setTurnIndex !== 0;
-}
-
-
 /**
  * 場のカードにジョーカーが含まれているかを判定
  */
@@ -69,8 +58,63 @@ export function shouldReshuffleAfterSet(jokerDealtThisSet: boolean): boolean {
 }
 
 /**
- * ゲーム終了条件（全員の手札が空かつジョーカーカウントが10以上）を判定
+ * JOKERが出せるかどうかを判定
+ * @param card - 判定するカード
+ * @param setTurnIndex - 現在のセット内ターン（0~4）
+ * @returns 出せる場合true
+ */
+export function canPlayJoker(card: Card, setTurnIndex: number): boolean {
+  // JOKERでない場合は常に出せる
+  if (!isJoker(card)) {
+    return true;
+  }
+  
+  // JOKERの場合、セットの1ターン目（setTurnIndex === 0）は出せない
+  return setTurnIndex !== 0;
+}
+
+/**
+ * プレイヤーの得点が0以下かどうかチェック
+ */
+export function hasPlayerBelowMinPoints(players: Player[]): boolean {
+  return players.some(player => player.points <= MIN_POINTS);
+}
+
+/**
+ * ゲーム終了条件を判定
+ * @param allHandsEmpty - 全員の手札が空かどうか
+ * @param jokerCount - JOKERカウント
+ * @param players - プレイヤー配列
+ * @returns 終了条件と理由
+ */
+export function checkGameEnd(
+  allHandsEmpty: boolean,
+  jokerCount: number,
+  players: Player[]
+): { shouldEnd: boolean; reason?: string } {
+  // 条件1: 誰かの得点が0以下
+  if (hasPlayerBelowMinPoints(players)) {
+    const bankruptPlayer = players.find(p => p.points <= MIN_POINTS);
+    return {
+      shouldEnd: true,
+      reason: `${bankruptPlayer?.name}の得点が${MIN_POINTS}以下になりました`
+    };
+  }
+
+  // 条件2: 全員の手札が空 かつ JOKERが規定回数以上出た
+  if (allHandsEmpty && jokerCount >= MAX_JOKER_COUNT) {
+    return {
+      shouldEnd: true,
+      reason: `JOKERが${MAX_JOKER_COUNT}回出ました`
+    };
+  }
+
+  return { shouldEnd: false };
+}
+
+/**
+ * @deprecated 代わりに checkGameEnd を使用してください
  */
 export function shouldEndGame(allHandsEmpty: boolean, jokerCount: number): boolean {
-  return allHandsEmpty && jokerCount >= 10;
+  return allHandsEmpty && jokerCount >= MAX_JOKER_COUNT;
 }
