@@ -9,6 +9,8 @@ import { drawCardsForNextTurn } from '../utils/draw';
 import { calculateNextMultiplier } from '../utils/multiplier';
 import { judgeWinner } from '../utils/judgeWinner';
 import { checkJokerInHands, checkGameEnd, shouldReshuffleAfterSet, canPlayJoker } from '../utils/joker';
+import {calculateAllTableFees, PreviousTurnResult} from '../utils/feeCalculator';
+
 
 export default function Game() {
   const [deck, setDeck] = useState<Card[]>([]);
@@ -31,7 +33,8 @@ export default function Game() {
   const [setTurnIndex, setSetTurnIndex] = useState(0);
   const [jokerDealtThisSet, setJokerDealtThisSet] = useState(false);
   const [gameOverReason, setGameOverReason] = useState<string>('');
-
+  const [previousTurnResult, setPreviousTurnResult] = useState<PreviousTurnResult>(null);
+  const [feeCollected, setFeeCollected] = useState(false);
   useEffect(() => {
     let newDeck = shuffleDeck(createDeck());
 
@@ -40,12 +43,20 @@ export default function Game() {
       hands[i % 3].push(newDeck[i]);
     }
 
-    const newPlayers = Array.from({ length: 3 }, (_, i) => ({
+    let newPlayers = Array.from({ length: 3 }, (_, i) => ({
       name: `Player ${i + 1}`,
       hand: hands[i],
       points: 200 * ANTE,
       wins: 0,
     }));
+    console.log('[ゲーム開始] 1ターン目の場代徴収');
+  const tableFees = calculateAllTableFees(null, 3);
+  
+  newPlayers = newPlayers.map((player, idx) => ({
+    ...player,
+    points: player.points - tableFees[idx]
+  }));
+  console.log('[1ターン目 場代徴収後] プレイヤーポイント:', newPlayers.map(p => ({ name: p.name, points: p.points })));
 
     setPlayers(newPlayers);
     setDeck(newDeck.slice(15));
@@ -53,9 +64,42 @@ export default function Game() {
     // ✅ 初期配布時のJOKER判定
     const hasJokerInInitialHands = checkJokerInHands(newPlayers);
     console.log('[初期配布] JOKER判定結果:', hasJokerInInitialHands);
-setJokerDealtThisSet(hasJokerInInitialHands);
     setJokerDealtThisSet(hasJokerInInitialHands);
+    setJokerDealtThisSet(hasJokerInInitialHands);
+    setFeeCollected(true);
   }, []);
+
+
+  //場代徴収
+  useEffect(() => {
+  // 1ターン目はスキップ（初期配布useEffectで徴収済み）
+  if (turnCount === 0) return;
+  
+  // すでに徴収済みの場合はスキップ
+  if (feeCollected) return;
+  
+  // roundResultが表示されている間はスキップ
+  if (roundResult !== null) return;
+  
+  // すでにカードが出されている場合はスキップ
+  if (fieldCards.some(card => card !== null)) return;
+  console.log('[ターン開始] 場代徴収開始');
+  console.log('[ターン開始] turnCount:', turnCount);
+  console.log('[ターン開始] previousTurnResult:', previousTurnResult);
+  
+  const tableFees = calculateAllTableFees(previousTurnResult, players.length);
+  
+  setPlayers(prev => {
+    const updated = prev.map((player, idx) => ({
+      ...player,
+      points: player.points - tableFees[idx]
+    }));
+    console.log('[場代徴収後] プレイヤーポイント:', updated.map(p => ({ name: p.name, points: p.points })));
+    return updated;
+  });
+  
+  setFeeCollected(true);
+}, [turnCount, feeCollected, roundResult, fieldCards, previousTurnResult, players.length]);
 
   function rankToValue(card: Card): number {
     if (!card.rank) return 0;
