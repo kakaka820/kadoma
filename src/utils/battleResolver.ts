@@ -8,6 +8,7 @@ export type BattleResult = {
   loserIndex: number;
   winnerCard: Card;
   loserCard: Card;
+  isReverse: boolean;
 } | null;
 
 /**
@@ -17,8 +18,8 @@ export function determineWinnerAndLoser(
   fieldCards: (Card | null)[],
   isDraw: boolean,
   winnerIndexes: number[],
-  isReverse: boolean,
-  originalWinnerIndex: number | undefined
+  isReverse?: boolean,
+  originalWinnerIndex?: number | undefined
 ): BattleResult {
   if (isDraw || winnerIndexes.length !== 1) {
     return null;
@@ -70,6 +71,7 @@ export function determineWinnerAndLoser(
     winnerIndex,
     loserIndex,
     winnerCard,
-    loserCard
+    loserCard,
+    isReverse: isReverse ?? false
   };
 }
