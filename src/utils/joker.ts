@@ -112,9 +112,3 @@ export function checkGameEnd(
   return { shouldEnd: false };
 }
 
-/**
- * @deprecated 代わりに checkGameEnd を使用してください
- */
-export function shouldEndGame(allHandsEmpty: boolean, jokerCount: number): boolean {
-  return allHandsEmpty && jokerCount >= MAX_JOKER_COUNT;
-}
