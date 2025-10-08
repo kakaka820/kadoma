@@ -54,6 +54,7 @@ interface UseTurnFlowProps {
   setJokerDealtThisSet: React.Dispatch<React.SetStateAction<boolean>>;
   setLastRoundWarning: React.Dispatch<React.SetStateAction<boolean>>;
   setGameOver: React.Dispatch<React.SetStateAction<boolean>>;
+  setGameOverReason: React.Dispatch<React.SetStateAction<string>>;
   setFeeCollected: React.Dispatch<React.SetStateAction<boolean>>;
   setPreviousTurnResult: React.Dispatch<React.SetStateAction<PreviousTurnResult | null>>;
   judgeWinner: (cards: CardWithIndex[]) => JudgeResult;
@@ -120,6 +121,7 @@ export function useTurnFlow({
   setJokerDealtThisSet,
   setLastRoundWarning,
   setGameOver,
+  setGameOverReason,
   setFeeCollected,
   setPreviousTurnResult,
   judgeWinner,
@@ -176,7 +178,8 @@ export function useTurnFlow({
           console.log('[useTurnFlow] 勝者カード:', winnerCard.rank, '値:', rankToValue(winnerCard));
           console.log('[useTurnFlow] 敗者カード:', loserCard.rank, '値:', rankToValue(loserCard));
           console.log('[useTurnFlow] currentMultiplier:', currentMultiplier);
-          console.log('[useTurnFlow] 逆転:', isReverse);
+          console.log('[useTurnFlow] (judgeWinnerから)逆転:', isReverse);
+          console.log('[useTurnFlow] (battleResultから)逆転:', battleResult.isReverse);
 
           scoreToAdd = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse || false);
           winnerIdx = winnerIndex;
@@ -211,6 +214,7 @@ export function useTurnFlow({
                   const gameEndCheck = checkGameEnd(true, newCount, players);
                   if (gameEndCheck.shouldEnd) {
                     console.log('[useTurnFlow] セット終了後ゲーム終了:', gameEndCheck.reason);
+                    setGameOverReason( gameEndCheck.reason || 'JOKERが規定枚数に到達しました');
                     setGameOver(true);
                   }
                 }, 0);
@@ -288,6 +292,7 @@ export function useTurnFlow({
             const bankruptCheck = checkGameEnd(false, jokerCount, updated);
             if (bankruptCheck.shouldEnd) {
               console.log('[useTurnFlow] 得点更新後ゲーム終了:', bankruptCheck.reason);
+              setGameOverReason( bankruptCheck.reason || '');
               setGameOver(true);
               return updated;
             }
