@@ -76,6 +76,7 @@ const {
   setPlayers,
   calculateAllTableFees,
   isInitialized,
+  gameOver,
 });
   const { currentMultiplier } = useTurnFlow({
     roundResult,
@@ -98,6 +99,7 @@ const {
     setJokerDealtThisSet,
     setLastRoundWarning,
     setGameOver,
+    setGameOverReason,
     setFeeCollected,
     setPreviousTurnResult,
     judgeWinner,
