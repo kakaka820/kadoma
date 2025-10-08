@@ -14,6 +14,7 @@ interface UseTableFeesProps {
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>;
   calculateAllTableFees: (prevResult: PreviousTurnResult | null, playerCount: number) => number[];
   isInitialized: boolean;
+  gameOver: boolean;
 }
 
 interface UseTableFeesReturn {
@@ -31,6 +32,7 @@ export function useTableFees({
   setPlayers,
   calculateAllTableFees,
   isInitialized,
+  gameOver,
 }: UseTableFeesProps): UseTableFeesReturn {
   const [previousTurnResult, setPreviousTurnResult] = useState<PreviousTurnResult | null>(null);
   const [feeCollected, setFeeCollected] = useState(false);
@@ -45,6 +47,8 @@ export function useTableFees({
 
   // 場代徴収処理
   useEffect(() => {
+    //ゲーム終了時はスキップ
+    if ( gameOver ) return;
     // 1ターン目はスキップ（初期化時に徴収済み）
     if (turnCount === 0) return;
 
@@ -77,6 +81,7 @@ export function useTableFees({
 
     setFeeCollected(true);
   }, [
+    gameOver,
     turnCount,
     feeCollected,
     roundResult,
