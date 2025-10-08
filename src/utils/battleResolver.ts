@@ -75,4 +75,3 @@ export function determineWinnerAndLoser(
     isReverse: isReverse ?? false
   };
 }
-
