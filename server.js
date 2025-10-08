@@ -15,8 +15,9 @@ const server = http.createServer(app);
 //WebSocket(socket.io)のセットアップ
 const io = socketIo(server, {
   cors: {
-    origin: "*", // GitHub Pagesからの接続許可
-    methods: ["GET", "POST"]
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -97,6 +98,8 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(4000, () => {
-  console.log('Server is running on http://localhost:4000');
+const PORT = process.env.PORT || 4000;
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
