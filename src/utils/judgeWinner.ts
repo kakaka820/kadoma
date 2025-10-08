@@ -62,32 +62,35 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
     (['J', 'Q', 'K', 'JOKER1', 'JOKER2'].includes(winnerCard.card))
   ) {
     // 逆転判定（カードに対応する逆転条件）
+     // 逆転条件のカードを探す（複数ある場合は最も強いものを選ぶ）
+     let reverseCards: typeof cardValues = []; 
+
     if (winnerCard.card === 'J') {
       // J: 1, 5 で逆転
-      if (loserCard && [1, 5].includes(rankToValue(loserCard.card))) {
-        winnerIndexes = [loserCard.playerIndex];
-        isReverse = true;
-      }
-    } else if (winnerCard.card === 'Q') {
+      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [1, 5].includes(rankToValue(c.card)));
+} else if (winnerCard.card === 'Q') {
       // Q: 2, 6 で逆転
-      if (loserCard && [2, 6].includes(rankToValue(loserCard.card))) {
-        winnerIndexes = [loserCard.playerIndex];
-        isReverse = true;
-      }
-    } else if (winnerCard.card === 'K') {
+      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [2, 6].includes(rankToValue(c.card)));
+} else if (winnerCard.card === 'K') {
       // K: 3, 7 で逆転
-      if (loserCard && [3, 7].includes(rankToValue(loserCard.card))) {
-        winnerIndexes = [loserCard.playerIndex];
-        isReverse = true;
-      }
-    } else if (winnerCard.card.startsWith('JOKER')) {
+      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [3, 7].includes(rankToValue(c.card)));
+} else if (winnerCard.card.startsWith('JOKER')) {
       // JOKER: 4 で逆転
-      if (loserCard && rankToValue(loserCard.card) === 4) {
-        winnerIndexes = [loserCard.playerIndex];
-        isReverse = true;
-      }
+       reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && rankToValue(c.card) === 4);
+}
+
+       
+  if (reverseCards.length > 0) {
+  const minReverseCard = reverseCards.reduce((min, card) => 
+    card.value < min.value ? card : min
+  );
+  winnerIndexes = [minReverseCard.playerIndex];
+  isReverse = true;
+}
+
+  
     }
-  }
+  
 
 
 
@@ -97,5 +100,4 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
     isDraw: winnerIndexes.length !== 1,
     isReverse,
     originalWinnerIndex: isReverse ? originalWinnerIndex : undefined,
-  };
-}
+  };}
