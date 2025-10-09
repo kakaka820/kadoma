@@ -29,10 +29,7 @@ const OnlineRoom: React.FC<OnlineRoomProps> = ({ onGameStart }) => {  // 修正
   const [gameReady, setGameReady] = useState(false);
 
   useEffect(() => {
-    const SOCKET_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://kadoma.onrender.com'
-  : 'http://localhost:4000';
-     const newSocket = io(SOCKET_URL);
+    const newSocket = io('https://kadoma.onrender.com');
     setSocket(newSocket);
 
     newSocket.on('room_update', (data: RoomUpdate) => {
