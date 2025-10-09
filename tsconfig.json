@@ -15,5 +15,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "src/Game.tsx"]
+  "include": ["src", "src/Game.tsx", "src/online/components/context/SocketContext.tsx"]
 }
