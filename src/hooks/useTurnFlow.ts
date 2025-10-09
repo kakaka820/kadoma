@@ -3,29 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import { Player, Card } from '../utils/deck';
-import { PreviousTurnResult } from '../utils/feeCalculator';
+import { CardWithIndex, JudgeResult, PreviousTurnResult, BattleResult } from '../types/game';
 
 
 
-
-interface CardWithIndex extends Card {
-  playerIndex: number;
-}
-
-interface JudgeResult {
-  winnerIndexes: number[];
-  isDraw: boolean;
-  isReverse?: boolean;
-  originalWinnerIndex?: number;
-}
-
-interface BattleResult {
-  winnerIndex: number;
-  loserIndex: number;
-  winnerCard: Card;
-  loserCard: Card;
-  isReverse: boolean;
-}
 
 interface DrawResult {
   updatedPlayers: Player[];
@@ -62,7 +43,7 @@ interface UseTurnFlowProps {
     fieldCards: (Card | null)[],
     isDraw: boolean,
     winnerIndexes: number[],
-    isReverse?: boolean,
+    isReverse: boolean,
     originalWinnerIndex?: number
   ) => BattleResult | null;
   calculateScore: (
