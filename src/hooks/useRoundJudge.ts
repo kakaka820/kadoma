@@ -1,20 +1,11 @@
 //勝敗判定フック
 
-
 import { useState, useEffect } from 'react';
 import { Player, Card } from '../utils/deck';
+import { CardWithIndex, JudgeResult } from '../types/game';
 
 
-interface CardWithIndex extends Card {
-  playerIndex: number;
-}
 
-interface JudgeResult {
-  winnerIndexes: number[];
-  isDraw: boolean;
-  isReverse?: boolean;
-  originalWinnerIndex?: number;
-}
 
 interface UseRoundJudgeProps {
   fieldCards: (Card | null)[];
