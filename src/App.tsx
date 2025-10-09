@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Game from './components/Game';
 import OnlineRoom from './components/OnlineRoom';
+import { SocketProvider } from './context/SocketContext';
 
 export default function App() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -13,6 +14,7 @@ export default function App() {
   };
 
   return (
+    <SocketProvider>
     <div className="App">
       <div className="min-h-screen bg-gray-50 p-4">
         {!gameStarted ? (
@@ -30,5 +32,6 @@ export default function App() {
         )}
       </div>
     </div>
+    </SocketProvider>
   );
 }
