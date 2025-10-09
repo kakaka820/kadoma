@@ -2,14 +2,8 @@
 // src/utils/battleResolver.ts
 import { Card } from './deck';
 import { rankToValue } from './cardValue';
+import { BattleResult } from '../types/game';
 
-export type BattleResult = {
-  winnerIndex: number;
-  loserIndex: number;
-  winnerCard: Card;
-  loserCard: Card;
-  isReverse: boolean;
-} | null;
 
 /**
  * 勝者と敗者を特定する
@@ -20,7 +14,7 @@ export function determineWinnerAndLoser(
   winnerIndexes: number[],
   isReverse?: boolean,
   originalWinnerIndex?: number | undefined
-): BattleResult {
+): BattleResult | null {
   if (isDraw || winnerIndexes.length !== 1) {
     return null;
   }
