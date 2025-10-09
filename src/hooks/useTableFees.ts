@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Player, Card } from '../utils/deck';
-import { PreviousTurnResult } from '../utils/feeCalculator';
+import { PreviousTurnResult } from '../types/game';
 
 
 interface UseTableFeesProps {
