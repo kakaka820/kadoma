@@ -1,5 +1,5 @@
 // src/utils/deck.ts
-//デッキ作成・シャッフル機能
+//デッキ作成・シャッフル機能,Card型とPlayer型の定義
 //山札処理修正済（まだ本確認はできてません）
 
 export const SUITS = ['♠', '♥', '♦', '♣'] as const;
