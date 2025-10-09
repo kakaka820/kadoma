@@ -3,17 +3,10 @@
 
 
 import React from 'react';
-import {isJoker} from '../utils/joker';
+import { isJoker } from '../utils/joker';
+import { HandProps } from '../types/game';
 
-type HandProps = {
-  playerName: string;
-  cards: { suit: string | null; rank: string }[];
-  onCardClick: (index: number) => void;
-  disabled: boolean;
-  wins: number;
-  playerScore:number;
-  setTurnIndex: number;
-};
+
 
 export default function Hand({ playerName, cards, onCardClick, disabled, wins, playerScore }: HandProps) {
   return (
