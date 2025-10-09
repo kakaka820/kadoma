@@ -1,10 +1,16 @@
+//serverフォルダはサーバー専用
+//server/server.js
 //WebSocketサーバーの立ち上げに使う
 
+
+//serverフォルダはサーバー専用
+//server/server.js
+//WebSocketサーバーの立ち上げに使う
 
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-
+const { createDeck, shuffleDeck } = require('../shared/deckLogic');  // ← 修正
 
 //Expressアプリーケーションのセットアップ
 const app = express();
@@ -72,6 +78,44 @@ io.on('connection', (socket) => {
         players: rooms[roomId].players
       });
     }
+  });
+
+  // ゲーム開始処理（追加）
+  socket.on('start_game', (roomId) => {
+    const room = rooms[roomId];
+    
+    if (!room || room.players.length !== 3) {
+      return;
+    }
+    
+    // 共通ロジック使用
+    const deck = shuffleDeck(createDeck());
+    
+    // 配布処理（5枚ずつ）
+    const hands = {
+      0: deck.slice(0, 5),
+      1: deck.slice(5, 10),
+      2: deck.slice(10, 15)
+    };
+    
+    room.gameState = {
+      hands,
+      drawPile: deck.slice(15),
+      discardPile: [],
+      currentPlayer: 0
+    };
+    
+    // 全員に配布
+    room.players.forEach((player, index) => {
+      io.to(player.id).emit('game_start', {
+        roomId,
+        hand: hands[index],
+        players: room.players,
+        currentPlayer: 0
+      });
+    });
+    
+    console.log(`Game started in ${roomId}`);
   });
 
   // 切断時の処理
