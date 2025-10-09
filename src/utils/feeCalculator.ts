@@ -3,17 +3,13 @@
 
 
 import { ANTE } from '../config';
+import { PreviousTurnResult } from '../types/game';
 
-export type PreviousTurnResult = {
-  winnerIndex: number | null;
-  loserIndex: number | null;
-  isDraw: boolean;
-} | null;
 
 
 export function calculateTableFee(
   playerIndex: number,
-  previousResult: PreviousTurnResult,
+  previousResult: PreviousTurnResult | null,
   playerCount: number = 3
 ): number {
   // 1ターン目の場合: 全員からANTE*1
@@ -52,7 +48,7 @@ export function calculateTableFee(
  * @returns プレイヤーごとの場代配列
  */
 export function calculateAllTableFees(
-  previousResult: PreviousTurnResult,
+  previousResult: PreviousTurnResult | null,
   playerCount: number = 3
 ): number[] {
   console.log('[場代計算] 開始:', previousResult);
