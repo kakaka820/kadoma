@@ -1,7 +1,8 @@
 //ゲームの基本状態の管理
 import { useState, useEffect } from 'react';
 import { createDeck, shuffleDeck, Card, Player } from '../utils/deck';
-import { calculateAllTableFees, PreviousTurnResult} from '../utils/feeCalculator';
+import { calculateAllTableFees } from '../utils/feeCalculator';
+import { PreviousTurnResult } from '../types/game';
 import { checkJokerInHands } from '../utils/joker';
 
 interface UseGameStateProps{
