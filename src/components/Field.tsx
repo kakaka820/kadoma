@@ -2,17 +2,9 @@
 
 
 import React from 'react';
+import { FieldProps } from '../types/game';
 
-// 型定義（必要に応じて共通化可能）
-type Card = {
-  suit: string | null;
-  rank: string;
-  playerIndex?: number;
-};
 
-type FieldProps = {
-  fieldCards:(Card | null)[];  // null を許容
-};
 
 export default function Field({ fieldCards }: FieldProps) {
   return (
