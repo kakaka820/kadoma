@@ -3,21 +3,12 @@
 
 import { Card } from './deck';
 import { isJoker } from './joker';
+import { rankToValue } from './cardValue';  
+import { CardWithIndex, JudgeResult } from '../types/game';  
 
-type JudgeResult = {
-  winnerIndexes: number[];
-  isDraw: boolean;
-  isReverse: boolean;
-  originalWinnerIndex?: number;  
-};
 
-function rankToValue(rank: string): number {
-  const order = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-  if (rank.startsWith('JOKER')) return 99;
-  return order.indexOf(rank) + 1;
-}
 
-export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeResult {
+export function judgeWinner(cards:CardWithIndex[]): JudgeResult {
   if (cards.length !== 3) return { winnerIndexes: [], isDraw: false, isReverse: false };
 
   // 1. 数字の重複 or ジョーカー同士が出ている場合 → 引き分け
@@ -37,7 +28,7 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
 
   // 2. 通常の最大値勝負
   const cardValues = cards.map(card => ({
-    value: rankToValue(card.rank),
+    value: rankToValue(card),
     playerIndex: card.playerIndex,
     card: card.rank,
   }));
@@ -67,16 +58,16 @@ export function judgeWinner(cards: (Card & { playerIndex: number })[]): JudgeRes
 
     if (winnerCard.card === 'J') {
       // J: 1, 5 で逆転
-      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [1, 5].includes(rankToValue(c.card)));
+      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [1, 5].includes(c.value));
 } else if (winnerCard.card === 'Q') {
       // Q: 2, 6 で逆転
-      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [2, 6].includes(rankToValue(c.card)));
+      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [2, 6].includes(c.value));
 } else if (winnerCard.card === 'K') {
       // K: 3, 7 で逆転
-      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [3, 7].includes(rankToValue(c.card)));
+      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [3, 7].includes(c.value));
 } else if (winnerCard.card.startsWith('JOKER')) {
       // JOKER: 4 で逆転
-       reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && rankToValue(c.card) === 4);
+       reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && c.value === 4);
 }
 
        
