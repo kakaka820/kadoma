@@ -1,0 +1,73 @@
+// src/online/hooks/useOnlineGameState.ts
+// ゲーム基本情報の管理（roomId, playerIndex, myHand, players, gameStatus）
+
+
+import { useState, useEffect } from 'react';
+import { Socket } from 'socket.io-client';
+import { Card } from '../types/game';
+
+interface UseOnlineGameStateProps {
+  socket: Socket | null;
+}
+
+interface UseOnlineGameStateReturn {
+  roomId: string;
+  playerIndex: number | null;
+  myHand: Card[];
+  players: string[];
+  gameStatus: 'waiting' | 'playing' | 'finished';
+}
+
+export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
+  const [roomId, setRoomId] = useState<string>('');
+  const [playerIndex, setPlayerIndex] = useState<number | null>(null);
+  const [myHand, setMyHand] = useState<Card[]>([]);
+  const [players, setPlayers] = useState<string[]>([]);
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
+
+  useEffect(() => {
+    if (!socket) return;
+
+    console.log('[useOnlineGameState] Setting up event listeners');
+
+    // ゲーム開始
+    socket.on('game_start', (data) => {
+      console.log('[useOnlineGameState] game_start received:', data);
+      setRoomId(data.roomId || '');
+      setPlayerIndex(data.playerIndex);
+      setMyHand(data.hand);
+      setPlayers(data.players);
+      setGameStatus('playing');
+      console.log('[useOnlineGameState] gameStatus set to playing');
+    });
+
+    // 手札更新
+    socket.on('hand_update', (data) => {
+      console.log('[useOnlineGameState] hand_update received:', data);
+      setMyHand(data.hand);
+    });
+
+    // ゲーム終了
+    socket.on('game_over', (data) => {
+      console.log('[useOnlineGameState] game_over received:', data);
+      setGameStatus('finished');
+      alert(`ゲーム終了！\n理由: ${data.reason}\n勝者: Player ${data.winner + 1}`);
+    });
+
+    // クリーンアップ
+    return () => {
+      console.log('[useOnlineGameState] Cleaning up event listeners');
+      socket.off('game_start');
+      socket.off('hand_update');
+      socket.off('game_over');
+    };
+  }, [socket]);
+
+  return {
+    roomId,
+    playerIndex,
+    myHand,
+    players,
+    gameStatus,
+  };
+}
