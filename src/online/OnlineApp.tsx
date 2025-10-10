@@ -1,9 +1,10 @@
 //とりあえず枠だけ先に作った
 // オンライン用エントリーらしい
-// onlinesrc/OnlineApp.tsx
+// src/online/OnlineApp.tsx
 import React, { useState } from 'react';
 import { SocketProvider } from './context/SocketContext';
 import OnlineRoom from './components/OnlineRoom';
+import { OnlineGame } from './components/OnlineGame';
 
 export default function OnlineApp() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -23,6 +24,7 @@ export default function OnlineApp() {
           <div>
             <h2>オンライン対戦中 (Room: {roomId})</h2>
             <p>ゲーム画面準備中...</p>
+            <OnlineGame />
             {/* ← 後で OnlineGame.tsx 作る */}
           </div>
         )}
