@@ -6,7 +6,7 @@ import './index.css'; // CSSを使ってる場合
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
-  <React.StrictMode>
+  //<React.StrictMode> これは開発環境でuseEffectとか二回実行しちゃうので、これを一回コメントアウトしてます
     <App />
-  </React.StrictMode>
+  //</React.StrictMode>　同上
 );
