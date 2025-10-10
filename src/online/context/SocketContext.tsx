@@ -7,18 +7,34 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SocketContext = createContext<Socket | null>(null);
+
+
+interface SocketContextType {
+  socket: Socket | null;
+  isConnected: boolean;  // ← 追加！
+}
+
+
+const SocketContext = createContext<SocketContextType>({
+  socket: null,
+  isConnected: false,
+});
 
 interface SocketProviderProps {
   children: ReactNode;
 }
 
+
+
+
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     console.log('[SocketContext] 接続開始');
     const newSocket = io('https://kadoma.onrender.com',{
+      transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts:10,
       reconnectionDelay:3500,
@@ -27,11 +43,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     
     newSocket.on('connect', () => {
       console.log('[SocketContext] 接続成功:', newSocket.id);
+      setIsConnected(true);
     });
 
     newSocket.on('disconnect', () => {
       console.log('[SocketContext] 切断');
+      setIsConnected(false);
     });
+
+    // ✅ エラーハンドリング追加
+    newSocket.on('connect_error', (error) => {
+      console.error('[SocketContext] 接続エラー:', error);
+      setIsConnected(false);
+    });
+
 
     setSocket(newSocket);
 
@@ -43,7 +68,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={socket}>
+    <SocketContext.Provider value={{ socket, isConnected }}>
       {children}
     </SocketContext.Provider>
   );
