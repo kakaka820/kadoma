@@ -18,11 +18,11 @@ interface RoomUpdate {
 }
 
 interface OnlineRoomProps {
-  onGameStart: (roomId: string) => void;  // 追加
+  onGameStart: (roomId: string) => void;
 }
 
-const OnlineRoom: React.FC<OnlineRoomProps> = ({ onGameStart }) => {  // 修正
-  const socket = useSocket();
+const OnlineRoom: React.FC<OnlineRoomProps> = ({ onGameStart }) => {
+  const { socket, isConnected } = useSocket();
   const [playerName, setPlayerName] = useState('');
   const [roomInfo, setRoomInfo] = useState<RoomUpdate | null>(null);
   const [matchingStatus, setMatchingStatus] = useState<'idle' | 'waiting' | 'ready'>('idle');
@@ -62,7 +62,7 @@ const OnlineRoom: React.FC<OnlineRoomProps> = ({ onGameStart }) => {  // 修正
 const handleStartMatching = () => {
     if (socket && playerName.trim()) {
       console.log('[OnlineRoom] join_room emit:', playerName);
-      socket.emit('join_room', playerName);
+      socket.emit('join_room', { playerName });
       setMatchingStatus('waiting');
     } else {
       console.warn('[OnlineRoom] socket not ready or name empty');
@@ -85,11 +85,13 @@ return (
           <button 
             onClick={handleStartMatching}
             style={{ padding: '8px 16px', cursor: 'pointer' }}
-            disabled={!socket}  // socket ない時は無効
+            disabled={!socket || !playerName.trim()}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded disabled:bg-gray-400"
           >
             マッチング開始
           </button>
-          {!socket && <p style={{ color: 'orange' }}>サーバー接続中...</p>}
+          {!isConnected && (  // ✅ isConnected 使用
+            <p className="text-orange-500 mt-4">サーバー接続中...</p>)}
         </div>
       )}
       
