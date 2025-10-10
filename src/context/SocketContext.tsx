@@ -1,5 +1,7 @@
 //WebSocketとの接続をフロント側で切っちゃう問題を解決するため
 
+//いまはもしかしたらsrc/online/contextの中に格納されてるかも
+
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 
