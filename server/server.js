@@ -205,7 +205,9 @@ io.on('connection', (socket) => {
       }, 1500);
     } else {
       io.to(roomId).emit('turn_update', {
-        turnIndex: gameState.turnIndex
+        turnIndex: gameState.turnIndex,
+        currentMultiplier: gameState.currentMultiplier,
+        fieldCards: gameState.fieldCards
       });
     }
   });
