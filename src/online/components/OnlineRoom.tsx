@@ -45,7 +45,7 @@ const OnlineRoom: React.FC<OnlineRoomProps> = ({ onGameStart }) => {
     // 3秒後に自動遷移
       setTimeout(() => {
         onGameStart(data.roomId);
-      }, 3000);
+      }, 0);
     });
 
 // クリーンアップ（イベントリスナー削除のみ）
