@@ -49,6 +49,7 @@ const games = new Map();
   room.players.forEach((player, idx) => {
     console.log(`[Game] Sending game_start to ${player.name} (${player.id})`);
     io.to(player.id).emit('game_start', {
+      roomId,
       playerIndex: idx,
       hand: gameState.hands[idx],
       players: room.players.map(p => p.name),
@@ -107,7 +108,7 @@ io.on('connection', (socket) => {
   // ルーム作成または参加
   socket.on('join_room', (data) => {
     console.log('[Server] join_room received:', data);
-    const { playerName } = data;
+    const playerName = typeof data === 'string' ? data : data.playerName;
     if (!playerName) {
     console.error('[Server] playerName is missing!');
     return;
@@ -140,7 +141,7 @@ io.on('connection', (socket) => {
     socket.join(roomId);
     socket.roomId = roomId;
     
-    console.log(`${playerName} joined ${roomId} (${room.players.length}/3)`);
+    console.log(`[Server]${playerName} joined ${roomId} (${room.players.length}/3)`);
 
     // ルーム情報を全員に送信
     io.to(roomId).emit('room_update', {
