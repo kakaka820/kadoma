@@ -3,14 +3,11 @@
 //WebSocketサーバーの立ち上げに使う
 
 
-//serverフォルダはサーバー専用
-//server/server.js
-//WebSocketサーバーの立ち上げに使う
-
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { createDeck, shuffleDeck } = require('../shared/deckLogic');  // ← 修正
+const { Server } = require('socket.io');
+const { initializeGame, processRound, prepareNextTurn } = require('../shared/gameFlow');
 
 //Expressアプリーケーションのセットアップ
 const app = express();
@@ -28,115 +25,206 @@ const io = socketIo(server, {
 });
 
 // ルーム管理用データ
-const rooms = {};
+const rooms = new Map();
+const games = new Map();
 
+//独立した関数として定義
+//ゲーム開始処理
+  function startGame(roomId, room) {
+  console.log(`[Game] Starting game in room ${roomId}`);
+  console.log(`[Game] Players:`, room.players);
+  
+  const gameState = initializeGame(3, 200);
+  gameState.roomId = roomId;
+  gameState.players = room.players;
+  
+  games.set(roomId, gameState);
+  console.log(`[Game] GameState created:`, {
+    roomId: gameState.roomId,
+    hands: gameState.hands.length,
+    players: gameState.players.length
+  });
+  
+  // 各プレイヤーに手札送信
+  room.players.forEach((player, idx) => {
+    console.log(`[Game] Sending game_start to ${player.name} (${player.id})`);
+    io.to(player.id).emit('game_start', {
+      playerIndex: idx,
+      hand: gameState.hands[idx],
+      players: room.players.map(p => p.name),
+      turnIndex: 0,
+      scores: gameState.scores
+    });
+  });
+}
+
+// ラウンド処理も独立関数
+
+
+function handleRoundEnd(roomId, gameState) {
+  const updatedState = processRound(gameState);
+  games.set(roomId, updatedState);
+  
+  io.to(roomId).emit('round_result', {
+    ...updatedState.roundResult,
+    scores: updatedState.scores,
+    wins: updatedState.wins
+  });
+  
+  setTimeout(() => {
+    const nextState = prepareNextTurn(updatedState);
+    games.set(roomId, nextState);
+    
+    if (nextState.isGameOver) {
+      io.to(roomId).emit('game_over', {
+        reason: nextState.gameOverReason,
+        finalScores: nextState.scores,
+        winner: nextState.scores.indexOf(Math.max(...nextState.scores))
+      });
+      games.delete(roomId);
+    } else {
+      // ✅ 新しい手札を各プレイヤーに送信
+      nextState.players.forEach((player, idx) => {
+        io.to(player.id).emit('hand_update', {
+          hand: nextState.hands[idx]
+        });
+      });
+      
+      // ✅ ターン情報を全員に送信
+      io.to(roomId).emit('turn_update', {
+        turnIndex: nextState.turnIndex,
+        currentMultiplier: nextState.currentMultiplier,
+        fieldCards: nextState.fieldCards
+      });
+    }
+  }, 2000);
+}
+
+//Socket.IOイベント処理
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   // ルーム作成または参加
-  socket.on('join_room', (playerName) => {
-    let roomId = null;
+  socket.on('join_room', (data) => {
+    console.log('[Server] join_room received:', data);
+    const { playerName } = data;
+    if (!playerName) {
+    console.error('[Server] playerName is missing!');
+    return;
+  }
+    let targetRoom = null;
 
     // 空きのあるルームを探す
-    for (const [id, room] of Object.entries(rooms)) {
+    for (const [id, room] of rooms.entries()) {
       if (room.players.length < 3) {
-        roomId = id;
+        targetRoom = { roomId: id, room };
         break;
       }
     }
 
     // なければ新規ルーム作成
-    if (!roomId) {
-      roomId = `room_${Date.now()}`;
-      rooms[roomId] = { players: [] };
+    if (!targetRoom) {
+      const newRoomId = `room_${Date.now()}`;
+      rooms.set(newRoomId, { players: [] });
+      targetRoom = { roomId: newRoomId, room: rooms.get(newRoomId) };
     }
 
-    // プレイヤー情報追加
-    const player = {
-      id: socket.id,
-      name: playerName,
-      position: rooms[roomId].players.length // 0, 1, 2
-    };
+    const { roomId, room }= targetRoom;
 
-    rooms[roomId].players.push(player);
+    // プレイヤー情報追加
+    room.players.push({
+      id: socket.id,
+      name: playerName
+    });
+    
     socket.join(roomId);
     socket.roomId = roomId;
-
-    console.log(`${playerName} joined ${roomId} (${rooms[roomId].players.length}/3)`);
+    
+    console.log(`${playerName} joined ${roomId} (${room.players.length}/3)`);
 
     // ルーム情報を全員に送信
     io.to(roomId).emit('room_update', {
       roomId,
-      players: rooms[roomId].players,
-      isFull: rooms[roomId].players.length === 3
+      players: room.players,
+      isFull: room.players.length === 3
     });
 
     // 3人揃ったら開始通知
-    if (rooms[roomId].players.length === 3) {
-      io.to(roomId).emit('game_ready', {
-        message: '3人揃いました！ゲーム開始準備完了',
-        players: rooms[roomId].players
-      });
+    if (room.players.length === 3) {
+      console.log('[Server] Room full! Sending game_ready...'); 
+      io.to(roomId).emit('game_ready', { roomId });
+      
+      // ✅ 1秒後にゲーム開始
+      setTimeout(() => {
+        console.log('[Server] Starting game...');
+        startGame(roomId, room);
+      }, 1000);
     }
   });
 
-  // ゲーム開始処理（追加）
-  socket.on('start_game', (roomId) => {
-    const room = rooms[roomId];
+
+    // カード出す処理
+  socket.on('play_card', (data) => {
+    const { roomId, cardIndex } = data;
+    const gameState = games.get(roomId);
     
-    if (!room || room.players.length !== 3) {
+    if (!gameState) {
+      console.error('[Game] Game not found:', roomId);
       return;
     }
     
-    // 共通ロジック使用
-    const deck = shuffleDeck(createDeck());
+    const playerIndex = gameState.players.findIndex(p => p.id === socket.id);
     
-    // 配布処理（5枚ずつ）
-    const hands = {
-      0: deck.slice(0, 5),
-      1: deck.slice(5, 10),
-      2: deck.slice(10, 15)
-    };
+    if (playerIndex === -1 || playerIndex !== gameState.turnIndex) {
+      console.error('[Game] Invalid turn');
+      return;
+    }
+
+    // 手札からカードを取り出す
+    const card = gameState.hands[playerIndex][cardIndex];
+    gameState.hands[playerIndex].splice(cardIndex, 1);
+    gameState.fieldCards[playerIndex] = card;
     
-    room.gameState = {
-      hands,
-      drawPile: deck.slice(15),
-      discardPile: [],
-      currentPlayer: 0
-    };
-    
-    // 全員に配布
-    room.players.forEach((player, index) => {
-      io.to(player.id).emit('game_start', {
-        roomId,
-        hand: hands[index],
-        players: room.players,
-        currentPlayer: 0
-      });
+    console.log(`[Game] Player ${playerIndex} played:`, card);
+
+    // 全員に通知
+    io.to(roomId).emit('card_played', {
+      playerIndex,
+      card,
+      fieldCards: gameState.fieldCards
     });
+
+    // 次のターンへ
+    gameState.turnIndex = (gameState.turnIndex + 1) % 3;
     
-    console.log(`Game started in ${roomId}`);
+    // 3人全員出したか確認
+    if (gameState.fieldCards.every(c => c !== null)) {
+      setTimeout(() => {
+        handleRoundEnd(roomId, gameState);  // ✅ 関数呼び出し
+      }, 1500);
+    } else {
+      io.to(roomId).emit('turn_update', {
+        turnIndex: gameState.turnIndex
+      });
+    }
   });
+
+
 
   // 切断時の処理
   socket.on('disconnect', () => {
-    const roomId = socket.roomId;
-    if (roomId && rooms[roomId]) {
-      // プレイヤーを削除
-      rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== socket.id);
-      
-      console.log(`User disconnected from ${roomId} (${rooms[roomId].players.length}/3)`);
-
-      // 空になったら部屋削除
-      if (rooms[roomId].players.length === 0) {
-        delete rooms[roomId];
-      } else {
-        // 残りのプレイヤーに通知
-        io.to(roomId).emit('room_update', {
-          roomId,
-          players: rooms[roomId].players,
-          isFull: false
-        });
+    console.log('User disconnected:', socket.id);
+    if (socket.roomId) {
+      const room = rooms.get(socket.roomId);
+      if (room) {
+        room.players = room.players.filter(p => p.id !== socket.id);
+        console.log(`User disconnected from ${socket.roomId} (${room.players.length}/3)`);
+        
+        if (room.players.length === 0) {
+          rooms.delete(socket.roomId);
+          games.delete(socket.roomId);
+          console.log(`Room ${socket.roomId} deleted`);
+        }
       }
     }
   });
