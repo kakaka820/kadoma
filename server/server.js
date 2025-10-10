@@ -42,8 +42,9 @@ const games = new Map();
   console.log(`[Game] GameState created:`, {
     roomId: gameState.roomId,
     hands: gameState.hands.length,
-    players: gameState.players.length
-  });
+    players: gameState.players.length,
+    sceores: gameState.scores
+    });
   
   // 各プレイヤーに手札送信
   room.players.forEach((player, idx) => {
@@ -74,6 +75,15 @@ function handleRoundEnd(roomId, gameState) {
   
   setTimeout(() => {
     const nextState = prepareNextTurn(updatedState);
+    //previousTurnResultを保存
+    if (updatedState.roundResult) {
+      const { winnerIndex, loserIndex, isDraw } = updatedState.roundResult;
+      nextState.previousTurnResult = {
+        winnerIndex: winnerIndex !== undefined ? winnerIndex : -1,
+        loserIndex: loserIndex !== undefined ? loserIndex : -1,
+        isDraw: isDraw || false
+      };
+    }
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
