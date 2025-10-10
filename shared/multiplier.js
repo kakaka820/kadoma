@@ -51,10 +51,7 @@ function calculateNextMultiplier(cards) {
   return multiplier;
 }
 
-function rankToNumber(rank) {
-  const order = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-  return order.indexOf(rank) + 1;
-}
+
 
 // CommonJS (Node.js用)
 if (typeof module !== 'undefined' && module.exports) {
