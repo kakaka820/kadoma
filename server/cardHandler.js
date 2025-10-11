@@ -42,6 +42,7 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   
   console.log(`[Game] Player ${playerIndex} played:`, card);
 
+
   // 全員に通知
   io.to(roomId).emit('card_played', {
     playerIndex,
