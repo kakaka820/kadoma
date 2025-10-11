@@ -6,6 +6,25 @@ const { calculateAllTableFees } = require('../shared/feeCalculator');
 const { checkJokerInHands } = require('../shared/joker');
 const LOW_DECK_THRESHOLD = 15;
 
+
+/**
+ * 絵札・JOKERかどうかを判定
+ */
+function isFaceCardOrJoker(card) {
+  return ['J', 'Q', 'K', 'JOKER1', 'JOKER2'].includes(card.rank);
+}
+/**
+ * 他プレイヤー用の手札情報を作成（絵札/JOKERのみ表示、他は裏向き）
+ */
+function createOpponentHandInfo(hand) {
+  return hand.map(card => {
+    if (isFaceCardOrJoker(card)) {
+      return { rank: card.rank, suit: card.suit, visible: true };
+    }
+    return { visible: false }; // 裏向き
+  });
+}
+
 /**
  * ゲーム開始処理
  */
@@ -74,6 +93,16 @@ function handleRoundEnd(io, games, roomId, gameState) {
       };
     }
 
+
+    const allHandsEmpty = updatedState.hands.every(h => h.length === 0);
+    const isSetEnd = allHandsEmpty && updatedState.setTurnIndex === 4;
+    // セット終了時は警告をクリア
+    if (isSetEnd) {
+      console.log('[警告] セット終了、警告クリア');
+      io.to(roomId).emit('clear_warnings');
+    }
+
+
     const nextState = prepareNextTurn(updatedState, previousTurnResult);
 
     // 新ターン開始時に場代徴収
@@ -105,7 +134,9 @@ function handleRoundEnd(io, games, roomId, gameState) {
           hand: nextState.hands[idx]
         });
       });
-      checkAndSendWarnings(io, nextState, nextState.players);
+     if (allHandsEmpty) {
+        checkAndSendWarnings(io, nextState, nextState.players);
+      }
       
       // 新ラウンドの情報を全員に送信
       io.to(roomId).emit('turn_update', {
@@ -157,5 +188,6 @@ function checkAndSendWarnings(io, gameState, players) {
 
 module.exports = {
   startGame,
-  handleRoundEnd
+  handleRoundEnd,
+  checkAndSendWarnings
 };
