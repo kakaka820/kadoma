@@ -1,5 +1,5 @@
 // src/online/hooks/useTurnFlow.ts
-// turn_updateとgame_overイベント,card_played,game_startイベントの処理を担当
+// ターンフロー（同時プレイ用：選択状態、倍率、場札）の管理
 
 import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
@@ -10,58 +10,53 @@ interface UseTurnFlowProps {
 }
 
 interface UseTurnFlowReturn {
-  turnIndex: number;
   currentMultiplier: number;
   fieldCards: (Card | null)[];
+  playerSelections: boolean[];
 }
 
 export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
-  const [turnIndex, setTurnIndex] = useState<number>(0);
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1);
   const [fieldCards, setFieldCards] = useState<(Card | null)[]>([null, null, null]);
+  const [playerSelections, setPlayerSelections] = useState<boolean[]>([false, false, false]);
 
   useEffect(() => {
     if (!socket) return;
 
     console.log('[useTurnFlow] Setting up event listeners');
 
-    // ゲーム開始 - turnIndexを初期化
-    socket.on('game_start', (data) => {
-      console.log('[useTurnFlow] game_start received:', data);
-      setTurnIndex(data.turnIndex || 0);
-    });
-    // カードが出された
+    // カードが出されたとき
     socket.on('card_played', (data) => {
       console.log('[useTurnFlow] card_played received:', data);
       setFieldCards(data.fieldCards);
     });
 
-    // ターン更新
+    // ターン更新（選択状態、倍率、場札）
     socket.on('turn_update', (data) => {
       console.log('[useTurnFlow] turn_update received:', data);
-      setTurnIndex(data.turnIndex);
-      setCurrentMultiplier(data.currentMultiplier);
-      setFieldCards(data.fieldCards);
+      setCurrentMultiplier(data.currentMultiplier || 1);
+      setFieldCards(data.fieldCards || [null, null, null]);
+      setPlayerSelections(data.playerSelections || [false, false, false]);
     });
 
-    // ゲーム終了
-    socket.on('game_over', (data) => {
-      console.log('[useTurnFlow] game_over received:', data);
-      alert(`ゲーム終了！\n理由: ${data.reason}\n勝者: Player ${data.winner + 1}`);
+    // ラウンド結果後、場札をクリア
+    socket.on('round_result', () => {
+      console.log('[useTurnFlow] round_result received, clearing field cards');
+      setFieldCards([null, null, null]);
     });
 
     // クリーンアップ
     return () => {
       console.log('[useTurnFlow] Cleaning up event listeners');
-      socket.off('game_start');
       socket.off('card_played');
       socket.off('turn_update');
+      socket.off('round_result');
     };
   }, [socket]);
 
   return {
-    turnIndex,
     currentMultiplier,
     fieldCards,
+    playerSelections,
   };
 }
