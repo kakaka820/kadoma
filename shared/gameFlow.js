@@ -106,7 +106,17 @@ function processRound(gameState) {
   }
   
   // 2. 次の倍率計算
-  const nextMultiplier = 1 + calculateNextMultiplier(fieldCards.filter(c => c));
+  const additionalMultiplier = calculateNextMultiplier(fieldCards.filter(c => c));
+  let nextMultiplier;
+  if (additionalMultiplier > 0) {
+    // 追加倍率がある場合は累積加算
+    nextMultiplier = currentMultiplier + additionalMultiplier;
+    console.log(`[倍率] ${currentMultiplier} + ${additionalMultiplier} = ${nextMultiplier}`);
+  } else {
+    // 追加倍率が0の場合はリセット
+    nextMultiplier = 1;
+    console.log(`[倍率] リセット: 1`);
+  }
   
   // 3. 前回結果保存
   const newPreviousTurnResult = isDraw 
