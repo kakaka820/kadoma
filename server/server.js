@@ -78,7 +78,7 @@ function handleRoundEnd(roomId, gameState) {
     let previousTurnResult = null;
     if (updatedState.roundResult) {
       const { winnerIndex, loserIndex, isDraw } = updatedState.roundResult;
-      nextState.previousTurnResult = {
+      previousTurnResult = {
         winnerIndex: winnerIndex !== undefined ? winnerIndex : -1,
         loserIndex: loserIndex !== undefined ? loserIndex : -1,
         isDraw: isDraw || false
@@ -86,7 +86,6 @@ function handleRoundEnd(roomId, gameState) {
     }
 
     const nextState = prepareNextTurn(updatedState, previousTurnResult);
-  games.set(roomId, nextState);
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
