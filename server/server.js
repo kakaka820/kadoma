@@ -30,13 +30,14 @@ const games = new Map();
 
 //独立した関数として定義
 //ゲーム開始処理
-  function startGame(roomId, room) {
+function startGame(roomId, room) {
   console.log(`[Game] Starting game in room ${roomId}`);
   console.log(`[Game] Players:`, room.players);
   
   const gameState = initializeGame(3, 200);
   gameState.roomId = roomId;
   gameState.players = room.players;
+  gameState.playerSelections = [false, false, false]; // 同時プレイ用の選択状態
   
   games.set(roomId, gameState);
   console.log(`[Game] GameState created:`, {
@@ -44,7 +45,7 @@ const games = new Map();
     hands: gameState.hands.length,
     players: gameState.players.length,
     scores: gameState.scores
-    });
+  });
   
   // 各プレイヤーに手札送信
   room.players.forEach((player, idx) => {
@@ -54,15 +55,20 @@ const games = new Map();
       playerIndex: idx,
       hand: gameState.hands[idx],
       players: room.players.map(p => p.name),
-      turnIndex: 0,
       scores: gameState.scores
     });
+  });
+  
+  // 全員にゲーム状態を送信
+  io.to(roomId).emit('turn_update', {
+    currentMultiplier: gameState.currentMultiplier,
+    fieldCards: gameState.fieldCards,
+    scores: gameState.scores,
+    playerSelections: gameState.playerSelections
   });
 }
 
 // ラウンド処理も独立関数
-
-
 function handleRoundEnd(roomId, gameState) {
   const updatedState = processRound(gameState);
   games.set(roomId, updatedState);
@@ -86,6 +92,20 @@ function handleRoundEnd(roomId, gameState) {
     }
 
     const nextState = prepareNextTurn(updatedState, previousTurnResult);
+    
+    // 場代徴収（新ラウンド開始時）
+    if (previousTurnResult) {
+      const fees = require('../shared/feeCalculator').calculateAllTableFees(
+        previousTurnResult, 
+        nextState.hands.length
+      );
+      nextState.scores = nextState.scores.map((score, idx) => score - fees[idx]);
+      console.log('[場代] 徴収:', fees, '結果:', nextState.scores);
+    }
+    
+    // 選択状態をリセット
+    nextState.playerSelections = [false, false, false];
+    
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
@@ -103,12 +123,12 @@ function handleRoundEnd(roomId, gameState) {
         });
       });
       
-      // ✅ ターン情報を全員に送信
+      // ✅ 新ラウンドの情報を全員に送信
       io.to(roomId).emit('turn_update', {
-        turnIndex: nextState.turnIndex,
         currentMultiplier: nextState.currentMultiplier,
         fieldCards: nextState.fieldCards,
-        scores: nextState.scores
+        scores: nextState.scores,
+        playerSelections: nextState.playerSelections
       });
     }
   }, 2000);
@@ -123,9 +143,9 @@ io.on('connection', (socket) => {
     console.log('[Server] join_room received:', data);
     const playerName = typeof data === 'string' ? data : data.playerName;
     if (!playerName) {
-    console.error('[Server] playerName is missing!');
-    return;
-  }
+      console.error('[Server] playerName is missing!');
+      return;
+    }
     let targetRoom = null;
 
     // 空きのあるルームを探す
@@ -143,7 +163,7 @@ io.on('connection', (socket) => {
       targetRoom = { roomId: newRoomId, room: rooms.get(newRoomId) };
     }
 
-    const { roomId, room }= targetRoom;
+    const { roomId, room } = targetRoom;
 
     // プレイヤー情報追加
     room.players.push({
@@ -177,7 +197,7 @@ io.on('connection', (socket) => {
   });
 
 
-    // カード出す処理
+  // カード出す処理（同時プレイ版）
   socket.on('play_card', (data) => {
     const { roomId, cardIndex } = data;
     const gameState = games.get(roomId);
@@ -189,8 +209,14 @@ io.on('connection', (socket) => {
     
     const playerIndex = gameState.players.findIndex(p => p.id === socket.id);
     
-    if (playerIndex === -1 || playerIndex !== gameState.turnIndex) {
-      console.error('[Game] Invalid turn');
+    if (playerIndex === -1) {
+      console.error('[Game] Player not found');
+      return;
+    }
+    
+    // すでに選択済みの場合は無視
+    if (gameState.playerSelections[playerIndex]) {
+      console.error('[Game] Player already selected');
       return;
     }
 
@@ -198,20 +224,9 @@ io.on('connection', (socket) => {
     const card = gameState.hands[playerIndex][cardIndex];
     gameState.hands[playerIndex].splice(cardIndex, 1);
     gameState.fieldCards[playerIndex] = card;
+    gameState.playerSelections[playerIndex] = true;
     
     console.log(`[Game] Player ${playerIndex} played:`, card);
-
-    if (playerIndex === 0 && gameState.previousTurnResult) {
-  const fees = require('../shared/feeCalculator').calculateAllTableFees(
-    gameState.previousTurnResult, 
-    gameState.hands.length
-  );
-  gameState.scores = gameState.scores.map((score, idx) => score - fees[idx]);
-  
-  // 場代徴収をログ出力
-  console.log('[場代] 徴収:', fees, '結果:', gameState.scores);
-}
-
 
     // 全員に通知
     io.to(roomId).emit('card_played', {
@@ -220,20 +235,19 @@ io.on('connection', (socket) => {
       fieldCards: gameState.fieldCards
     });
 
-    // 次のターンへ
-    gameState.turnIndex = (gameState.turnIndex + 1) % 3;
+    // 選択状態を送信
+    io.to(roomId).emit('turn_update', {
+      currentMultiplier: gameState.currentMultiplier,
+      fieldCards: gameState.fieldCards,
+      scores: gameState.scores,
+      playerSelections: gameState.playerSelections
+    });
     
-    // 3人全員出したか確認
-    if (gameState.fieldCards.every(c => c !== null)) {
+    // 全員選択したか確認
+    if (gameState.playerSelections.every(Boolean)) {
       setTimeout(() => {
-        handleRoundEnd(roomId, gameState);  // ✅ 関数呼び出し
+        handleRoundEnd(roomId, gameState);
       }, 1500);
-    } else {
-      io.to(roomId).emit('turn_update', {
-        turnIndex: gameState.turnIndex,
-        currentMultiplier: gameState.currentMultiplier,
-        fieldCards: gameState.fieldCards
-      });
     }
   });
 
