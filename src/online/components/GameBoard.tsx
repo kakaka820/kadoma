@@ -4,6 +4,7 @@
 import Hand from './Hand';
 import Field from './Field';
 import { Warning } from '../hooks/useWarnings';
+import { OpponentCard } from '../hooks/useOnlineGameState';
 
 
 interface GameBoardProps {
@@ -21,6 +22,7 @@ interface GameBoardProps {
   playCard: (cardIndex: number) => void;
   warnings: Warning[];
   removeWarning: (id: string) => void; 
+  opponentHands: OpponentCard[][];
 }
 
 export function GameBoard({
@@ -37,7 +39,8 @@ export function GameBoard({
   myHand,
   playCard,
   warnings,
-  removeWarning
+  removeWarning,
+  opponentHands,
 }: GameBoardProps) {
   return (
     <>
@@ -84,10 +87,34 @@ export function GameBoard({
               }`}
             >
               <div className="font-bold">{name}</div>
+               {/* ← 他プレイヤーの手札を表示 */}
+               <>
+                 {idx !== playerIndex && opponentHands[idx] && (
+                  <div className="mt-2">
+                    <div className="text-xs mb-1">手札:</div>
+                    <div className="flex gap-1 flex-wrap">
+                      {opponentHands[idx].map((card, cardIdx) => (
+                        <div
+                          key={cardIdx}
+                          className="px-2 py-1 text-xs border border-gray-500 rounded"
+                        >
+                          {card.visible ? (
+                            <span className="text-yellow-300">
+                              {card.suit ? `${card.rank}${card.suit}` : card.rank}
+                            </span>
+                          ) : (
+                            <span>🂠</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                  </>
+                  {playerSelections[idx] && <div className="text-sm mt-1">（選択済み）</div>}
               <div>スコア: {scores[idx]}</div>
               <div>勝利数: {wins[idx]}</div>
               {idx === playerIndex && <div className="text-sm mt-1">（あなた）</div>}
-              {playerSelections[idx] && <div className="text-sm mt-1">（選択済み）</div>}
             </div>
           ))}
         </div>

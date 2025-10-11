@@ -21,6 +21,7 @@ export function OnlineGame() {
     myHand,
     players,
     gameStatus,
+    opponentHands
   } = useOnlineGameState({ socket });
 
   const {
@@ -72,6 +73,7 @@ export function OnlineGame() {
       playCard={playCard}
       warnings={warnings}
       removeWarning={removeWarning}
+      opponentHands={opponentHands}
     />
   );
 }
