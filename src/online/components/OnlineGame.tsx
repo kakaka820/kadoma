@@ -9,6 +9,7 @@ import { useCardPlay } from '../hooks/useCardPlay';
 import { ConnectionStatus } from './ConnectionStatus';
 import { WaitingRoom } from './WaitingRoom';
 import { GameBoard } from './GameBoard';
+import { useWarnings } from '../hooks/useWarnings';
 
 export function OnlineGame() {
   const { socket, isConnected } = useSocket();
@@ -44,6 +45,7 @@ export function OnlineGame() {
     playerSelections,
     setTurnIndex,
   });
+  const { warnings, removeWarning } =useWarnings({ socket })
 
   // UI分岐
   if (!isConnected) {
@@ -68,6 +70,8 @@ export function OnlineGame() {
       roundResult={roundResult}
       myHand={myHand}
       playCard={playCard}
+      warnings={warnings}
+      removeWarning={removeWarning}
     />
   );
 }
