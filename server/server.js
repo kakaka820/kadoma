@@ -93,15 +93,6 @@ function handleRoundEnd(roomId, gameState) {
 
     const nextState = prepareNextTurn(updatedState, previousTurnResult);
     
-    // 場代徴収（新ラウンド開始時）
-    if (previousTurnResult) {
-      const fees = require('../shared/feeCalculator').calculateAllTableFees(
-        previousTurnResult, 
-        nextState.hands.length
-      );
-      nextState.scores = nextState.scores.map((score, idx) => score - fees[idx]);
-      console.log('[場代] 徴収:', fees, '結果:', nextState.scores);
-    }
     
     // 選択状態をリセット
     nextState.playerSelections = [false, false, false];
