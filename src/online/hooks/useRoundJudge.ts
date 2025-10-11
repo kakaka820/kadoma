@@ -24,6 +24,13 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
 
     console.log('[useRoundJudge] Setting up event listeners');
 
+    // ✅ 初期スコア受信（ゲーム開始時）
+    socket.on('game_start', (data) => {
+      console.log('[useRoundJudge] game_start - 初期スコア:', data.scores);
+      setScores(data.scores);
+      setWins([0, 0, 0]);  // 初期化
+    });
+
     // ラウンド結果
     socket.on('round_result', (data) => {
       console.log('[useRoundJudge] round_result received:', data);
@@ -35,6 +42,12 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
       setTimeout(() => {
         setRoundResult(null);
       }, 2000);
+    });
+
+    // ✅ 新ターン開始時のスコア更新（場代徴収後）
+    socket.on('turn_update', (data) => {
+      console.log('[useRoundJudge] turn_update - 場代徴収後スコア:', data.scores);
+      setScores(data.scores);
     });
 
     // クリーンアップ
