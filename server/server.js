@@ -43,7 +43,7 @@ const games = new Map();
     roomId: gameState.roomId,
     hands: gameState.hands.length,
     players: gameState.players.length,
-    sceores: gameState.scores
+    scores: gameState.scores
     });
   
   // 各プレイヤーに手札送信
@@ -74,8 +74,8 @@ function handleRoundEnd(roomId, gameState) {
   });
   
   setTimeout(() => {
-    const nextState = prepareNextTurn(updatedState);
     //previousTurnResultを保存
+    let previousTurnResult = null;
     if (updatedState.roundResult) {
       const { winnerIndex, loserIndex, isDraw } = updatedState.roundResult;
       nextState.previousTurnResult = {
@@ -84,6 +84,9 @@ function handleRoundEnd(roomId, gameState) {
         isDraw: isDraw || false
       };
     }
+
+    const nextState = prepareNextTurn(updatedState, previousTurnResult);
+  games.set(roomId, nextState);
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
@@ -245,9 +248,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
