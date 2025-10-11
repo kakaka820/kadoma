@@ -13,12 +13,14 @@ interface UseTurnFlowReturn {
   currentMultiplier: number;
   fieldCards: (Card | null)[];
   playerSelections: boolean[];
+  setTurnIndex: number;
 }
 
 export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1);
   const [fieldCards, setFieldCards] = useState<(Card | null)[]>([null, null, null]);
   const [playerSelections, setPlayerSelections] = useState<boolean[]>([false, false, false]);
+  const [setTurnIndex, setSetTurnIndex] = useState<number>(0);
 
   useEffect(() => {
     if (!socket) return;
@@ -37,6 +39,7 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       setCurrentMultiplier(data.currentMultiplier || 1);
       setFieldCards(data.fieldCards || [null, null, null]);
       setPlayerSelections(data.playerSelections || [false, false, false]);
+      setSetTurnIndex(data.setTurnIndex);
     });
 
     // ラウンド結果後、場札をクリア
@@ -58,5 +61,6 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
     currentMultiplier,
     fieldCards,
     playerSelections,
+    setTurnIndex,
   };
 }
