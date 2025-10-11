@@ -64,11 +64,7 @@ function initializeGame(playerCount = 3, initialPoints = 200) {
 function processRound(gameState) {
   const { fieldCards, scores, wins, currentMultiplier, previousTurnResult } = gameState;
   
-  // 1. 場代徴収
-  const fees = calculateAllTableFees(previousTurnResult);
-  const newScores = scores.map((score, idx) => score - fees[idx]);
-  
-  // 2. 勝敗判定
+  // 1. 勝敗判定
   const cardsWithIndex = fieldCards.map((card, idx) => ({
     ...card,
     playerIndex: idx
@@ -80,6 +76,7 @@ function processRound(gameState) {
   let resultMessage = '';
   let winnerIdx = -1;
   let loserIdx = -1;
+  const newScores = [...scores];
   let scoreChange = 0;
   const newWins = [...wins];
   
@@ -109,10 +106,10 @@ function processRound(gameState) {
     }
   }
   
-  // 3. 次の倍率計算
+  // 2. 次の倍率計算
   const nextMultiplier = 1 + calculateNextMultiplier(fieldCards.filter(c => c));
   
-  // 4. 前回結果保存
+  // 3. 前回結果保存
   const newPreviousTurnResult = isDraw 
     ? { winnerIndex: -1, loserIndex: -1, isDraw: true }
     : { winnerIndex: winnerIdx, loserIndex: loserIdx, isDraw: false };
@@ -136,7 +133,7 @@ function processRound(gameState) {
 /**
  * 次のターン準備（カード配布 + ゲーム終了判定）
  */
-function prepareNextTurn(gameState) {
+function prepareNextTurn(gameState, newPreviousTurnResult) {
   const {
     hands,
     deck,
@@ -146,9 +143,11 @@ function prepareNextTurn(gameState) {
     setTurnIndex,
     jokerCount,
     jokerDealtThisSet,
-    previousTurnResult
   } = gameState;
+
   
+  const fees = calculateAllTableFees(newPreviousTurnResult, hands.length);
+  const newScores = scores.map((score, idx) => score - fees[idx]);
   const allHandsEmpty = hands.every(h => h.length === 0);
   let newSetTurnIndex = setTurnIndex;
   let newCurrentMultiplier = nextMultiplier;
@@ -208,7 +207,7 @@ function prepareNextTurn(gameState) {
   const players = newHands.map((hand, idx) => ({
     name: `Player ${idx + 1}`,
     hand,
-    points: scores[idx],
+    points: newScores[idx],
     wins: wins[idx]
   }));
   
@@ -218,11 +217,13 @@ function prepareNextTurn(gameState) {
     ...gameState,
     deck: newDeck,
     hands: newHands,
+    scores: newScores,
     fieldCards: Array(hands.length).fill(null),
     currentMultiplier: newCurrentMultiplier,
     setTurnIndex: newSetTurnIndex,
     jokerCount: newJokerCount,
     jokerDealtThisSet: newJokerDealtThisSet,
+    previousTurnResult: newPreviousTurnResult,
     isGameOver: gameEndCheck.shouldEnd,
     gameOverReason: gameEndCheck.reason
   };
