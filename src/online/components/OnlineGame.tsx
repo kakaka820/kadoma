@@ -7,6 +7,34 @@ import { useOnlineGameState } from '../hooks/useOnlineGameState';
 import { useRoundJudge } from '../hooks/useRoundJudge';
 import { useTurnFlow } from '../hooks/useTurnFlow';
 
+
+// ✅ shared/joker.jsから直接インポート
+// TypeScriptの型定義用
+interface JokerModule {
+  canPlayJoker: (card: any, setTurnIndex: number) => boolean;
+  isJoker: (card: any) => boolean;
+}
+// ✅ Window型を拡張
+declare global {
+  interface Window {
+    JokerLogic?: JokerModule;
+  }
+}
+// ✅ 動的インポートまたは require を使う
+let JokerLogic: JokerModule | null = null;
+// Reactコンポーネント外で初期化を試みる
+try {
+  // Node.js環境（ビルド時）とブラウザ環境の両方に対応
+  if (typeof window !== 'undefined' && (window as any).JokerLogic) {
+    JokerLogic = (window as any).JokerLogic;
+  } else {
+    // webpack/Viteが解決してくれる
+    JokerLogic = require('../../../shared/joker');
+  }
+} catch (e) {
+  console.warn('[OnlineGame] JokerLogic not loaded yet');
+}
+
 export function OnlineGame() {
   const { socket, isConnected } = useSocket();
   
@@ -29,6 +57,7 @@ export function OnlineGame() {
     currentMultiplier,
     fieldCards,
     playerSelections,
+    setTurnIndex,
   } = useTurnFlow({ socket });
 
 
@@ -42,6 +71,17 @@ export function OnlineGame() {
       console.log('[OnlineGame] Already selected a card');
       return;
     }
+
+    // ✅ JOKER制限チェック
+    const card = myHand[cardIndex];
+
+    // JokerLogic変数またはwindow.JokerLogicから取得
+const jokerModule = JokerLogic || window.JokerLogic;
+if (jokerModule && !jokerModule.canPlayJoker(card, setTurnIndex)) {
+  console.log('[OnlineGame] JOKERはセットの1ターン目に出せません');
+  alert('🃏 JOKERはセットの1ターン目には出せません！');
+  return;
+}
 
     console.log('[OnlineGame] Playing card:', cardIndex);
     socket.emit('play_card', {
@@ -83,6 +123,7 @@ export function OnlineGame() {
           <div>接続状態: {isConnected ? '✅ 接続中' : '❌ 切断'}</div>
           <div>あなた: Player {playerIndex !== null ? playerIndex + 1 : '?'}</div>
           <div>倍率: ×{currentMultiplier}</div>
+          <div>セットターン: {setTurnIndex + 1}/5</div> {/* ✅ デバッグ用に追加 */}
           <div>選択状況: {playerSelections.filter(Boolean).length}/3 人選択済み</div>
         </div>
       </div>
