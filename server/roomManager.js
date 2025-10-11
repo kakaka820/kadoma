@@ -1,0 +1,90 @@
+// server/roomManager.js
+// ルーム管理（参加・切断処理）、ルーム管理ロジックを担当
+
+/**
+ * プレイヤーのルーム参加処理
+ */
+function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
+  console.log('[Server] join_room received:', data);
+  const playerName = typeof data === 'string' ? data : data.playerName;
+  
+  if (!playerName) {
+    console.error('[Server] playerName is missing!');
+    return;
+  }
+  
+  let targetRoom = null;
+
+  // 空きのあるルームを探す
+  for (const [id, room] of rooms.entries()) {
+    if (room.players.length < 3) {
+      targetRoom = { roomId: id, room };
+      break;
+    }
+  }
+
+  // なければ新規ルーム作成
+  if (!targetRoom) {
+    const newRoomId = `room_${Date.now()}`;
+    rooms.set(newRoomId, { players: [] });
+    targetRoom = { roomId: newRoomId, room: rooms.get(newRoomId) };
+  }
+
+  const { roomId, room } = targetRoom;
+
+  // プレイヤー情報追加
+  room.players.push({
+    id: socket.id,
+    name: playerName
+  });
+  
+  socket.join(roomId);
+  socket.roomId = roomId;
+  
+  console.log(`[Server] ${playerName} joined ${roomId} (${room.players.length}/3)`);
+
+  // ルーム情報を全員に送信
+  io.to(roomId).emit('room_update', {
+    roomId,
+    players: room.players,
+    isFull: room.players.length === 3
+  });
+
+  // 3人揃ったら開始通知
+  if (room.players.length === 3) {
+    console.log('[Server] Room full! Sending game_ready...'); 
+    io.to(roomId).emit('game_ready', { roomId });
+    
+    // 1秒後にゲーム開始
+    setTimeout(() => {
+      console.log('[Server] Starting game...');
+      startGameCallback(roomId, room);
+    }, 1000);
+  }
+}
+
+/**
+ * プレイヤー切断時の処理
+ */
+function handleDisconnect(rooms, games, socket) {
+  console.log('User disconnected:', socket.id);
+  
+  if (socket.roomId) {
+    const room = rooms.get(socket.roomId);
+    if (room) {
+      room.players = room.players.filter(p => p.id !== socket.id);
+      console.log(`User disconnected from ${socket.roomId} (${room.players.length}/3)`);
+      
+      if (room.players.length === 0) {
+        rooms.delete(socket.roomId);
+        games.delete(socket.roomId);
+        console.log(`Room ${socket.roomId} deleted`);
+      }
+    }
+  }
+}
+
+module.exports = {
+  handleJoinRoom,
+  handleDisconnect
+};
