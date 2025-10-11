@@ -107,7 +107,8 @@ function handleRoundEnd(roomId, gameState) {
       io.to(roomId).emit('turn_update', {
         turnIndex: nextState.turnIndex,
         currentMultiplier: nextState.currentMultiplier,
-        fieldCards: nextState.fieldCards
+        fieldCards: nextState.fieldCards,
+        scores: nextState.scores
       });
     }
   }, 2000);
