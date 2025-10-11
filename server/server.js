@@ -92,6 +92,16 @@ function handleRoundEnd(roomId, gameState) {
     }
 
     const nextState = prepareNextTurn(updatedState, previousTurnResult);
+
+    // ✅ 新ターン開始時に場代徴収（previousTurnResultを参照）
+    if (previousTurnResult) {
+      const fees = require('../shared/feeCalculator').calculateAllTableFees(
+        previousTurnResult, 
+        nextState.hands.length
+      );
+      nextState.scores = nextState.scores.map((score, idx) => score - fees[idx]);
+      console.log('[場代] 新ターン開始時徴収:', fees, '結果:', nextState.scores);
+    }
     
     
     // 選択状態をリセット
@@ -118,7 +128,7 @@ function handleRoundEnd(roomId, gameState) {
       io.to(roomId).emit('turn_update', {
         currentMultiplier: nextState.currentMultiplier,
         fieldCards: nextState.fieldCards,
-        scores: nextState.scores,
+        scores: nextState.scores, 
         playerSelections: nextState.playerSelections
       });
     }
