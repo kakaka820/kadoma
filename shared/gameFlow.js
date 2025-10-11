@@ -146,8 +146,6 @@ function prepareNextTurn(gameState, newPreviousTurnResult) {
   } = gameState;
 
   
-  const fees = calculateAllTableFees(newPreviousTurnResult, hands.length);
-  const newScores = scores.map((score, idx) => score - fees[idx]);
   const allHandsEmpty = hands.every(h => h.length === 0);
   let newSetTurnIndex = setTurnIndex;
   let newCurrentMultiplier = nextMultiplier;
@@ -207,7 +205,7 @@ function prepareNextTurn(gameState, newPreviousTurnResult) {
   const players = newHands.map((hand, idx) => ({
     name: `Player ${idx + 1}`,
     hand,
-    points: newScores[idx],
+    points: scores[idx],
     wins: wins[idx]
   }));
   
@@ -217,7 +215,7 @@ function prepareNextTurn(gameState, newPreviousTurnResult) {
     ...gameState,
     deck: newDeck,
     hands: newHands,
-    scores: newScores,
+    scores: scores,
     fieldCards: Array(hands.length).fill(null),
     currentMultiplier: newCurrentMultiplier,
     setTurnIndex: newSetTurnIndex,
