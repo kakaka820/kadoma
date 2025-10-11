@@ -201,6 +201,18 @@ io.on('connection', (socket) => {
     
     console.log(`[Game] Player ${playerIndex} played:`, card);
 
+    if (playerIndex === 0 && gameState.previousTurnResult) {
+  const fees = require('../shared/feeCalculator').calculateAllTableFees(
+    gameState.previousTurnResult, 
+    gameState.hands.length
+  );
+  gameState.scores = gameState.scores.map((score, idx) => score - fees[idx]);
+  
+  // 場代徴収をログ出力
+  console.log('[場代] 徴収:', fees, '結果:', gameState.scores);
+}
+
+
     // 全員に通知
     io.to(roomId).emit('card_played', {
       playerIndex,
