@@ -22,7 +22,8 @@ function judgeWinner(cards) {
   // 1. 数字の重複 or ジョーカー同士が出ている場合 → 引き分け
   const rankCounts = {};
   for (const card of cards) {
-    rankCounts[card.rank] = (rankCounts[card.rank] || 0) + 1;
+    const rank = (card.rank === 'JOKER1' || card.rank === 'JOKER2') ? 'JOKER' : card.rank;
+    rankCounts[rank] = (rankCounts[rank] || 0) + 1;
   }
 
   const hasDuplicate = Object.values(rankCounts).some(count => count > 1);
