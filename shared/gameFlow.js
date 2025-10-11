@@ -47,7 +47,6 @@ function initializeGame(playerCount = 3, initialPoints = 200) {
     scores,
     wins: Array(playerCount).fill(0),
     fieldCards: Array(playerCount).fill(null),
-    turnIndex: 0,
     currentMultiplier: 1,
     nextMultiplier: 1,
     setTurnIndex: 0,
