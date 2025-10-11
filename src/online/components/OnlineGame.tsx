@@ -1,6 +1,5 @@
 // src/online/components/OnlineGame.tsx
 
-import React from 'react';
 import { useSocket } from '../context/SocketContext';
 import Hand from './Hand';
 import Field from './Field';
@@ -27,9 +26,9 @@ export function OnlineGame() {
   } = useRoundJudge({ socket });
 
   const {
-    turnIndex,
     currentMultiplier,
     fieldCards,
+    playerSelections,
   } = useTurnFlow({ socket });
 
 
@@ -38,8 +37,9 @@ export function OnlineGame() {
   const playCard = (cardIndex: number) => {
     if (!socket || playerIndex === null || !roomId) return;
     
-    if (playerIndex !== turnIndex) {
-      console.log('[OnlineGame] Not your turn!');
+    // 同時プレイ：すでに選択済みの場合は何もしない
+    if (playerSelections[playerIndex]) {
+      console.log('[OnlineGame] Already selected a card');
       return;
     }
 
@@ -82,8 +82,8 @@ export function OnlineGame() {
         <div className="text-sm">
           <div>接続状態: {isConnected ? '✅ 接続中' : '❌ 切断'}</div>
           <div>あなた: Player {playerIndex !== null ? playerIndex + 1 : '?'}</div>
-          <div>現在のターン: Player {turnIndex + 1}</div>
           <div>倍率: ×{currentMultiplier}</div>
+          <div>選択状況: {playerSelections.filter(Boolean).length}/3 人選択済み</div>
         </div>
       </div>
 
@@ -97,7 +97,7 @@ export function OnlineGame() {
               className={`p-4 rounded ${
                 idx === playerIndex
                   ? 'bg-blue-600'
-                  : idx === turnIndex
+                  : playerSelections[idx]
                   ? 'bg-green-600'
                   : 'bg-gray-700'
               }`}
@@ -106,7 +106,7 @@ export function OnlineGame() {
               <div>スコア: {scores[idx]}</div>
               <div>勝利数: {wins[idx]}</div>
               {idx === playerIndex && <div className="text-sm mt-1">（あなた）</div>}
-              {idx === turnIndex && <div className="text-sm mt-1">（ターン中）</div>}
+              {playerSelections[idx] && <div className="text-sm mt-1">（選択済み）</div>}
             </div>
           ))}
         </div>
@@ -131,11 +131,15 @@ export function OnlineGame() {
         <Hand
           cards={myHand}
           onCardClick={playCard}
-          disabled={playerIndex !== turnIndex}
+          disabled={playerIndex === null || playerSelections[playerIndex || 0]}
         />
-        {playerIndex !== turnIndex && (
+        {playerIndex !== null && playerSelections[playerIndex] ? (
+          <div className="text-center mt-4 text-green-400">
+            選択済み - 他のプレイヤーを待っています
+          </div>
+        ) : (
           <div className="text-center mt-4 text-yellow-400">
-            他のプレイヤーが選択中です
+            カードを選択してください
           </div>
         )}
       </div>
