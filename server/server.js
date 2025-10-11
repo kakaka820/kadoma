@@ -64,7 +64,8 @@ function startGame(roomId, room) {
     currentMultiplier: gameState.currentMultiplier,
     fieldCards: gameState.fieldCards,
     scores: gameState.scores,
-    playerSelections: gameState.playerSelections
+    playerSelections: gameState.playerSelections,
+    setTurnIndex: gameState.setTurnIndex,
   });
 }
 
@@ -129,7 +130,8 @@ function handleRoundEnd(roomId, gameState) {
         currentMultiplier: nextState.currentMultiplier,
         fieldCards: nextState.fieldCards,
         scores: nextState.scores, 
-        playerSelections: nextState.playerSelections
+        playerSelections: nextState.playerSelections,
+        setTurnIndex: nextState.setTurnIndex,
       });
     }
   }, 2000);
@@ -223,6 +225,17 @@ io.on('connection', (socket) => {
 
     // 手札からカードを取り出す
     const card = gameState.hands[playerIndex][cardIndex];
+
+    // ✅ サーバー側でJOKER制限チェック
+  if (card.rank && card.rank.startsWith('JOKER') && gameState.setTurnIndex === 0) {
+    console.error('[Game] JOKER cannot be played in first turn of set');
+    socket.emit('error', { message: 'JOKERはセットの1ターン目に出せません' });
+    return;
+  }
+
+
+
+
     gameState.hands[playerIndex].splice(cardIndex, 1);
     gameState.fieldCards[playerIndex] = card;
     gameState.playerSelections[playerIndex] = true;
