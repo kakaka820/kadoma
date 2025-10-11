@@ -6,6 +6,13 @@ import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { Card } from '../types/game';
 
+
+export interface OpponentCard {
+  visible: boolean;
+  rank?: string;
+  suit?: string;
+}
+
 interface UseOnlineGameStateProps {
   socket: Socket | null;
 }
@@ -16,6 +23,7 @@ interface UseOnlineGameStateReturn {
   myHand: Card[];
   players: string[];
   gameStatus: 'waiting' | 'playing' | 'finished';
+  opponentHands: OpponentCard[][];
 }
 
 export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
@@ -24,6 +32,8 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
   const [myHand, setMyHand] = useState<Card[]>([]);
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
+  const [opponentHands, setOpponentHands] = useState<OpponentCard[][]>([]);
+
 
   useEffect(() => {
     if (!socket) return;
@@ -37,6 +47,7 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       setPlayerIndex(data.playerIndex);
       setMyHand(data.hand);
       setPlayers(data.players);
+      setOpponentHands(data.opponentHands || []);
       setGameStatus('playing');
       console.log('[useOnlineGameState] gameStatus set to playing');
     });
@@ -45,6 +56,7 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     socket.on('hand_update', (data) => {
       console.log('[useOnlineGameState] hand_update received:', data);
       setMyHand(data.hand);
+      setOpponentHands(data.opponentHands || []);
     });
 
     // ゲーム終了
@@ -69,5 +81,6 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     myHand,
     players,
     gameStatus,
+    opponentHands,
   };
 }

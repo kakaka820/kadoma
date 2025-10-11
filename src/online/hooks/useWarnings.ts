@@ -28,25 +28,33 @@ export function useWarnings({ socket }: UseWarningsProps): UseWarningsReturn {
 
     const handleWarning = (data: { type: 'joker_dealt' | 'low_deck'; message: string }) => {
       const newWarning: Warning = {
-        id: `${Date.now()}-${Math.random()}`,
+        id: `${data.type}-${Date.now()}`,
         type: data.type,
         message: data.message,
         timestamp: Date.now(),
       };
 
-      setWarnings(prev => [...prev, newWarning]);
+      setWarnings(prev => {
+        // 同じタイプの警告があれば削除して新しいものを追加
+        const filtered = prev.filter(w => w.type !== data.type);
+        return [...filtered, newWarning];
+      });
+      
       console.log('[useWarnings] 警告受信:', newWarning);
+    }; // ← handleWarningの終わり
 
-      // 5秒後に自動削除
-      setTimeout(() => {
-        setWarnings(prev => prev.filter(w => w.id !== newWarning.id));
-      }, 5000);
+    // ← handleClearWarningsはここから（handleWarningの外）
+    const handleClearWarnings = () => {
+      console.log('[useWarnings] 警告クリア');
+      setWarnings([]);
     };
 
     socket.on('warning', handleWarning);
+    socket.on('clear_warnings', handleClearWarnings);
 
     return () => {
       socket.off('warning', handleWarning);
+      socket.off('clear_warnings', handleClearWarnings);
     };
   }, [socket]);
 
