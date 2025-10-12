@@ -2,6 +2,7 @@
 // カード出す処理、JOKER制限チェック、カード選択の管理担当
 
 const { botAutoPlay } = require('./botPlayer');
+const { CARD_REVEAL_DELAY_MS } = require('../shared/config');
 
 /**
  * カード出す処理（同時プレイ版）
@@ -62,7 +63,7 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
     });
     setTimeout(() => {
       handleRoundEndCallback(roomId, gameState);
-    }, 1500);
+    }, CARD_REVEAL_DELAY_MS);
   }
 }
 

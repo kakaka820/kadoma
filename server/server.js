@@ -42,7 +42,8 @@ io.on('connection', (socket) => {
       data, 
       (roomId, room) => startGame(io, games, roomId, room)
     );
-  });
+      });
+
 
   // カード出す処理（同時プレイ版）
   socket.on('play_card', (data) => {
@@ -55,16 +56,19 @@ io.on('connection', (socket) => {
     );
   });
 
+  //復帰処理
+socket.on('reconnect_to_game', (data) => {
+  handlePlayerReconnect(io, rooms, games, socket, data.roomId);
+});
+
   // 切断時の処理
   socket.on('disconnect', () => {
     handleDisconnect(rooms, games, socket);
   });
 });
 
-//復帰処理
-socket.on('reconnect_to_game', (data) => {
-  handlePlayerReconnect(io, rooms, games, socket, data.roomId);
-});
+
+
 
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, '0.0.0.0', () => {

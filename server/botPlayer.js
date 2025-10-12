@@ -1,7 +1,7 @@
 // server/botPlayer.js
 // Bot プレイヤーのAI処理
 
-const { TURN_TIME_LIMIT } = require('../shared/config');
+const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../shared/config');
 
 /**
  * Bot用のランダムカード選択
@@ -43,8 +43,8 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback) {
   // すでに選択済みなら無視
   if (gameState.playerSelections[botIndex]) return;
 
-  // 1-3秒のランダムな遅延（人間らしさ演出）
-  const delay = 1000 + Math.floor(Math.random() * 6500);
+  //人間らしさ演出
+  const delay = BOT_MIN_DELAY_MS + Math.floor(Math.random() * (BOT_MAX_DELAY_MS - BOT_MIN_DELAY_MS));
 
   setTimeout(() => {
     const currentGameState = games.get(roomId);

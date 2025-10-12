@@ -3,6 +3,7 @@
 
 const { createBotPlayer } = require('./botPlayer');
 const { handlePlayerDisconnect } = require('./disconnectHandler');
+const { BOT_WAIT_TIME_MS } = require('../shared/config');
 
 /**
  * プレイヤーのルーム参加処理
@@ -86,7 +87,7 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
       setTimeout(() => {
         startGameCallback(roomId, currentRoom);
       }, 1000);
-    }, 10000); // 10秒待機
+    }, BOT_WAIT_TIME_MS); // 10秒待機
   }
 
   // 3人揃ったら開始通知
