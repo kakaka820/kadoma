@@ -7,6 +7,7 @@ const socketIo = require('socket.io');
 const { startGame, handleRoundEnd } = require('./gameManager');
 const { handleJoinRoom, handleDisconnect } = require('./roomManager');
 const { handlePlayCard } = require('./cardHandler');
+const { handlePlayerReconnect } = require('./disconnectHandler');
 
 // Expressアプリケーションのセットアップ
 const app = express();
@@ -58,6 +59,11 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     handleDisconnect(rooms, games, socket);
   });
+});
+
+//復帰処理
+socket.on('reconnect_to_game', (data) => {
+  handlePlayerReconnect(io, rooms, games, socket, data.roomId);
 });
 
 const PORT = process.env.PORT || 3001;

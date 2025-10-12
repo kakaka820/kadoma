@@ -2,6 +2,7 @@
 // ルーム管理（参加・切断処理）、ルーム管理ロジックを担当
 
 const { createBotPlayer } = require('./botPlayer');
+const { handlePlayerDisconnect } = require('./disconnectHandler');
 
 /**
  * プレイヤーのルーム参加処理
@@ -110,21 +111,7 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
  * プレイヤー切断時の処理
  */
 function handleDisconnect(rooms, games, socket) {
-  console.log('User disconnected:', socket.id);
-  
-  if (socket.roomId) {
-    const room = rooms.get(socket.roomId);
-    if (room) {
-      room.players = room.players.filter(p => p.id !== socket.id);
-      console.log(`User disconnected from ${socket.roomId} (${room.players.length}/3)`);
-      
-      if (room.players.length === 0) {
-        rooms.delete(socket.roomId);
-        games.delete(socket.roomId);
-        console.log(`Room ${socket.roomId} deleted`);
-      }
-    }
-  }
+  handlePlayerDisconnect(io, rooms, games, socket);
 }
 
 module.exports = {

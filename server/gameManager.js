@@ -4,10 +4,10 @@
 const { initializeGame, processRound, prepareNextTurn } = require('../shared/gameFlow');
 const { calculateAllTableFees } = require('../shared/feeCalculator');
 const { checkJokerInHands } = require('../shared/joker');
-const { TURN_TIME_LIMIT } = require('../shared/config');
+const { ANTE, TURN_TIME_LIMIT } = require('../shared/config');
 const { botAutoPlay } = require('./botPlayer');
 const LOW_DECK_THRESHOLD = 15;
-
+const ANTE_MULTIPLIER = 200;
 
 /**
  * 絵札・JOKERかどうかを判定
@@ -41,7 +41,7 @@ function startGame(io, games, roomId, room) {
   console.log(`[Game] Starting game in room ${roomId}`);
   console.log(`[Game] Players:`, room.players);
   
-  const gameState = initializeGame(3, 200);
+  const gameState = initializeGame(3, ANTE_MULTIPLIER);
   gameState.roomId = roomId;
   gameState.players = room.players;
   gameState.playerSelections = [false, false, false];
@@ -149,10 +149,12 @@ function handleRoundEnd(io, games, roomId, gameState) {
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
+       // TODO: アカウント実装後、Bot代替中のプレイヤーにペナルティ処理
       io.to(roomId).emit('game_over', {
         reason: nextState.gameOverReason,
-        finalScores: nextState.scores,
-        winner: nextState.scores.indexOf(Math.max(...nextState.scores))
+        finalScores: finalScores,
+        winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
+        penaltyPlayers
       });
       games.delete(roomId);
     } else {
@@ -230,9 +232,14 @@ function startTurnTimer(io, games, roomId) {
     // 更新を全員に通知
     io.to(roomId).emit('turn_update', {
       currentMultiplier: gameState.currentMultiplier,
-      fieldCards: gameState.fieldCards,
+      fieldCards: [null, null, null],
       scores: gameState.scores,
       playerSelections: gameState.playerSelections
+    });
+
+    //カードを一斉開示
+    io.to(roomId).emit('cards_revealed', {
+      fieldCards: gameState.fieldCards
     });
 
 // ラウンド終了処理

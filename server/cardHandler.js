@@ -45,23 +45,21 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   console.log(`[Game] Player ${playerIndex} played:`, card);
 
 
-  // 全員に通知
-  io.to(roomId).emit('card_played', {
-    playerIndex,
-    card,
-    fieldCards: gameState.fieldCards
-  });
+  
 
   // 選択状態を送信
   io.to(roomId).emit('turn_update', {
     currentMultiplier: gameState.currentMultiplier,
-    fieldCards: gameState.fieldCards,
+    fieldCards: [null, null, null],
     scores: gameState.scores,
     playerSelections: gameState.playerSelections
   });
   
   // 全員選択したか確認
   if (gameState.playerSelections.every(Boolean)) {
+    io.to(roomId).emit('cards_revealed', {
+      fieldCards: gameState.fieldCards
+    });
     setTimeout(() => {
       handleRoundEndCallback(roomId, gameState);
     }, 1500);

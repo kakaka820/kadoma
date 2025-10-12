@@ -44,7 +44,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback) {
   if (gameState.playerSelections[botIndex]) return;
 
   // 1-3秒のランダムな遅延（人間らしさ演出）
-  const delay = 1000 + Math.floor(Math.random() * 2000);
+  const delay = 1000 + Math.floor(Math.random() * 6500);
 
   setTimeout(() => {
     const currentGameState = games.get(roomId);
