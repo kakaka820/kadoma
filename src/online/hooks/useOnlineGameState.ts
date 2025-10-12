@@ -7,6 +7,7 @@ import { Socket } from 'socket.io-client';
 import { Card } from '../types/game';
 
 
+
 export interface OpponentCard {
   visible: boolean;
   rank?: string;
@@ -24,6 +25,7 @@ interface UseOnlineGameStateReturn {
   players: string[];
   gameStatus: 'waiting' | 'playing' | 'finished';
   opponentHands: OpponentCard[][];
+  removeCardFromHand: (cardIndex: number) => void;
 }
 
 export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
@@ -33,6 +35,13 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
   const [opponentHands, setOpponentHands] = useState<OpponentCard[][]>([]);
+
+
+
+  //手札から即座にカードを削除する関数
+  const removeCardFromHand = (cardIndex: number) => {
+    setMyHand(prev => prev.filter((_, i) => i !== cardIndex));
+  };
 
 
   useEffect(() => {
@@ -82,5 +91,6 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     players,
     gameStatus,
     opponentHands,
+    removeCardFromHand,
   };
 }

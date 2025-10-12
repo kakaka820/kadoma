@@ -45,6 +45,13 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       setSetTurnIndex(data.setTurnIndex);
     });
 
+    //ラウンド結果後、2秒待って場札クリア
+  socket.on('round_result', () => {
+    console.log('[useTurnFlow] round_result received, will clear field cards in 2s');
+    setTimeout(() => {
+      setFieldCards([null, null, null]);
+    }, 2000);
+  });
     
 
     //タイマー開始イベント
@@ -59,6 +66,7 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       console.log('[useTurnFlow] Cleaning up event listeners');
       socket.off('cards_revealed');
       socket.off('turn_update');
+      socket.off('round_result');
       socket.off('timer_start');
     };
   }, [socket]);

@@ -34,6 +34,7 @@ interface UseCardPlayProps {
   myHand: any[];
   playerSelections: boolean[];
   setTurnIndex: number;
+  removeCardFromHand: (cardIndex: number) => void;
 }
 
 export function useCardPlay({
@@ -43,6 +44,7 @@ export function useCardPlay({
   myHand,
   playerSelections,
   setTurnIndex,
+  removeCardFromHand,
 }: UseCardPlayProps) {
   const playCard = (cardIndex: number) => {
     if (!socket || playerIndex === null || !roomId) return;
@@ -64,6 +66,11 @@ export function useCardPlay({
     }
 
     console.log('[useCardPlay] Playing card:', cardIndex);
+
+    //即座に手札から削除
+    removeCardFromHand(cardIndex);
+
+    
     socket.emit('play_card', {
       roomId,
       cardIndex
