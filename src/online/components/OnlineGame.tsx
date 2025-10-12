@@ -35,6 +35,8 @@ export function OnlineGame() {
     fieldCards,
     playerSelections,
     setTurnIndex,
+    timeRemaining,
+    timeLimit,
   } = useTurnFlow({ socket });
 
   // カード出す処理
@@ -74,6 +76,8 @@ export function OnlineGame() {
       warnings={warnings}
       removeWarning={removeWarning}
       opponentHands={opponentHands}
+      timeRemaining={timeRemaining}
+      timeLimit={timeLimit}
     />
   );
 }
