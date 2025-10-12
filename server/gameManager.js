@@ -26,6 +26,13 @@ function createOpponentHandInfo(hand) {
 }
 
 /**
+ * 全プレイヤーの手札情報を配列で作成
+ */
+function createAllHandsInfo(hands) {
+  return hands.map(hand => createOpponentHandInfo(hand));
+}
+
+/**
  * ゲーム開始処理
  */
 function startGame(io, games, roomId, room) {
