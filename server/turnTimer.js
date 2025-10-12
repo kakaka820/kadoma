@@ -47,13 +47,6 @@ function startTurnTimer(io, games, roomId, handleRoundEndCallback) {
       console.log(`[Timer] Auto-selected card for Player ${playerIndex}:`, card);
     });
     
-    // 更新を全員に通知
-    io.to(roomId).emit('turn_update', {
-      currentMultiplier: gameState.currentMultiplier,
-      fieldCards: [null, null, null],
-      scores: gameState.scores,
-      playerSelections: gameState.playerSelections
-    });
 
     // カードを一斉開示
     io.to(roomId).emit('cards_revealed', {
