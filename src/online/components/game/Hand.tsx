@@ -2,7 +2,7 @@
 // オンライン版：自分の手札表示用コンポーネント
 
 import React from 'react';
-import { Card } from '../types/game';
+import { Card } from '../../types/game';
 
 interface HandProps {
   cards: Card[];
