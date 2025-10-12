@@ -14,6 +14,8 @@ interface UseTurnFlowReturn {
   fieldCards: (Card | null)[];
   playerSelections: boolean[];
   setTurnIndex: number;
+  timeRemaining: number;
+  timeLimit: number;
 }
 
 export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
@@ -21,6 +23,8 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
   const [fieldCards, setFieldCards] = useState<(Card | null)[]>([null, null, null]);
   const [playerSelections, setPlayerSelections] = useState<boolean[]>([false, false, false]);
   const [setTurnIndex, setSetTurnIndex] = useState<number>(0);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
+  const [timeLimit, setTimeLimit] = useState<number>(8);
 
   useEffect(() => {
     if (!socket) return;
@@ -48,19 +52,38 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       setFieldCards([null, null, null]);
     });
 
+    //タイマー開始イベント
+    socket.on('timer_start', (data) => {
+      console.log('[useTurnFlow] timer_start received:', data);
+      setTimeLimit(data.timeLimit);
+      setTimeRemaining(data.timeLimit);
+    });
+
     // クリーンアップ
     return () => {
       console.log('[useTurnFlow] Cleaning up event listeners');
       socket.off('card_played');
       socket.off('turn_update');
       socket.off('round_result');
+      socket.off('timer_start');
     };
   }, [socket]);
+
+  //タイマーのカウントダウン
+  useEffect(() => {
+    if (timeRemaining <= 0) return;
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timeRemaining]);
 
   return {
     currentMultiplier,
     fieldCards,
     playerSelections,
     setTurnIndex,
+    timeRemaining,
+    timeLimit,
   };
 }
