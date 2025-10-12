@@ -31,9 +31,9 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
 
     console.log('[useTurnFlow] Setting up event listeners');
 
-    // カードが出されたとき
-    socket.on('card_played', (data) => {
-      console.log('[useTurnFlow] card_played received:', data);
+   //新規追加：全員選択後の一斉開示
+    socket.on('cards_revealed', (data) => {
+      console.log('[useTurnFlow] cards_revealed received:', data);
       setFieldCards(data.fieldCards);
     });
 
