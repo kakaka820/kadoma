@@ -51,6 +51,19 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setIsConnected(false);
     });
 
+    newSocket.on('reconnect', (attemptNumber) => {
+    console.log('[SocketContext] 再接続成功:', attemptNumber);
+    });
+
+    newSocket.on('reconnect_attempt', (attemptNumber) => {
+    console.log('[SocketContext] 再接続試行中:', attemptNumber);
+    });
+
+    newSocket.on('reconnect_failed', () => {
+    console.error('[SocketContext] 再接続失敗');
+    });
+
+
     // ✅ エラーハンドリング追加
     newSocket.on('connect_error', (error) => {
       console.error('[SocketContext] 接続エラー:', error);
