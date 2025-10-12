@@ -63,7 +63,7 @@ socket.on('reconnect_to_game', (data) => {
 
   // 切断時の処理
   socket.on('disconnect', () => {
-    handleDisconnect(rooms, games, socket);
+    handleDisconnect(io, rooms, games, socket);
   });
 });
 

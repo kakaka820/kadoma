@@ -111,7 +111,7 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
 /**
  * プレイヤー切断時の処理
  */
-function handleDisconnect(rooms, games, socket) {
+function handleDisconnect(io, rooms, games, socket) {
   handlePlayerDisconnect(io, rooms, games, socket);
 }
 

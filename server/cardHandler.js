@@ -51,7 +51,6 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   // 選択状態を送信
   io.to(roomId).emit('turn_update', {
     currentMultiplier: gameState.currentMultiplier,
-    fieldCards: [null, null, null],
     scores: gameState.scores,
     playerSelections: gameState.playerSelections
   });
