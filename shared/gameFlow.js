@@ -16,7 +16,7 @@ const { ANTE } = require('./config');
 /**
  * ゲーム初期化
  */
-function initializeGame(playerCount = 3, initialPoints = 200) {
+function initializeGame(playerCount = 3, anteMultiplier = 200) {
   const deck = shuffleDeck(createDeck());
   
   // 各プレイヤーに5枚配布
@@ -26,10 +26,14 @@ function initializeGame(playerCount = 3, initialPoints = 200) {
   }
   
   const remainingDeck = deck.slice(playerCount * 5);
+
+   // 初期持ち点 = ANTE * anteMultiplier
+  const initialPoints = ANTE * anteMultiplier;
+  console.log(`[Init] 初期持ち点: ${ANTE} × ${anteMultiplier} = ${initialPoints}`);
   
   // 初期場代徴収
   const tableFees = calculateAllTableFees(null, playerCount);
-  const scores = Array(playerCount).fill(initialPoints * ANTE).map((score, idx) => score - tableFees[idx]);
+  const scores = Array(playerCount).fill(initialPoints).map((score, idx) => score - tableFees[idx]);
   
   // 初期JOKER判定
   const players = hands.map((hand, idx) => ({
