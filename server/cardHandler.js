@@ -1,6 +1,8 @@
 // server/cardHandler.js
 // カード出す処理、JOKER制限チェック、カード選択の管理担当
 
+const { botAutoPlay } = require('./botPlayer');
+
 /**
  * カード出す処理（同時プレイ版）
  */

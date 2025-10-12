@@ -4,6 +4,8 @@
 const { initializeGame, processRound, prepareNextTurn } = require('../shared/gameFlow');
 const { calculateAllTableFees } = require('../shared/feeCalculator');
 const { checkJokerInHands } = require('../shared/joker');
+const { TURN_TIME_LIMIT } = require('../shared/config');
+const { botAutoPlay } = require('./botPlayer');
 const LOW_DECK_THRESHOLD = 15;
 
 
@@ -77,12 +79,27 @@ function startGame(io, games, roomId, room) {
     playerSelections: gameState.playerSelections,
     setTurnIndex: gameState.setTurnIndex,
   });
+
+  //タイマー開始
+  startTurnTimer(io, games, roomId);
+
+  //Botプレイヤーに自動選択させる
+  gameState.players.forEach((player, idx) => {
+    if (player.isBot) {
+      botAutoPlay(io, games, roomId, idx, handleRoundEnd);
+    }
+  });
+
 }
 
 /**
  * ラウンド終了処理
  */
 function handleRoundEnd(io, games, roomId, gameState) {
+  if (gameState.turnTimer) {
+    clearTimeout(gameState.turnTimer);
+    gameState.turnTimer = null;
+  }
   const updatedState = processRound(gameState);
   games.set(roomId, updatedState);
   
@@ -161,9 +178,72 @@ function handleRoundEnd(io, games, roomId, gameState) {
         playerSelections: nextState.playerSelections,
         setTurnIndex: nextState.setTurnIndex,
       });
+      startTurnTimer(io, games, roomId);
+
+      //Botプレイヤーに自動選択させる
+      nextState.players.forEach((player, idx) => {
+        if (player.isBot) {
+          botAutoPlay(io, games, roomId, idx, handleRoundEnd);
+        }
+      });
     }
   }, 2000);
 }
+
+//タイマー機能（新規追加）
+function startTurnTimer(io, games, roomId) {
+  const gameState = games.get(roomId);
+  if (!gameState) return;
+  // 既存のタイマーをクリア
+  if (gameState.turnTimer) {
+    clearTimeout(gameState.turnTimer);
+  }
+  console.log(`[Timer] Starting ${TURN_TIME_LIMIT}s timer for ${roomId}`);
+  // タイマー開始をクライアントに通知
+  io.to(roomId).emit('timer_start', {
+    timeLimit: TURN_TIME_LIMIT
+  });
+
+  // タイマー設定
+  gameState.turnTimer = setTimeout(() => {
+    console.log('[Timer] Time up!');
+    
+    // まだ選択していないプレイヤーを取得
+    const unselectedPlayers = gameState.playerSelections
+      .map((selected, idx) => selected ? null : idx)
+      .filter(idx => idx !== null);
+    // 各未選択プレイヤーにランダムカードを選択
+    unselectedPlayers.forEach(playerIndex => {
+      const hand = gameState.hands[playerIndex];
+      if (hand.length === 0) return;
+      // ランダムにカードを選択
+      const randomIndex = Math.floor(Math.random() * hand.length);
+      const card = hand[randomIndex];
+
+
+      // カードを場に出す
+      hand.splice(randomIndex, 1);
+      gameState.fieldCards[playerIndex] = card;
+      gameState.playerSelections[playerIndex] = true;
+      console.log(`[Timer] Auto-selected card for Player ${playerIndex}:`, card);
+    });
+    // 更新を全員に通知
+    io.to(roomId).emit('turn_update', {
+      currentMultiplier: gameState.currentMultiplier,
+      fieldCards: gameState.fieldCards,
+      scores: gameState.scores,
+      playerSelections: gameState.playerSelections
+    });
+
+// ラウンド終了処理
+    handleRoundEnd(io, games, roomId, gameState);
+  }, TURN_TIME_LIMIT * 1000);
+  games.set(roomId, gameState);
+}
+
+
+
+
 function checkAndSendWarnings(io, gameState, players) {
   const { hands, deck } = gameState;
   

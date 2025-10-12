@@ -1,6 +1,8 @@
 // server/roomManager.js
 // ルーム管理（参加・切断処理）、ルーム管理ロジックを担当
 
+const { createBotPlayer } = require('./botPlayer');
+
 /**
  * プレイヤーのルーム参加処理
  */
@@ -35,7 +37,8 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   // プレイヤー情報追加
   room.players.push({
     id: socket.id,
-    name: playerName
+    name: playerName,
+    isBot: false
   });
   
   socket.join(roomId);
@@ -50,8 +53,48 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
     isFull: room.players.length === 3
   });
 
+  //3人未満なら10秒待ってBot補充
+  if (room.players.length < 3) {
+    if (room.botTimer) {
+      clearTimeout(room.botTimer);
+    }
+
+
+    room.botTimer = setTimeout(() => {
+      const currentRoom = rooms.get(roomId);
+      if (!currentRoom) return;
+      // まだ3人未満ならBotを追加
+      while (currentRoom.players.length < 3) {
+        const botNumber = currentRoom.players.length + 1;
+        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber);
+        currentRoom.players.push(bot);
+        console.log(`[Bot] Added ${bot.name} to ${roomId}`);
+      }
+
+
+      // 更新通知
+      io.to(roomId).emit('room_update', {
+        roomId,
+        players: currentRoom.players,
+        isFull: true
+      });
+      // ゲーム開始
+      console.log('[Server] Room full with bots! Starting game...');
+      io.to(roomId).emit('game_ready', { roomId });
+      
+      setTimeout(() => {
+        startGameCallback(roomId, currentRoom);
+      }, 1000);
+    }, 10000); // 10秒待機
+  }
+
   // 3人揃ったら開始通知
   if (room.players.length === 3) {
+    // Botタイマーをクリア
+    if (room.botTimer) {
+      clearTimeout(room.botTimer);
+      room.botTimer = null;
+    }
     console.log('[Server] Room full! Sending game_ready...'); 
     io.to(roomId).emit('game_ready', { roomId });
     
