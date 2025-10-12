@@ -41,7 +41,6 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
     socket.on('turn_update', (data) => {
       console.log('[useTurnFlow] turn_update received:', data);
       setCurrentMultiplier(data.currentMultiplier || 1);
-      setFieldCards(data.fieldCards || [null, null, null]);
       setPlayerSelections(data.playerSelections || [false, false, false]);
       setSetTurnIndex(data.setTurnIndex);
     });
