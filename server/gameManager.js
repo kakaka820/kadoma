@@ -45,6 +45,9 @@ function startGame(io, games, roomId, room) {
     scores: gameState.scores
   });
   
+//全プレイヤーの手札情報を作成
+  const allHandsInfo = createAllHandsInfo(gameState.hands);
+
   // 各プレイヤーに手札送信
   room.players.forEach((player, idx) => {
     console.log(`[Game] Sending game_start to ${player.name} (${player.id})`);
@@ -53,7 +56,8 @@ function startGame(io, games, roomId, room) {
       playerIndex: idx,
       hand: gameState.hands[idx],
       players: room.players.map(p => p.name),
-      scores: gameState.scores
+      scores: gameState.scores,
+      opponentHands: allHandsInfo
     });
   });
   checkAndSendWarnings(io, gameState, room.players);
@@ -128,10 +132,14 @@ function handleRoundEnd(io, games, roomId, gameState) {
       });
       games.delete(roomId);
     } else {
+
+      //全プレイヤーの手札情報を作成
+      const allHandsInfo = createAllHandsInfo(nextState.hands);
       // 新しい手札を各プレイヤーに送信
       nextState.players.forEach((player, idx) => {
         io.to(player.id).emit('hand_update', {
-          hand: nextState.hands[idx]
+          hand: nextState.hands[idx],
+          opponentHands: allHandsInfo
         });
       });
      if (allHandsEmpty) {
@@ -162,18 +170,12 @@ function checkAndSendWarnings(io, gameState, players) {
   
   const hasJoker = checkJokerInHands(playersData);
   
+  
+  // ← JOKER警告を全員に送信（誰か1人でも持ってたら）
   if (hasJoker) {
-    playersData.forEach((player, idx) => {
-      const playerHasJoker = player.hand.some(card => 
-        card.rank && card.rank.startsWith('JOKER')
-      );
-      
-      if (playerHasJoker) {
-        io.to(players[idx].id).emit('warning', {
-          type: 'joker_dealt',
-          message: '🃏 JOKERが配られました！'
-        });
-      }
+    io.to(gameState.roomId).emit('warning', {
+      type: 'joker_dealt',
+      message: '🃏 JOKERが配られました！'
     });
   }
   
