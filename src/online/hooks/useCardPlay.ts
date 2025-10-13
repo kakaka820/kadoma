@@ -1,6 +1,7 @@
 // src/online/hooks/useCardPlay.ts
 // カード出す処理とJOKER制限チェック,JokerLogic初期化担当
 
+import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 
 interface JokerModule {
@@ -36,6 +37,11 @@ interface UseCardPlayProps {
   setTurnIndex: number;
 }
 
+interface UseCardPlayReturn {
+  playCard: (cardIndex: number) => void;
+  selectedCardIndex: number | null;
+}
+
 export function useCardPlay({
   socket,
   roomId,
@@ -43,7 +49,11 @@ export function useCardPlay({
   myHand,
   playerSelections,
   setTurnIndex,
-}: UseCardPlayProps) {
+}: UseCardPlayProps) : UseCardPlayReturn {
+
+  // ✅ 選択したカードのインデックスを保存
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+
   const playCard = (cardIndex: number) => {
     if (!socket || playerIndex === null || !roomId) return;
     
@@ -65,7 +75,8 @@ export function useCardPlay({
 
     console.log('[useCardPlay] Playing card:', cardIndex);
 
-
+    //選択したインデックスを保存
+    setSelectedCardIndex(cardIndex);
     
     socket.emit('play_card', {
       roomId,
@@ -73,5 +84,17 @@ export function useCardPlay({
     });
   };
 
-  return { playCard };
+  //cards_revealed でリセット
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('cards_revealed', () => {
+      console.log('[useCardPlay] cards_revealed - resetting selectedCardIndex');
+      setSelectedCardIndex(null);
+    });
+    return () => {
+      socket.off('cards_revealed');
+    };
+  }, [socket]);
+
+  return { playCard, selectedCardIndex };
 }
