@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { OnlineGame } from './components/OnlineGame';
 import { AuthProvider, useAuth } from './contexts/AuthContext'; 
 import { SocketProvider } from './contexts/SocketContext';
-import LoginScreen from './components/LoginScreen';
+import LoginScreen from './screens/LoginScreen';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
 
