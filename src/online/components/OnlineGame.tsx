@@ -1,6 +1,7 @@
 // src/online/components/OnlineGame.tsx
 //UIの分岐処理のみ！
 
+import { useState } from 'react'; 
 import { useSocket } from '../contexts/SocketContext';
 import { useOnlineGameState } from '../hooks/useOnlineGameState';
 import { useRoundJudge } from '../hooks/useRoundJudge';
@@ -11,10 +12,12 @@ import { useDisconnectNotification } from '../hooks/useDisconnectNotification';
 import { ConnectionStatus } from './ui/ConnectionStatus';
 import { WaitingRoom } from './ui/WaitingRoom';
 import { GameBoard } from './game/GameBoard';
+import { HomeScreen } from '../screens/HomeScreen';
 
 
 export function OnlineGame() {
   const { socket, isConnected } = useSocket();
+  const [isInRoom, setIsInRoom] = useState(false);
   
   // 状態管理フック
   const {
@@ -55,9 +58,23 @@ export function OnlineGame() {
   const { warnings, removeWarning } =useWarnings({ socket });
   const { notification } = useDisconnectNotification({ socket });
 
+  //オンライン対戦開始
+  const handleStartMatch = () => {
+    if (!socket) return;
+
+    const playerName = localStorage.getItem('kadoma_username') || 'Player';
+    socket.emit('join_room', { playerName });
+    setIsInRoom(true);
+  };
+
   // UI分岐
   if (!isConnected) {
     return <ConnectionStatus />;
+  }
+  
+  //ルームに入ってない → ホーム画面
+  if (!isInRoom) {
+    return <HomeScreen onStartMatch={handleStartMatch} />;
   }
 
   if (gameStatus === 'waiting') {
