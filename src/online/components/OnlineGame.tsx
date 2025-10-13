@@ -41,8 +41,8 @@ export function OnlineGame() {
     timeLimit,
   } = useTurnFlow({ socket });
 
-  // カード出す処理
-  const { playCard } = useCardPlay({
+  //カードを出す処理でついでにselectedCardIndex を取得
+  const { playCard, selectedCardIndex } = useCardPlay({
     socket,
     roomId,
     playerIndex,
@@ -50,6 +50,7 @@ export function OnlineGame() {
     playerSelections,
     setTurnIndex,
   });
+
   const { warnings, removeWarning } =useWarnings({ socket });
   const { notification } = useDisconnectNotification({ socket });
 
@@ -76,6 +77,7 @@ export function OnlineGame() {
       roundResult={roundResult}
       myHand={myHand}
       playCard={playCard}
+      selectedCardIndex={selectedCardIndex}
       warnings={warnings}
       removeWarning={removeWarning}
       opponentHands={opponentHands}
