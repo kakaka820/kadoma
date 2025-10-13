@@ -12,23 +12,32 @@ interface UseRoundJudgeReturn {
   roundResult: string | null;
   scores: number[];
   wins: number[];
+  isShowdown: boolean;
 }
 
 export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeReturn {
   const [roundResult, setRoundResult] = useState<string | null>(null);
   const [scores, setScores] = useState<number[]>([0, 0, 0]);
   const [wins, setWins] = useState<number[]>([0, 0, 0]);
+  const [isShowdown, setIsShowdown] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
 
     console.log('[useRoundJudge] Setting up event listeners');
 
+    // ✅ cards_revealed でショーダウン開始
+    socket.on('cards_revealed', () => {
+      console.log('[useRoundJudge] cards_revealed - ショーダウン開始');
+      setIsShowdown(true);
+    });
+
     // ✅ 初期スコア受信（ゲーム開始時）
     socket.on('game_start', (data) => {
       console.log('[useRoundJudge] game_start - 初期スコア:', data.scores);
       setScores(data.scores);
-      setWins([0, 0, 0]);  // 初期化
+      setWins([0, 0, 0]); 
+      setIsShowdown(false);
     });
 
     //再接続時のスコア・勝利数復元
@@ -36,6 +45,7 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
     console.log('[useRoundJudge] reconnect_success - スコア復元:', data.gameState);
     setScores(data.gameState.scores);
     setWins(data.gameState.wins);
+    setIsShowdown(false);
   });
 
     // ラウンド結果
@@ -48,6 +58,7 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
       // 2秒後に結果クリア
       setTimeout(() => {
         setRoundResult(null);
+        setIsShowdown(false);
       }, 2000);
     });
 
@@ -55,6 +66,7 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
     socket.on('turn_update', (data) => {
       console.log('[useRoundJudge] turn_update - 場代徴収後スコア:', data.scores);
       setScores(data.scores);
+      setIsShowdown(false);
     });
 
     // クリーンアップ
@@ -71,5 +83,6 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
     roundResult,
     scores,
     wins,
+    isShowdown,
   };
 }

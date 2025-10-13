@@ -84,17 +84,19 @@ export function useCardPlay({
     });
   };
 
-  //cards_revealed でリセット
-  useEffect(() => {
-    if (!socket) return;
-    socket.on('cards_revealed', () => {
-      console.log('[useCardPlay] cards_revealed - resetting selectedCardIndex');
-      setSelectedCardIndex(null);
-    });
-    return () => {
-      socket.off('cards_revealed');
-    };
-  }, [socket]);
+//turn_updateでリセット（新ターン開始時）
+useEffect(() => {
+  if (!socket) return;
+  
+  socket.on('turn_update', () => {
+    console.log('[useCardPlay] turn_update - resetting selectedCardIndex');
+    setSelectedCardIndex(null);
+  });
+  
+  return () => {
+    socket.off('turn_update');
+  };
+}, [socket]);
 
   return { playCard, selectedCardIndex };
 }
