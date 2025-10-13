@@ -9,9 +9,10 @@ interface HandProps {
   onCardClick: (index: number) => void;
   disabled: boolean;
   selectedCardIndex?: number | null;
+  isShowdown?: boolean;
 }
 
-export default function Hand({ cards, onCardClick, disabled, selectedCardIndex }: HandProps) {
+export default function Hand({ cards, onCardClick, disabled, selectedCardIndex, isShowdown = false }: HandProps) {
   return (
     <div>
       <div style={{ display: 'flex', gap: '8px' }}>
@@ -27,7 +28,9 @@ export default function Hand({ cards, onCardClick, disabled, selectedCardIndex }
               cursor: disabled ? 'not-allowed' : 'pointer',
               userSelect: 'none',
               opacity: disabled ? 0.5 : 1,
-              visibility: selectedCardIndex === idx ? 'hidden' : 'visible',
+              visibility: (isShowdown && selectedCardIndex === idx) 
+              ? 'hidden' 
+              : 'visible', 
             }}
           >
             {card.suit ? `${card.rank}${card.suit}` : card.rank}

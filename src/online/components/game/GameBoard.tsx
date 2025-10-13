@@ -33,6 +33,7 @@ interface GameBoardProps {
     type: 'disconnected' | 'reconnected';
   } | null;
   selectedCardIndex?: number | null;
+  isShowdown?: boolean;
 }
 
 export function GameBoard(props: GameBoardProps) {
@@ -47,6 +48,7 @@ export function GameBoard(props: GameBoardProps) {
     removeWarning,
     disconnectNotification,
     selectedCardIndex,
+    isShowdown,
   } = props;
 
   return (
@@ -93,6 +95,7 @@ export function GameBoard(props: GameBoardProps) {
             onCardClick={playCard}
             disabled={playerIndex === null || playerSelections[playerIndex || 0]}
             selectedCardIndex={selectedCardIndex}
+            isShowdown={isShowdown}
           />
           {playerIndex !== null && playerSelections[playerIndex] ? (
             <div className="text-center mt-4 text-green-400">
