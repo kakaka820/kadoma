@@ -4,7 +4,7 @@ import Game from './local/components/Game';
 import OnlineApp from './online/OnlineApp';
 
 export default function App() {
-  const [mode, setMode] = useState<'local' | 'online'>('local');
+  const [mode, setMode] = useState<'local' | 'online'>('online');
 
   if (mode === 'online') {
     return <OnlineApp />;
