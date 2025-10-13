@@ -1,34 +1,44 @@
 //とりあえず枠だけ先に作った
 // オンライン用エントリーらしい
 // src/online/OnlineApp.tsx
-import React, { useState } from 'react';
-import { SocketProvider } from './context/SocketContext';
-import OnlineRoom from './components/OnlineRoom';
+import React, { useState, useEffect } from 'react';
 import { OnlineGame } from './components/OnlineGame';
+import { AuthProvider, useAuth } from './contexts/AuthContext'; 
+import { SocketProvider } from './contexts/SocketContext';
+import LoginScreen from './components/LoginScreen';
+
+const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
+
+
+function OnlineAppContent() {
+  const { user, isLoading } = useAuth();
+
+  // ✅ ローディング中
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // ✅ 未ログイン → ログイン画面
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  // ✅ ログイン済み → ゲーム画面
+    return <OnlineGame />;  
+}
 
 export default function OnlineApp() {
-  const [gameStarted, setGameStarted] = useState(false);
-  const [roomId, setRoomId] = useState<string>('');
-
-  const handleGameStart = (roomId: string) => {
-    setRoomId(roomId);
-    setGameStarted(true);
-  };
+  
 
   return (
     <SocketProvider>
-      <div className="online-app min-h-screen bg-gray-50 p-4">
-        {!gameStarted ? (
-          <OnlineRoom onGameStart={handleGameStart} />
-        ) : (
-          <div>
-            <h2>オンライン対戦中 (Room: {roomId})</h2>
-            <p>ゲーム画面準備中...</p>
-            <OnlineGame />
-            {/* ← 後で OnlineGame.tsx 作る */}
-          </div>
-        )}
-      </div>
+    <AuthProvider>
+      <OnlineAppContent />
+    </AuthProvider>
     </SocketProvider>
   );
 }
