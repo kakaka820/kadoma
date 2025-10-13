@@ -57,11 +57,17 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   
   // 全員選択したか確認
   if (gameState.playerSelections.every(Boolean)) {
+    console.log('[Game] All players selected, revealing cards');
     //場札と一緒にプレイヤーの手札も送信
     gameState.players.forEach((player, idx) => {
+    console.log(`[Game] Sending to ${player.id}:`, {
+      fieldCards: gameState.fieldCards,
+      hand: gameState.hands[idx]
+    });
+    
     io.to(player.id).emit('cards_revealed', {
       fieldCards: gameState.fieldCards,
-      hand: gameState.hands[idx]  //更新された手札
+      hand: gameState.hands[idx]
     });
   });
     setTimeout(() => {
