@@ -16,7 +16,7 @@ const CARDS_PER_PLAYER = 5;         // プレイヤーごとの配布枚数
 const TURN_TIME_LIMIT = 8;          // 各ターンの制限時間（秒）
 const WAIT_TIME_MS = 2000;          // ターン間の待機時間（ms）
 const ROUND_RESULT_DISPLAY_MS = 2000; // ラウンド結果表示時間（ms）
-const CARD_REVEAL_DELAY_MS = 1500;  // カード一斉開示の遅延（ms）
+const CARD_REVEAL_DELAY_MS = 500;  // カード一斉開示の遅延（ms）（場札表示してから勝敗表示までの時間
 
 // ==================== Bot設定 ====================
 const BOT_WAIT_TIME_MS = 10000;     // Bot補充待機時間（10秒）
