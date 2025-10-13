@@ -12,30 +12,43 @@ export default function LoginScreen() {
 
   // 新規登録
   const handleRegister = async () => {
+
+    console.log('[LoginScreen] handleRegister 開始');
+    console.log('[LoginScreen] username:', username);
+
     if (!username.trim()) {
+      console.log('[LoginScreen] バリデーションエラー: 空欄');
       setError('ユーザー名を入力してください');
       return;
     }
 
     if (username.length < 2 || username.length > 12) {
+      console.log('[LoginScreen] バリデーションエラー: 文字数');
       setError('ユーザー名は2〜12文字で入力してください');
       return;
     }
 
+    console.log('[LoginScreen] バリデーション通過');
     setIsLoading(true);
     setError('');
-
+    
+    console.log('[LoginScreen] register 呼び出し:', username.trim());
     const result = await register(username.trim());
+    console.log('[LoginScreen] register 結果:', result);
 
     if (!result.success) {
+      console.log('[LoginScreen] 登録失敗:', result.error);
       setError(result.error || '登録に失敗しました');
       setIsLoading(false);
+      } else {
+      console.log('[LoginScreen] 登録成功！');
     }
     // 成功時は自動でログイン画面に遷移
   };
 
   // 引継ぎコードログイン
   const handleTransferLogin = async () => {
+    console.log('[LoginScreen] handleTransferLogin 開始');
     if (!transferCode.trim()) {
       setError('引継ぎコードを入力してください');
       return;
@@ -43,9 +56,12 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     setError('');
-
+    
+    console.log('[LoginScreen] loginWithCode 呼び出し:', transferCode.trim());
     const result = await loginWithCode(transferCode.trim().toUpperCase());
+    console.log('[LoginScreen] loginWithCode 結果:', result);
 
+    
     if (!result.success) {
       setError(result.error || 'ログインに失敗しました');
       setIsLoading(false);
