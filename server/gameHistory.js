@@ -1,5 +1,6 @@
 // server/gameHistory.js
 const { supabase } = require('./supabaseClient');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * ゲーム履歴を保存
@@ -22,12 +23,15 @@ async function saveGameHistory(roomId, gameState) {
     const finalScore = scores[i];
     const buyIn = 1000; // 今は固定（後で可変に）
     const profit = finalScore; // 簡易計算（後で改善）
+
+    // ✅ 仮UUID生成（アカウント実装まで）
+    const tempUserId = uuidv4();
     
     try {
       const { data, error } = await supabase
         .from('game_history')
         .insert({
-          user_id: player.id, // 今は socket.id（後でユーザーIDに）
+          user_id: player.id,
           room_id: roomId,
           buy_in: buyIn,
           final_score: finalScore,
