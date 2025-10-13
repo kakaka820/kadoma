@@ -1,4 +1,4 @@
-// src/online/components/Hand.tsx
+// src/online/components/game/Hand.tsx
 // オンライン版：自分の手札表示用コンポーネント
 
 import React from 'react';
@@ -8,9 +8,10 @@ interface HandProps {
   cards: Card[];
   onCardClick: (index: number) => void;
   disabled: boolean;
+  selectedCardIndex?: number | null;
 }
 
-export default function Hand({ cards, onCardClick, disabled }: HandProps) {
+export default function Hand({ cards, onCardClick, disabled, selectedCardIndex }: HandProps) {
   return (
     <div>
       <div style={{ display: 'flex', gap: '8px' }}>
@@ -26,6 +27,7 @@ export default function Hand({ cards, onCardClick, disabled }: HandProps) {
               cursor: disabled ? 'not-allowed' : 'pointer',
               userSelect: 'none',
               opacity: disabled ? 0.5 : 1,
+              visibility: selectedCardIndex === idx ? 'hidden' : 'visible',
             }}
           >
             {card.suit ? `${card.rank}${card.suit}` : card.rank}
