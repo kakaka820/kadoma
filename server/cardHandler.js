@@ -67,7 +67,7 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
     
     io.to(player.id).emit('cards_revealed', {
       fieldCards: gameState.fieldCards,
-      hand: gameState.hands[idx]
+      hand: gameState.hands[playerIndex]
     });
   });
     setTimeout(() => {

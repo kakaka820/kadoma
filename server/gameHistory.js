@@ -31,7 +31,7 @@ async function saveGameHistory(roomId, gameState) {
       const { data, error } = await supabase
         .from('game_history')
         .insert({
-          user_id: player.id,
+          user_id: tempUserId,
           room_id: roomId,
           buy_in: buyIn,
           final_score: finalScore,
