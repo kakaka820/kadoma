@@ -1,6 +1,7 @@
 //server/server.js
 //WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');

@@ -1,6 +1,7 @@
 // server/roundHandler.js
 // ラウンド終了処理
 
+const { saveGameHistory } = require('./gameHistory');
 const { processRound, prepareNextTurn } = require('../shared/core/gameFlow');
 const { calculateAllTableFees } = require('../shared/utils/feeCalculator');
 const { ROUND_RESULT_DISPLAY_MS } = require('../shared/config');
@@ -75,14 +76,21 @@ function handleRoundEnd(io, games, roomId, gameState) {
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
-     // TODO: アカウント実装後、Bot代替中のプレイヤーにペナルティ処理
-     io.to(roomId).emit('game_over', {
-     reason: nextState.gameOverReason,
-     finalScores: nextState.scores,
-     winner: nextState.scores.indexOf(Math.max(...nextState.scores))
-     });
-     games.delete(roomId);
-     } else {
+
+      // ✅ 履歴保存（非同期だけど待たない）
+  saveGameHistory(roomId, nextState).catch(err => {
+    console.error('[game_over] 履歴保存失敗:', err);
+  });
+  
+  // TODO: アカウント実装後、Bot代替中のプレイヤーにペナルティ処理
+  io.to(roomId).emit('game_over', {
+    reason: nextState.gameOverReason,
+    finalScores: nextState.scores,
+    winner: nextState.scores.indexOf(Math.max(...nextState.scores))
+  });
+  games.delete(roomId);
+} else {
+
       // 全プレイヤーの手札情報を作成
       const allHandsInfo = createAllHandsInfo(nextState.hands);
       
