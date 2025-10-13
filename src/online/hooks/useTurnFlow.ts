@@ -31,7 +31,15 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
 
     console.log('[useTurnFlow] Setting up event listeners');
 
-   //新規追加：全員選択後の一斉開示
+     //再接続時のゲーム状態復元
+  socket.on('reconnect_success', (data) => {
+    console.log('[useTurnFlow] reconnect_success received:', data.gameState);
+    setCurrentMultiplier(data.gameState.currentMultiplier);
+    setFieldCards(data.gameState.fieldCards);
+    setPlayerSelections(data.gameState.playerSelections);
+  });
+
+   //全員選択後の一斉開示
     socket.on('cards_revealed', (data) => {
       console.log('[useTurnFlow] cards_revealed received:', data);
       setFieldCards(data.fieldCards);
@@ -61,6 +69,8 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       setTimeRemaining(data.timeLimit);
     });
 
+
+
     // クリーンアップ
     return () => {
       console.log('[useTurnFlow] Cleaning up event listeners');
@@ -68,6 +78,7 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       socket.off('turn_update');
       socket.off('round_result');
       socket.off('timer_start');
+      socket.off('reconnect_success');
     };
   }, [socket]);
 

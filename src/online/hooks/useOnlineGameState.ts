@@ -25,7 +25,6 @@ interface UseOnlineGameStateReturn {
   players: string[];
   gameStatus: 'waiting' | 'playing' | 'finished';
   opponentHands: OpponentCard[][];
-  removeCardFromHand: (cardIndex: number) => void;
 }
 
 export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
@@ -36,12 +35,6 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
   const [opponentHands, setOpponentHands] = useState<OpponentCard[][]>([]);
 
-
-
-  //手札から即座にカードを削除する関数
-  const removeCardFromHand = (cardIndex: number) => {
-    setMyHand(prev => prev.filter((_, i) => i !== cardIndex));
-  };
 
 
   useEffect(() => {
@@ -61,12 +54,30 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       console.log('[useOnlineGameState] gameStatus set to playing');
     });
 
-    // 手札更新
+
+    //再接続成功イベント追加
+  socket.on('reconnect_success', (data) => {
+    console.log('[useOnlineGameState] reconnect_success received:', data);
+    setPlayerIndex(data.playerIndex);
+    setMyHand(data.gameState.hand);
+    setGameStatus('playing');
+  });
+
+
+  //場札公開時に手札を更新
+  socket.on('cards_revealed', (data) => {
+    console.log('[useOnlineGameState] cards_revealed - updating hand');
+    setMyHand(data.hand);
+  });
+
+
+  // 手札更新
     socket.on('hand_update', (data) => {
       console.log('[useOnlineGameState] hand_update received:', data);
       setMyHand(data.hand);
       setOpponentHands(data.opponentHands || []);
     });
+
 
     // ゲーム終了
     socket.on('game_over', (data) => {
@@ -75,10 +86,13 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       alert(`ゲーム終了！\n理由: ${data.reason}\n勝者: Player ${data.winner + 1}`);
     });
 
+
     // クリーンアップ
     return () => {
       console.log('[useOnlineGameState] Cleaning up event listeners');
       socket.off('game_start');
+      socket.off('reconnect_success');
+      socket.off('cards_revealed');
       socket.off('hand_update');
       socket.off('game_over');
     };
@@ -91,6 +105,5 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     players,
     gameStatus,
     opponentHands,
-    removeCardFromHand,
   };
 }
