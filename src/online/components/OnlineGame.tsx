@@ -24,7 +24,6 @@ export function OnlineGame() {
     players,
     gameStatus,
     opponentHands,
-    removeCardFromHand
   } = useOnlineGameState({ socket });
 
   const {
@@ -50,7 +49,6 @@ export function OnlineGame() {
     myHand,
     playerSelections,
     setTurnIndex,
-    removeCardFromHand
   });
   const { warnings, removeWarning } =useWarnings({ socket });
   const { notification } = useDisconnectNotification({ socket });
