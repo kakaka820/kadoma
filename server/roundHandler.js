@@ -13,6 +13,15 @@ const { botAutoPlay } = require('./botPlayer');
  * ラウンド終了処理
  */
 function handleRoundEnd(io, games, roomId, gameState) {
+  
+//gameStateチェック
+  if (!gameState) {
+    console.error('[roundHandler] gameState is undefined for room:', roomId);
+    return;
+  }
+
+
+
   if (gameState.turnTimer) {
     clearTimeout(gameState.turnTimer);
     gameState.turnTimer = null;

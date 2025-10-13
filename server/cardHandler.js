@@ -57,9 +57,13 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   
   // 全員選択したか確認
   if (gameState.playerSelections.every(Boolean)) {
-    io.to(roomId).emit('cards_revealed', {
-      fieldCards: gameState.fieldCards
+    //場札と一緒にプレイヤーの手札も送信
+    gameState.players.forEach((player, idx) => {
+    io.to(player.id).emit('cards_revealed', {
+      fieldCards: gameState.fieldCards,
+      hand: gameState.hands[idx]  //更新された手札
     });
+  });
     setTimeout(() => {
       handleRoundEndCallback(roomId, gameState);
     }, CARD_REVEAL_DELAY_MS);
