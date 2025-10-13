@@ -1,7 +1,7 @@
 //server/server.js
 //WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
-require('dotenv').config();
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -9,6 +9,11 @@ const { startGame, handleRoundEnd } = require('./gameManager');
 const { handleJoinRoom, handleDisconnect } = require('./roomManager');
 const { handlePlayCard } = require('./cardHandler');
 const { handlePlayerReconnect } = require('./disconnectHandler');
+
+console.log('[server.js] authHandler を読み込み中...');
+const { registerUser, loginWithTransferCode, loginWithUserId} = require('./authHandler');
+require('dotenv').config();
+console.log('[server.js] authHandler 読み込み成功');
 
 // Expressアプリケーションのセットアップ
 const app = express();
@@ -32,6 +37,49 @@ const games = new Map();
 // Socket.IOイベント処理
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+
+  //ユーザー登録
+  socket.on('register', async (data, callback) => {
+    console.log('[server.js] register イベント受信:', data);
+    try{
+    const result = await registerUser(data.username);
+    console.log('[server.js] registerUser 結果:', result);
+    callback(result);
+  }catch (error) {
+      console.error('[server.js] register エラー:', error);
+      callback({ success: false, error: 'サーバーエラー' });
+    }
+  }
+
+);
+  
+  //引継ぎコードログイン
+  socket.on('login_with_code', async (data, callback) => {
+    console.log('[server.js] login_with_code イベント受信:', data);
+    try{
+    const result = await loginWithTransferCode(data.transferCode);
+    callback(result);
+  }catch (error) {
+      console.error('[server.js] login_with_code エラー:', error);
+      callback({ success: false, error: 'サーバーエラー' });
+    }
+  }
+
+
+);
+  
+  //自動ログイン
+  socket.on('auto_login', async (data, callback) => {
+    console.log('[server.js] auto_login イベント受信:', data);
+    try{
+    const result = await loginWithUserId(data.userId);
+    callback(result);
+  }catch (error) {
+      console.error('[server.js] auto_login エラー:', error);
+      callback({ success: false, error: 'サーバーエラー' });
+    }
+  }
+);
 
   // ルーム作成または参加
   socket.on('join_room', (data) => {
