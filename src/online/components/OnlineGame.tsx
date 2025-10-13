@@ -30,6 +30,7 @@ export function OnlineGame() {
     roundResult,
     scores,
     wins,
+    isShowdown,
   } = useRoundJudge({ socket });
 
   const {
@@ -77,6 +78,7 @@ export function OnlineGame() {
       roundResult={roundResult}
       myHand={myHand}
       playCard={playCard}
+      isShowdown={isShowdown}
       selectedCardIndex={selectedCardIndex}
       warnings={warnings}
       removeWarning={removeWarning}
