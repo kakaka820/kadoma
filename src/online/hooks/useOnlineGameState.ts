@@ -64,11 +64,18 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
   });
 
 
-  //場札公開時に手札を更新
-  socket.on('cards_revealed', (data) => {
-    console.log('[useOnlineGameState] cards_revealed - updating hand');
+  // 場札公開時に手札を更新
+socket.on('cards_revealed', (data) => {
+  console.log('[useOnlineGameState] cards_revealed received:', data);  // ✅ data全体を表示
+  
+  //data.hand が存在する場合のみ更新
+  if (data.hand !== undefined) {
+    console.log('[useOnlineGameState] Updating hand to:', data.hand);
     setMyHand(data.hand);
-  });
+  } else {
+    console.warn('[useOnlineGameState] cards_revealed: hand is undefined');
+  }
+});
 
 
   // 手札更新
