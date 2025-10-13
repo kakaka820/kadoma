@@ -1,7 +1,7 @@
 // src/online/components/OnlineGame.tsx
 //UIの分岐処理のみ！
 
-import { useSocket } from '../context/SocketContext';
+import { useSocket } from '../contexts/SocketContext';
 import { useOnlineGameState } from '../hooks/useOnlineGameState';
 import { useRoundJudge } from '../hooks/useRoundJudge';
 import { useTurnFlow } from '../hooks/useTurnFlow';
