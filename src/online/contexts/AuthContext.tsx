@@ -28,7 +28,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
 
   // 起動時: 自動ログイン
   useEffect(() => {
-    if (!socket) return;
+    console.log('[AuthContext] useEffect 実行, socket:', socket);
+    if (!socket) {console.log('[AuthContext] socket is null, waiting...');
+      return;
+    }
 
     const userId = localStorage.getItem('kadoma_user_id');
     
@@ -67,16 +70,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
 
   // 新規登録
   const register = async (username: string): Promise<{ success: boolean; error?: string }> => {
+    
+    console.log('[AuthContext] register 開始:', username);
+    console.log('[AuthContext] socket:', socket);
+    
+    
     if (!socket) {
+      console.error('[AuthContext] socket is null!');
       return { success: false, error: 'サーバーに接続できません' };
     }
 
+    console.log('[AuthContext] socket.emit("register") 実行');
+
     return new Promise((resolve) => {
       socket.emit('register', { username }, (response: any) => {
+        console.log('[AuthContext] register callback 受信:', response);
         if (response.success) {
+          console.log('[AuthContext] 登録成功、login 呼び出し');
           login(response.user);
           resolve({ success: true });
         } else {
+          console.log('[AuthContext] 登録失敗:', response.error);
           resolve({ success: false, error: response.error });
         }
       });
@@ -85,12 +99,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
 
   // 引継ぎコードでログイン
   const loginWithCode = async (code: string): Promise<{ success: boolean; error?: string }> => {
+    
+    console.log('[AuthContext] loginWithCode 開始:', code);
+
     if (!socket) {
+      console.error('[AuthContext] socket is null!');
       return { success: false, error: 'サーバーに接続できません' };
     }
 
+    console.log('[AuthContext] socket.emit("login_with_code") 実行');
+
     return new Promise((resolve) => {
       socket.emit('login_with_code', { transferCode: code }, (response: any) => {
+        console.log('[AuthContext] loginWithCode callback 受信:', response);
         if (response.success) {
           login(response.user);
           resolve({ success: true });
