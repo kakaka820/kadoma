@@ -11,15 +11,23 @@ interface UseRejoinGameProps {
 
 export function useRejoinGame({ socket, isConnected, userId }: UseRejoinGameProps) {
   useEffect(() => {
-    if (!socket || !isConnected || !userId) return;
+    if (!socket || !isConnected) return;
 
     const savedRoomId = localStorage.getItem('kadoma_active_room');
+    const userIdToUse = userId || localStorage.getItem('kadoma_user_id');
     
-    if (savedRoomId) {
+    if (savedRoomId && userIdToUse ) {
       console.log('[useRejoinGame] 保存された roomId を発見:', savedRoomId);
+      console.log('[useRejoinGame] userId:', userIdToUse);
       socket.emit('rejoin_game', { 
         roomId: savedRoomId,
-        userId 
+        userId: userIdToUse
+      });
+    }
+    else {
+      console.log('[useRejoinGame] rejoin 条件未達成:', {
+        savedRoomId,
+        userId: userIdToUse
       });
     }
   }, [socket, isConnected, userId]);
