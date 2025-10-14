@@ -6,12 +6,12 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
-
+import { useAuth } from './AuthContext';
 
 
 interface SocketContextType {
   socket: Socket | null;
-  isConnected: boolean;  // ← 追加！
+  isConnected: boolean;
 }
 
 
@@ -30,6 +30,7 @@ interface SocketProviderProps {
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     console.log('[SocketContext] 接続開始');
@@ -44,22 +45,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on('connect', () => {
       console.log('[SocketContext] 接続成功:', newSocket.id);
       setIsConnected(true);
-     
-    // ✅ リロード後の自動復帰処理
-      const savedRoomId = localStorage.getItem('kadoma_active_room');
-      if (savedRoomId) {
-        console.log('[SocketContext] 保存された roomId を発見:', savedRoomId);
-        console.log('[SocketContext] 自動復帰を試みます...');  
-
-
-    // 少し待ってから復帰（サーバー側の準備を待つ）
-        setTimeout(() => {
-          newSocket.emit('reconnect_to_game', { roomId: savedRoomId });
-        }, 500);
-      }
-
-
-
     });
    
 
@@ -88,22 +73,37 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setIsConnected(false);
     });
 
-    // ✅ 復帰失敗時の処理
-    newSocket.on('reconnect_failed', (data) => {
-      console.error('[SocketContext] 復帰失敗:', data.reason);
+    // ✅ rejoin_failed イベント（reconnect_failed じゃない！）
+    newSocket.on('rejoin_failed', (data) => {
+      console.log('[SocketContext] 復帰失敗:', data.message);
       localStorage.removeItem('kadoma_active_room');
-      alert(`復帰できませんでした: ${data.reason}`);
+      alert(`復帰できませんでした: ${data.message}`);
     });
-
-
     setSocket(newSocket);
 
-    // アプリ終了時のみ切断
+
+     // アプリ終了時のみ切断
     return () => {
       console.log('[SocketContext] クリーンアップ');
       newSocket.close();
     };
   }, []);
+
+  // ✅ リロード後の自動復帰処理（別の useEffect）
+  useEffect(() => {
+    if (!socket || !isConnected || !user) return;
+    const savedRoomId = localStorage.getItem('kadoma_active_room');
+    
+    if (savedRoomId) {
+      console.log('[SocketContext] 保存された roomId を発見:', savedRoomId);
+      console.log('[SocketContext] 自動復帰を試みます...');
+      
+      socket.emit('rejoin_game', { 
+        roomId: savedRoomId,
+        userId: user.id 
+      });
+    }
+  }, [socket, isConnected, user]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
@@ -111,8 +111,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     </SocketContext.Provider>
   );
 }
-
-
 export const useSocket = () => {
   const context = useContext(SocketContext);
   if (context === undefined) {
