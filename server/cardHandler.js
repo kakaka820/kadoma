@@ -57,21 +57,33 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   
   // 全員選択したか確認
   if (gameState.playerSelections.every(Boolean)) {
+  //最新の gameState を取得
+    const currentGameState = games.get(roomId);
+    if (!currentGameState) {
+      console.error('[cardHandler] gameState disappeared');
+      return;
+    }
     console.log('[Game] All players selected, revealing cards');
     //場札と一緒にプレイヤーの手札も送信
-    gameState.players.forEach((player, idx) => {
-    console.log(`[Game] Sending to ${player.id}:`, {
-      fieldCards: gameState.fieldCards,
-      hand: gameState.hands[idx]
+    currentGameState.players.forEach((player, idx) => {
+      console.log(`[Game] Sending to ${player.id}:`, {
+        fieldCards: currentGameState.fieldCards,
+        hand: currentGameState.hands[idx]
+      });
+      
+      io.to(player.id).emit('cards_revealed', {
+        fieldCards: currentGameState.fieldCards,
+        hand: currentGameState.hands[idx]
+      });
     });
-    
-    io.to(player.id).emit('cards_revealed', {
-      fieldCards: gameState.fieldCards,
-      hand: gameState.hands[idx]
-    });
-  });
     setTimeout(() => {
-      handleRoundEndCallback(io, games, roomId, gameState);
+      const finalGameState = games.get(roomId);
+      if (!finalGameState) {
+        console.error('[cardHandler] gameState disappeared in setTimeout');
+        return;
+      }
+      
+      handleRoundEndCallback(io, games, roomId, finalGameState);
     }, CARD_REVEAL_DELAY_MS);
   }
 }

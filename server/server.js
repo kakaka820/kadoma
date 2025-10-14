@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
       games, 
       socket, 
       data, 
-      (roomId, gameState) => handleRoundEnd(io, games, roomId, gameState)
+      (io, games, roomId, gameState) => handleRoundEnd(io, games, roomId, gameState)
     );
   });
 
