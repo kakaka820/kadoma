@@ -77,12 +77,17 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
   const player = gameState.players[botIndex];
   const strategy = player.botStrategy || BOT_STRATEGIES.RANDOM;
 
+   
+  //player.isProxy も確認（引数より優先）
+  const isProxyBot = isProxy || player.isProxy || false;
+  
+
   //セット番号を遅延前に計算
   const setNumber = Math.floor(gameState.turnIndex / 5);
 
   //人間らしさ演出
   // 代理Botは即座に選択（遅延なし）
-  const delay = isProxy ? 0 : BOT_MIN_DELAY_MS + Math.floor(Math.random() * (BOT_MAX_DELAY_MS - BOT_MIN_DELAY_MS));
+  const delay = isProxyBot ? 0 : BOT_MIN_DELAY_MS + Math.floor(Math.random() * (BOT_MAX_DELAY_MS - BOT_MIN_DELAY_MS));
 
   setTimeout(() => {
     const currentGameState = games.get(roomId);
@@ -103,7 +108,9 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
     currentGameState.fieldCards[botIndex] = card;
     currentGameState.playerSelections[botIndex] = true;
 
-    console.log(`[Bot] Player ${botIndex} (Bot) played:`, card);
+
+
+    console.log(`[Bot] Player ${botIndex} (${strategy}, proxy: ${isProxyBot}) played:`, card);
 
     // 全員に通知
     io.to(roomId).emit('card_played', {
@@ -123,10 +130,9 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
     if (currentGameState.playerSelections.every(Boolean)) {
 
       //代理Bot の場合は即公開・即処理
-      if (isProxy) {
+      if (isProxyBot) {
         console.log('[Bot] Proxy bot triggered instant reveal');
         
-        // 即座に cards_revealed 送信
         currentGameState.players.forEach((player, idx) => {
           io.to(player.id).emit('cards_revealed', {
             fieldCards: currentGameState.fieldCards,
