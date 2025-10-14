@@ -79,7 +79,7 @@ export function OnlineGame() {
     if (!socket) return;
 
     const playerName = localStorage.getItem('kadoma_username') || 'Player';
-    socket.emit('join_room', { playerName });
+    socket.emit('join_room', { playerName, userId: user?.id });
     setIsInRoom(true);
   };
 
@@ -108,7 +108,7 @@ useEffect(() => {
   const handleRematch = () => {
     if (!socket) return;
     const playerName = localStorage.getItem('kadoma_username') || 'Player';
-    socket.emit('join_room', { playerName });
+    socket.emit('join_room', { playerName, userId: user?.id });
     // gameStatus は自動的に 'waiting' に変わる
   };
 
