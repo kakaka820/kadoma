@@ -69,8 +69,19 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       console.log('[useOnlineGameState] gameStatus set to playing');
     });
 
+    //rejoin_success
+  socket.on('rejoin_success', (data) => {
+    console.log('[useOnlineGameState] rejoin_success received:', data);
+    setRoomId(data.roomId);
+    setPlayerIndex(data.playerIndex);
+    setMyHand(data.gameState.hand);
+    setGameStatus('playing');
+    if (data.roomId) {
+      localStorage.setItem('kadoma_active_room', data.roomId);
+    }
+  });
 
-    //再接続成功イベント追加
+    //再接続成功イベント(reconnect_to_game用)
   socket.on('reconnect_success', (data) => {
     console.log('[useOnlineGameState] reconnect_success received:', data);
     setPlayerIndex(data.playerIndex);
@@ -108,7 +119,7 @@ socket.on('cards_revealed', (data) => {
     socket.on('game_over', (data) => {
       console.log('[useOnlineGameState] game_over received:', data);
       setGameStatus('finished');
-      setGameOverData({ // ✅ データ保存（alert 削除）
+      setGameOverData({ // データ保存（alert 削除）
         reason: data.reason,
         finalScores: data.finalScores,
         winner: data.winner
@@ -123,6 +134,7 @@ socket.on('cards_revealed', (data) => {
     return () => {
       console.log('[useOnlineGameState] Cleaning up event listeners');
       socket.off('game_start');
+      socket.off('rejoin_success');
       socket.off('reconnect_success');
       socket.off('cards_revealed');
       socket.off('hand_update');
