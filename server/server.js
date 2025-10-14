@@ -114,39 +114,40 @@ socket.on('reconnect_to_game', (data) => {
 
 //リロード後の復帰処理
 socket.on('rejoin_game', ({ roomId, userId }) => {
-
   console.log(`[Server] rejoin_game received:`, { roomId, userId });
   console.log(`[Server] rejoin_game: ${userId} → ${roomId}`);
   
-  const gameState = games.get(roomId);
-  
-  if (!gameState) {
-    socket.emit('rejoin_failed', { 
-      message: 'ゲームが終了しました' 
-    });
-    return;
-  }
-  
-  //disconnectedPlayersからプレイヤーを探す
+  //userId で全ゲームから検索
+  let targetRoomId = null;
   let playerIndex = -1;
   let disconnectInfo = null;
   
-  for (const [oldSocketId, info] of Object.entries(gameState.disconnectedPlayers || {})) {
-     console.log(`[Server] Checking disconnectInfo:`, { oldSocketId, info });
-    if (info.userId === userId) {
-      playerIndex = info.playerIndex;
-      disconnectInfo = info;
-      break;
+  for (const [gameRoomId, gameState] of games.entries()) {
+    if (!gameState.disconnectedPlayers) continue;
+    
+    for (const [oldSocketId, info] of Object.entries(gameState.disconnectedPlayers)) {
+      console.log(`[Server] Checking disconnectInfo in ${gameRoomId}:`, { oldSocketId, info });
+      if (info.userId === userId) {
+        targetRoomId = gameRoomId;
+        playerIndex = info.playerIndex;
+        disconnectInfo = info;
+        break;
+      }
     }
+    
+    if (targetRoomId) break;
   }
   
-  if (playerIndex === -1) {
+  if (!targetRoomId || playerIndex === -1) {
     socket.emit('rejoin_failed', { 
       message: 'プレイヤー情報が見つかりません' 
     });
     return;
   }
-//代理botを元のプレイヤーに戻す
+  
+  const gameState = games.get(targetRoomId);
+  
+  // 代理botを元のプレイヤーに戻す
   const restoredPlayer = {
     id: socket.id,
     name: disconnectInfo.originalName,
@@ -156,7 +157,7 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
 
   gameState.players[playerIndex] = restoredPlayer;
 
-  //disconnectedPlayers から削除
+  // disconnectedPlayers から削除
   const oldSocketId = Object.keys(gameState.disconnectedPlayers).find(
     key => gameState.disconnectedPlayers[key].userId === userId
   );
@@ -164,13 +165,11 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
     delete gameState.disconnectedPlayers[oldSocketId];
   }
   
-  // Socket idを更新（roomIdに参加）
-   gameState.players[playerIndex].id = socket.id;
-  socket.join(roomId);
+  socket.join(targetRoomId);
   
   // 成功を通知
   socket.emit('rejoin_success', {
-    roomId,
+    roomId: targetRoomId,  // ✅ 正しい roomId を返す
     playerIndex,
     gameState: {
       hand: gameState.hands[playerIndex],
@@ -183,14 +182,14 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
     }
   });
 
-  //全員に復帰通知
-io.to(roomId).emit('player_reconnected', {
+  // 全員に復帰通知
+  io.to(targetRoomId).emit('player_reconnected', {
     playerIndex,
     playerName: disconnectInfo.originalName
   });
 
-  console.log(`[Server] rejoin_success: Player ${playerIndex}`);
-  });
+  console.log(`[Server] rejoin_success: Player ${playerIndex} in ${targetRoomId}`);
+});
   
   // 切断時の処理
   socket.on('disconnect', () => {
