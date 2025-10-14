@@ -1,7 +1,7 @@
 // src/online/components/OnlineGame.tsx
 //UIの分岐処理のみ！
 
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { useSocket } from '../contexts/SocketContext';
 import { useAuth } from '../contexts/AuthContext'; 
 import { useOnlineGameState } from '../hooks/useOnlineGameState';
@@ -10,6 +10,7 @@ import { useTurnFlow } from '../hooks/useTurnFlow';
 import { useCardPlay } from '../hooks/useCardPlay';
 import { useWarnings } from '../hooks/useWarnings';
 import { useDisconnectNotification } from '../hooks/useDisconnectNotification';
+import { useRejoinGame } from '../hooks/useRejoinGame';
 import { ConnectionStatus } from './ui/ConnectionStatus';
 import { WaitingRoom } from './ui/WaitingRoom';
 import { GameBoard } from './game/GameBoard';
@@ -23,6 +24,12 @@ export function OnlineGame() {
   const [isInRoom, setIsInRoom] = useState(false);
 
 
+
+   useRejoinGame({ 
+    socket, 
+    isConnected, 
+    userId: user?.id 
+  });
 
   
   // 状態管理フック
@@ -75,6 +82,23 @@ export function OnlineGame() {
     socket.emit('join_room', { playerName });
     setIsInRoom(true);
   };
+
+
+// ✅ rejoin_success を受信したら isInRoom を true に
+useEffect(() => {
+  if (!socket) return;
+
+  socket.on('rejoin_success', () => {
+    console.log('[OnlineGame] rejoin_success - setting isInRoom to true');
+    setIsInRoom(true);
+  });
+
+  return () => {
+    socket.off('rejoin_success');
+  };
+}, [socket]);
+
+
 
   //ホームへ戻る
   const handleReturnHome = () => {
