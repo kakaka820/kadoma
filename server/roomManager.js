@@ -1,9 +1,9 @@
 // server/roomManager.js
 // ルーム管理（参加・切断処理）、ルーム管理ロジックを担当
 
-const { createBotPlayer } = require('./botPlayer');
 const { handlePlayerDisconnect } = require('./disconnectHandler');
 const { BOT_WAIT_TIME_MS } = require('../shared/config');
+const { createBotPlayer, BOT_STRATEGIES } = require('./botPlayer');
 
 /**
  * プレイヤーのルーム参加処理
@@ -11,6 +11,7 @@ const { BOT_WAIT_TIME_MS } = require('../shared/config');
 function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   console.log('[Server] join_room received:', data);
   const playerName = typeof data === 'string' ? data : data.playerName;
+  const difficulty = data.difficulty || 'normal';
   
   if (!playerName) {
     console.error('[Server] playerName is missing!');
@@ -65,10 +66,35 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
     room.botTimer = setTimeout(() => {
       const currentRoom = rooms.get(roomId);
       if (!currentRoom) return;
+     
+    
+    // 難易度に応じてBot戦略を決定
+    let botStrategies = [];
+    switch (difficulty) {
+      case 'easy':
+        // かんたん：強気と弱気のみ
+        botStrategies = [BOT_STRATEGIES.AGGRESSIVE, BOT_STRATEGIES.PASSIVE];
+        break;
+      case 'hard':
+        // むずかしい：適応型のみ
+        botStrategies = [BOT_STRATEGIES.ADAPTIVE];
+        break;
+      case 'normal':
+      default:
+        // ふつう：ランダムのみ
+        botStrategies = [BOT_STRATEGIES.RANDOM];
+        break;
+    }
+
+
+
+
+
       // まだ3人未満ならBotを追加
       while (currentRoom.players.length < 3) {
         const botNumber = currentRoom.players.length + 1;
-        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber);
+        const strategy = botStrategies[Math.floor(Math.random() * botStrategies.length)];
+        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber, strategy, false);
         currentRoom.players.push(bot);
         console.log(`[Bot] Added ${bot.name} to ${roomId}`);
       }

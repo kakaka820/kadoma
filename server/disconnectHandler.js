@@ -1,7 +1,7 @@
 // server/disconnectHandler.js
 // 切断・復帰処理の管理
 
-const { createBotPlayer } = require('./botPlayer');
+const { createBotPlayer, BOT_STRATEGIES, botAutoPlay } = require('./botPlayer');
 const { RECONNECT_WAIT_TIME } = require('../shared/config');
 
 /**
@@ -33,8 +33,12 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
     // Bot に切り替え
     const botReplacement = createBotPlayer(
       `bot_replacement_${socket.id}`,
-      playerIndex + 1
+      playerIndex + 1,
+      BOT_STRATEGIES.RANDOM,
+      true
     );
+
+    //追加情報
     botReplacement.isReplacement = true; // ← 代替Bot フラグ
     botReplacement.originalPlayerId = socket.id; // ← 元のプレイヤーID
     botReplacement.originalPlayerName = disconnectedPlayer.name; // ← 元の名前
@@ -51,6 +55,21 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
       playerName: disconnectedPlayer.name,
       botName: botReplacement.name
     });
+
+    //まだカード選択してなければ即座に選択
+    if (!gameState.playerSelections[playerIndex]) {
+      // handleRoundEnd を取得
+      const { handleRoundEnd } = require('./roundHandler');
+      
+      botAutoPlay(
+        io, 
+        games, 
+        socket.roomId, 
+        playerIndex, 
+        handleRoundEnd, 
+        true
+      );
+    }
 
     // 復帰待機タイマー（ゲーム終了まで）
     gameState.disconnectedPlayers = gameState.disconnectedPlayers || {};

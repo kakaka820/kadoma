@@ -10,6 +10,7 @@ const { handleJoinRoom, handleDisconnect } = require('./roomManager');
 const { handlePlayCard } = require('./cardHandler');
 const { handlePlayerReconnect } = require('./disconnectHandler');
 
+
 console.log('[server.js] authHandler を読み込み中...');
 const { registerUser, loginWithTransferCode, loginWithUserId} = require('./authHandler');
 require('dotenv').config();
