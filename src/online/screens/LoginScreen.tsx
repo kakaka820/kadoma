@@ -1,4 +1,4 @@
-// src/online/components/LoginScreen.tsx
+// src/online/screens/LoginScreen.tsx
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
