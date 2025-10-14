@@ -112,7 +112,33 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
 
     console.log(`[Bot] Player ${botIndex} (${strategy}, proxy: ${isProxyBot}) played:`, card);
 
-    // 全員に通知
+    // ✅ 代理Bot の場合は即座に場札を公開（handleRoundEnd は呼ばない）
+  if (isProxyBot) {
+    console.log('[Bot] Proxy bot - revealing card immediately');
+    
+    // 全員に場札を送信（即開示）
+    io.to(roomId).emit('turn_update', {
+      currentMultiplier: currentGameState.currentMultiplier,
+      fieldCards: currentGameState.fieldCards,
+      scores: currentGameState.scores,
+      playerSelections: currentGameState.playerSelections
+    });
+    
+    // cards_revealed も送信（フロントで表示用）
+    currentGameState.players.forEach((player, idx) => {
+      io.to(player.id).emit('cards_revealed', {
+        fieldCards: currentGameState.fieldCards,
+        hand: currentGameState.hands[idx]
+      });
+    });
+    
+    // ✅ ここで return（handleRoundEnd は呼ばない）
+    return;
+  }
+    
+    
+
+    //通常botは全員に通知
     io.to(roomId).emit('card_played', {
       playerIndex: botIndex,
       card,
@@ -128,25 +154,6 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
 
     // 全員選択したか確認
     if (currentGameState.playerSelections.every(Boolean)) {
-
-      //代理Bot の場合は即公開・即処理
-      if (isProxyBot) {
-        console.log('[Bot] Proxy bot triggered instant reveal');
-        
-        currentGameState.players.forEach((player, idx) => {
-          io.to(player.id).emit('cards_revealed', {
-            fieldCards: currentGameState.fieldCards,
-            hand: currentGameState.hands[idx]
-          });
-        });
-
-        // 即座に handleRoundEnd（0.5ｓ遅延で処理時間を確保）
-        setTimeout(() => {
-      handleRoundEndCallback(io, games, roomId, currentGameState);
-    }, 500);
-    return;
-  }
-
   //cards_revealed を送る
   console.log('[Bot] Normal bot triggered reveal after 1.5s');
   
