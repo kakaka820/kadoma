@@ -78,7 +78,15 @@ export function OnlineGame() {
   const handleStartMatch = () => {
     if (!socket) return;
 
+     //userId がない場合は待つ
+  if (!user?.id) {
+    console.warn('[OnlineGame] userId not ready yet');
+    return;
+  }
+
     const playerName = localStorage.getItem('kadoma_username') || 'Player';
+    console.log('[OnlineGame] handleStartMatch - userId:', user?.id);
+
     socket.emit('join_room', { playerName, userId: user?.id });
     setIsInRoom(true);
   };
