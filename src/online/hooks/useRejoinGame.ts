@@ -19,12 +19,13 @@ export function useRejoinGame({ socket, isConnected, userId }: UseRejoinGameProp
     if (savedRoomId && userIdToUse ) {
       console.log('[useRejoinGame] 保存された roomId を発見:', savedRoomId);
       console.log('[useRejoinGame] userId:', userIdToUse);
-      socket.emit('rejoin_game', { 
-        roomId: savedRoomId,
-        userId: userIdToUse
-      });
-    }
-    else {
+      setTimeout(() => {
+        socket.emit('rejoin_game', { 
+          roomId: savedRoomId,
+          userId: userIdToUse
+        });
+      }, 500);
+    } else {
       console.log('[useRejoinGame] rejoin 条件未達成:', {
         savedRoomId,
         userId: userIdToUse
