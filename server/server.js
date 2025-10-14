@@ -178,7 +178,13 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
       currentMultiplier: gameState.currentMultiplier,
       turnIndex: gameState.turnIndex,
       setTurnIndex: gameState.setTurnIndex,
-      playerSelections: gameState.playerSelections
+      playerSelections: gameState.playerSelections,
+      players: gameState.players.map(p => p.name),
+      opponentHands: gameState.hands.map((hand, idx) => {
+      if (idx === playerIndex) return [];
+      return hand.map(() => ({ visible: false }));
+    }),
+    wins: gameState.wins || [0, 0, 0],
     }
   });
 
