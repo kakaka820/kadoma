@@ -22,23 +22,17 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) { // ✅ socket props 削除
-  const { socket } = useSocket();
+  const { socket, isConnected } = useSocket();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // 起動時: 自動ログイン
-  useEffect(() => {
-    console.log('[AuthContext] useEffect 実行, socket:', socket);
-    if (!socket) {console.log('[AuthContext] socket is null, waiting...');
+  useEffect(() => {  // ✅ useEffect を追加！
+    console.log('[AuthContext] useEffect 実行, socket:', socket, 'isConnected:', isConnected);
+  if (!socket || !isConnected) {
+      console.log('[AuthContext] socket or isConnected is false, waiting...');
       return;
-    }
-
-    //socket が ready か確認
-  if (!socket.connected) {
-    console.log('[AuthContext] socket not connected yet, waiting...');
-    return;
   }
-
 
     const userId = localStorage.getItem('kadoma_user_id');
     
@@ -59,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
       console.log('[認証] ローカルデータなし');
       setIsLoading(false);
     }
-  }, [socket, socket?.connected]); 
+  }, [socket, isConnected]);
 
 
   // ログイン（ローカルストレージに保存）
