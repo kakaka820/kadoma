@@ -1,5 +1,5 @@
 // src/online/screens/ResultScreen.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ResultScreenProps {
   playerIndex: number | null;
@@ -20,6 +20,14 @@ export function ResultScreen({
   onReturnHome,
   onRematch
 }: ResultScreenProps) {
+
+// ✅ マウント時に localStorage を削除
+  useEffect(() => {
+    localStorage.removeItem('kadoma_active_room');
+    console.log('[ResultScreen] Removed roomId from localStorage');
+  }, []);
+
+
   const isWinner = playerIndex === winner;
   const myScore = playerIndex !== null ? finalScores[playerIndex] : 0;
 
