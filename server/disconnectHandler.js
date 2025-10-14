@@ -30,7 +30,7 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
 
     const disconnectedPlayer = room.players[playerIndex];
     
-    // Bot に切り替え
+    //代理Botに切り替え
     const botReplacement = createBotPlayer(
       `bot_replacement_${socket.id}`,
       playerIndex + 1,
@@ -58,15 +58,20 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
 
     //まだカード選択してなければ即座に選択
     if (!gameState.playerSelections[playerIndex]) {
+      console.log(`[Disconnect] Triggering proxy bot for player ${playerIndex}`);
       // handleRoundEnd を取得
-      const { handleRoundEnd } = require('./roundHandler');
+      // ✅ handleRoundEnd を wrapper 関数でラップ
+      const handleRoundEndWrapper = (roomId, gameState) => {
+        const { handleRoundEnd } = require('./roundHandler');
+        handleRoundEnd(io, games, roomId, gameState);
+      };
       
       botAutoPlay(
         io, 
         games, 
         socket.roomId, 
         playerIndex, 
-        handleRoundEnd, 
+        handleRoundEndWrapper, 
         true
       );
     }
