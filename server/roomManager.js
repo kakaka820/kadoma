@@ -13,6 +13,12 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   const playerName = typeof data === 'string' ? data : data.playerName;
   const userId = data.userId;
   const difficulty = data.difficulty || 'normal';
+
+  console.log('[RoomManager] Extracted data:', {
+    playerName,
+    userId,
+    difficulty
+  });
   
   if (!playerName) {
     console.error('[Server] playerName is missing!');
@@ -45,6 +51,10 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
     userId: userId,
     isBot: false
   });
+
+  console.log('[RoomManager] Added player:', room.players[room.players.length - 1]);
+
+  
   
   socket.join(roomId);
   socket.roomId = roomId;
