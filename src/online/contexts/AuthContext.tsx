@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
   const [isLoading, setIsLoading] = useState(true);
 
   // 起動時: 自動ログイン
-  useEffect(() => {  // ✅ useEffect を追加！
+  useEffect(() => {
     console.log('[AuthContext] useEffect 実行, socket:', socket, 'isConnected:', isConnected);
   if (!socket || !isConnected) {
       console.log('[AuthContext] socket or isConnected is false, waiting...');
@@ -38,11 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
     
     if (userId) {
       console.log('[認証] 自動ログイン試行:', userId);
-      
       socket.emit('auto_login', { userId }, (response: any) => {
         if (response.success) {
           console.log('[認証] 自動ログイン成功:', response.user);
           setUser(response.user);
+          localStorage.setItem('kadoma_user_id', response.user.id);
         } else {
           console.log('[認証] 自動ログイン失敗、ローカルデータ削除');
           localStorage.removeItem('kadoma_user_id');
