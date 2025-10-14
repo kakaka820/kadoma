@@ -158,7 +158,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
   });
 
   //通常botは1.5ｓ待機
-      ssetTimeout(() => {
+      setTimeout(() => {
   const latestGameState = games.get(roomId);
   if (!latestGameState) return;
   handleRoundEndCallback(io, games, roomId, latestGameState);
