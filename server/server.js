@@ -106,16 +106,64 @@ io.on('connection', (socket) => {
     );
   });
 
-  //復帰処理
+  //復帰処理(切断→再接続)
 socket.on('reconnect_to_game', (data) => {
   handlePlayerReconnect(io, rooms, games, socket, data.roomId);
 });
 
+
+// ✅ リロード後の復帰処理
+socket.on('rejoin_game', ({ roomId, userId }) => {
+  console.log(`[Server] rejoin_game: ${userId} → ${roomId}`);
+  
+  const gameState = games.get(roomId);
+  
+  if (!gameState) {
+    socket.emit('rejoin_failed', { 
+      message: 'ゲームが終了しました' 
+    });
+    return;
+  }
+  
+  // プレイヤーを探す
+  const playerIndex = gameState.players.findIndex(p => 
+    p.id === socket.id || p.userId === userId
+  );
+  
+  if (playerIndex === -1) {
+    socket.emit('rejoin_failed', { 
+      message: 'プレイヤー情報が見つかりません' 
+    });
+    return;
+  }
+  
+  // Socket ID を更新
+  gameState.players[playerIndex].id = socket.id;
+  socket.join(roomId);
+  
+  // 成功を通知
+  socket.emit('rejoin_success', {
+    roomId,
+    playerIndex,
+    gameState: {
+      hand: gameState.hands[playerIndex],
+      fieldCards: gameState.fieldCards,
+      scores: gameState.scores,
+      currentMultiplier: gameState.currentMultiplier,
+      turnIndex: gameState.turnIndex,
+      setTurnIndex: gameState.setTurnIndex,
+      playerSelections: gameState.playerSelections
+    }
+  });
+  console.log(`[Server] rejoin_success: Player ${playerIndex}`);
+  });
+  
   // 切断時の処理
   socket.on('disconnect', () => {
     handleDisconnect(io, rooms, games, socket);
   });
 });
+
 
 
 
