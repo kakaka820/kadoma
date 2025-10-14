@@ -33,6 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
       return;
     }
 
+    //socket が ready か確認
+  if (!socket.connected) {
+    console.log('[AuthContext] socket not connected yet, waiting...');
+    return;
+  }
+
+
     const userId = localStorage.getItem('kadoma_user_id');
     
     if (userId) {
@@ -52,7 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) { // �
       console.log('[認証] ローカルデータなし');
       setIsLoading(false);
     }
-  }, [socket]);
+  }, [socket, socket?.connected]); 
+
 
   // ログイン（ローカルストレージに保存）
   const login = (userData: User) => {

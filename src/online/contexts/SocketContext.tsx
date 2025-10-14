@@ -6,7 +6,6 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAuth } from './AuthContext';
 
 
 interface SocketContextType {
@@ -30,7 +29,6 @@ interface SocketProviderProps {
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const { user } = useAuth();
 
   useEffect(() => {
     console.log('[SocketContext] 接続開始');
@@ -45,6 +43,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on('connect', () => {
       console.log('[SocketContext] 接続成功:', newSocket.id);
       setIsConnected(true);
+      setSocket(newSocket);
     });
    
 
@@ -88,22 +87,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       newSocket.close();
     };
   }, []);
-
-  // ✅ リロード後の自動復帰処理（別の useEffect）
-  useEffect(() => {
-    if (!socket || !isConnected || !user) return;
-    const savedRoomId = localStorage.getItem('kadoma_active_room');
-    
-    if (savedRoomId) {
-      console.log('[SocketContext] 保存された roomId を発見:', savedRoomId);
-      console.log('[SocketContext] 自動復帰を試みます...');
-      
-      socket.emit('rejoin_game', { 
-        roomId: savedRoomId,
-        userId: user.id 
-      });
-    }
-  }, [socket, isConnected, user]);
 
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
