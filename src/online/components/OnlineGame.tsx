@@ -13,6 +13,7 @@ import { ConnectionStatus } from './ui/ConnectionStatus';
 import { WaitingRoom } from './ui/WaitingRoom';
 import { GameBoard } from './game/GameBoard';
 import { HomeScreen } from '../screens/HomeScreen';
+import { ResultScreen } from '../screens/ResultScreen';
 
 
 export function OnlineGame() {
@@ -27,6 +28,7 @@ export function OnlineGame() {
     players,
     gameStatus,
     opponentHands,
+    gameOverData,
   } = useOnlineGameState({ socket });
 
   const {
@@ -67,6 +69,18 @@ export function OnlineGame() {
     setIsInRoom(true);
   };
 
+  //ホームへ戻る
+  const handleReturnHome = () => {
+    setIsInRoom(false);
+  };
+  //再戦する
+  const handleRematch = () => {
+    if (!socket) return;
+    const playerName = localStorage.getItem('kadoma_username') || 'Player';
+    socket.emit('join_room', { playerName });
+    // gameStatus は自動的に 'waiting' に変わる
+  };
+
   // UI分岐
   if (!isConnected) {
     return <ConnectionStatus />;
@@ -75,6 +89,21 @@ export function OnlineGame() {
   //ルームに入ってない → ホーム画面
   if (!isInRoom) {
     return <HomeScreen onStartMatch={handleStartMatch} />;
+  }
+
+  // ✅ ゲーム終了 → 結果画面
+  if (gameStatus === 'finished' && gameOverData) {
+    return (
+      <ResultScreen
+        playerIndex={playerIndex}
+        finalScores={gameOverData.finalScores}
+        winner={gameOverData.winner}
+        players={players}
+        reason={gameOverData.reason}
+        onReturnHome={handleReturnHome}
+        onRematch={handleRematch}
+      />
+    );
   }
 
   if (gameStatus === 'waiting') {
