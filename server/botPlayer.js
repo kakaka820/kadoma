@@ -2,7 +2,7 @@
 // Bot プレイヤーのAI処理
 
 const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../shared/config');
-const { rankToValue } = require('../shared/cardValue');
+const { rankToValue } = require('../shared/core/cardValue');
 
 
 // Bot戦略の定義
