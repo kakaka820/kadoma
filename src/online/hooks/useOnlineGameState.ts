@@ -62,6 +62,10 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       setOpponentHands(data.opponentHands || []);
       setGameStatus('playing');
       setGameOverData(null);
+      if (data.roomId) {
+    localStorage.setItem('kadoma_active_room', data.roomId);
+    console.log('[useOnlineGameState] Saved roomId to localStorage:', data.roomId);
+  }
       console.log('[useOnlineGameState] gameStatus set to playing');
     });
 
@@ -72,7 +76,10 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     setPlayerIndex(data.playerIndex);
     setMyHand(data.gameState.hand);
     setGameStatus('playing');
-  });
+    if (data.roomId) {
+    localStorage.setItem('kadoma_active_room', data.roomId);
+  }
+});
 
 
   // 場札公開時に手札を更新
@@ -106,6 +113,9 @@ socket.on('cards_revealed', (data) => {
         finalScores: data.finalScores,
         winner: data.winner
       });
+
+      localStorage.removeItem('kadoma_active_room');
+  console.log('[useOnlineGameState] Removed roomId from localStorage');
     });
 
 
