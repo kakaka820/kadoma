@@ -78,7 +78,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       localStorage.removeItem('kadoma_active_room');
       alert(`復帰できませんでした: ${data.message}`);
     });
-    setSocket(newSocket);
+
 
 
      // アプリ終了時のみ切断
