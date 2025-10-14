@@ -1,8 +1,9 @@
 // src/online/components/OnlineGame.tsx
 //UIの分岐処理のみ！
 
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { useSocket } from '../contexts/SocketContext';
+import { useAuth } from '../contexts/AuthContext'; 
 import { useOnlineGameState } from '../hooks/useOnlineGameState';
 import { useRoundJudge } from '../hooks/useRoundJudge';
 import { useTurnFlow } from '../hooks/useTurnFlow';
@@ -18,6 +19,7 @@ import { ResultScreen } from '../screens/ResultScreen';
 
 export function OnlineGame() {
   const { socket, isConnected } = useSocket();
+  const { user } = useAuth();
   const [isInRoom, setIsInRoom] = useState(false);
   
   // 状態管理フック
@@ -59,6 +61,22 @@ export function OnlineGame() {
 
   const { warnings, removeWarning } =useWarnings({ socket });
   const { notification } = useDisconnectNotification({ socket });
+
+
+
+useEffect(() => {
+  if (!socket || !isConnected || !user) return;
+
+  const savedRoomId = localStorage.getItem('kadoma_active_room');
+  
+  if (savedRoomId) {
+    console.log('[OnlineGame] 保存された roomId を発見:', savedRoomId);
+    socket.emit('rejoin_game', { 
+      roomId: savedRoomId,
+      userId: user.id 
+    });
+  }
+}, [socket, isConnected, user]);
 
   //オンライン対戦開始
   const handleStartMatch = () => {
