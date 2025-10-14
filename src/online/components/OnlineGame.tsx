@@ -93,8 +93,9 @@ export function OnlineGame() {
 useEffect(() => {
   if (!socket) return;
 
-  socket.on('rejoin_success', () => {
+  socket.on('rejoin_success', (data) => {
     console.log('[OnlineGame] rejoin_success - setting isInRoom to true');
+    console.log('[OnlineGame] rejoin_success data:', data);
     setIsInRoom(true);
   });
 
