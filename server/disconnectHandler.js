@@ -81,6 +81,7 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
     gameState.disconnectedPlayers[socket.id] = {
       playerIndex,
       originalName: disconnectedPlayer.name,
+      userId: disconnectedPlayer.userId,
       disconnectedAt: Date.now()
     };
 
