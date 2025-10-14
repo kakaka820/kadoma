@@ -112,7 +112,7 @@ socket.on('reconnect_to_game', (data) => {
 });
 
 
-// ✅ リロード後の復帰処理
+//リロード後の復帰処理
 socket.on('rejoin_game', ({ roomId, userId }) => {
   console.log(`[Server] rejoin_game: ${userId} → ${roomId}`);
   

@@ -11,6 +11,7 @@ const { createBotPlayer, BOT_STRATEGIES } = require('./botPlayer');
 function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   console.log('[Server] join_room received:', data);
   const playerName = typeof data === 'string' ? data : data.playerName;
+  const userId = data.userId;
   const difficulty = data.difficulty || 'normal';
   
   if (!playerName) {
@@ -41,6 +42,7 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   room.players.push({
     id: socket.id,
     name: playerName,
+    userId: userId,
     isBot: false
   });
   
