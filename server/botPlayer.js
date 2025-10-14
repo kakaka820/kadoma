@@ -146,10 +146,23 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
     }, 500);
     return;
   }
+
+  //cards_revealed を送る
+  console.log('[Bot] Normal bot triggered reveal after 1.5s');
+  
+  currentGameState.players.forEach((player, idx) => {
+    io.to(player.id).emit('cards_revealed', {
+      fieldCards: currentGameState.fieldCards,
+      hand: currentGameState.hands[idx]
+    });
+  });
+
   //通常botは1.5ｓ待機
-      setTimeout(() => {
-        handleRoundEndCallback(io, games, roomId, currentGameState);
-      }, 1500);
+      ssetTimeout(() => {
+  const latestGameState = games.get(roomId);
+  if (!latestGameState) return;
+  handleRoundEndCallback(io, games, roomId, latestGameState);
+}, 1500);
     }
   }, delay);
 }
