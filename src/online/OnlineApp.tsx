@@ -35,10 +35,10 @@ export default function OnlineApp() {
   
 
   return (
-    <AuthProvider>
     <SocketProvider>
+    <AuthProvider>    
       <OnlineAppContent />
-      </SocketProvider>
       </AuthProvider>
+      </SocketProvider>
   );
 }
