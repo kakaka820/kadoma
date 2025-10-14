@@ -75,6 +75,8 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     setRoomId(data.roomId);
     setPlayerIndex(data.playerIndex);
     setMyHand(data.gameState.hand);
+    setPlayers(data.gameState.players || []);
+    setOpponentHands(data.gameState.opponentHands || []);
     setGameStatus('playing');
     if (data.roomId) {
       localStorage.setItem('kadoma_active_room', data.roomId);

@@ -44,7 +44,7 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
   socket.on('reconnect_success', (data) => {
     console.log('[useRoundJudge] reconnect_success - スコア復元:', data.gameState);
     setScores(data.gameState.scores);
-    setWins(data.gameState.wins);
+    setWins(data.gameState.wins || [0, 0, 0]);
     setIsShowdown(false);
   });
 
