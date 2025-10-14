@@ -46,18 +46,36 @@ function startTurnTimer(io, games, roomId, handleRoundEndCallback) {
     unselectedPlayers.forEach(playerIndex => {
       const hand = currentGameState.hands[playerIndex];
       if (hand.length === 0) return;
-      
+
+      //セットの1ターン目ならJOKERを除外
+  let availableCards = hand;
+  if (currentGameState.setTurnIndex === 0) {
+    availableCards = hand.filter(card => !card.rank?.startsWith('JOKER'));
+  }
+
+  //理論上ありえないが念のためのエラーハンドリング
+     if (availableCards.length === 0) {
+    console.error(`[Timer] Player ${playerIndex} has no valid cards!`);
+    return;
+  }    
+
+
       // ランダムにカードを選択
-      const randomIndex = Math.floor(Math.random() * hand.length);
-      const card = hand[randomIndex];
+      const randomIndex = Math.floor(Math.random() * availableCards.length);
+      const selectedCard = availableCards[randomIndex];
+      const handIndex = hand.findIndex(c => 
+    c.suit === selectedCard.suit && c.rank === selectedCard.rank
+  );
 
       // カードを場に出す
-      hand.splice(randomIndex, 1);
-      currentGameState.fieldCards[playerIndex] = card;
+      hand.splice(handIndex, 1);
+      currentGameState.fieldCards[playerIndex] = selectedCard;
       currentGameState.playerSelections[playerIndex] = true;
-      console.log(`[Timer] Auto-selected card for Player ${playerIndex}:`, card);
+      console.log(`[Timer] Auto-selected card for Player ${playerIndex}:`, selectedCard);
     });
     
+
+
 
     //カードを一斉開示（各プレイヤーに手札も送信）
     currentGameState.players.forEach((player, idx) => {
