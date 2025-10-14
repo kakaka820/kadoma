@@ -25,6 +25,11 @@ interface UseOnlineGameStateReturn {
   players: string[];
   gameStatus: 'waiting' | 'playing' | 'finished';
   opponentHands: OpponentCard[][];
+  gameOverData: {
+    reason: string;
+    finalScores: number[];
+    winner: number;
+  } | null;
 }
 
 export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
@@ -34,6 +39,11 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
   const [players, setPlayers] = useState<string[]>([]);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'playing' | 'finished'>('waiting');
   const [opponentHands, setOpponentHands] = useState<OpponentCard[][]>([]);
+  const [gameOverData, setGameOverData] = useState<{
+    reason: string;
+    finalScores: number[];
+    winner: number;
+  } | null>(null);
 
 
 
@@ -51,6 +61,7 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       setPlayers(data.players);
       setOpponentHands(data.opponentHands || []);
       setGameStatus('playing');
+      setGameOverData(null);
       console.log('[useOnlineGameState] gameStatus set to playing');
     });
 
@@ -90,7 +101,11 @@ socket.on('cards_revealed', (data) => {
     socket.on('game_over', (data) => {
       console.log('[useOnlineGameState] game_over received:', data);
       setGameStatus('finished');
-      alert(`ゲーム終了！\n理由: ${data.reason}\n勝者: Player ${data.winner + 1}`);
+      setGameOverData({ // ✅ データ保存（alert 削除）
+        reason: data.reason,
+        finalScores: data.finalScores,
+        winner: data.winner
+      });
     });
 
 
@@ -112,5 +127,6 @@ socket.on('cards_revealed', (data) => {
     players,
     gameStatus,
     opponentHands,
+    gameOverData,
   };
 }
