@@ -1,10 +1,9 @@
 // src/online/components/OnlineGame.tsx
 //UIの分岐処理のみ！
 
-import { useState, useEffect } from 'react'; 
+import { useState } from 'react'; 
 import { useSocket } from '../contexts/SocketContext';
 import { useAuth } from '../contexts/AuthContext'; 
-import { useRejoinGame } from '../hooks/useRejoinGame';
 import { useOnlineGameState } from '../hooks/useOnlineGameState';
 import { useRoundJudge } from '../hooks/useRoundJudge';
 import { useTurnFlow } from '../hooks/useTurnFlow';
