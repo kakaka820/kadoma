@@ -140,10 +140,13 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
           });
         });
 
-        // 即座に handleRoundEnd（遅延なし）
-        handleRoundEndCallback(io, games, roomId, currentGameState);
-        return;
-      }
+        // 即座に handleRoundEnd（0.5ｓ遅延で処理時間を確保）
+        setTimeout(() => {
+      handleRoundEndCallback(io, games, roomId, currentGameState);
+    }, 500);
+    return;
+  }
+  //通常botは1.5ｓ待機
       setTimeout(() => {
         handleRoundEndCallback(io, games, roomId, currentGameState);
       }, 1500);
