@@ -67,11 +67,11 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
     
     io.to(player.id).emit('cards_revealed', {
       fieldCards: gameState.fieldCards,
-      hand: gameState.hands[playerIndex]
+      hand: gameState.hands[idx]
     });
   });
     setTimeout(() => {
-      handleRoundEndCallback(roomId, gameState);
+      handleRoundEndCallback(io, games, roomId, gameState);
     }, CARD_REVEAL_DELAY_MS);
   }
 }

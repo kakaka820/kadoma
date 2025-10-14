@@ -61,7 +61,7 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
       console.log(`[Disconnect] Triggering proxy bot for player ${playerIndex}`);
       // handleRoundEnd を取得
       // ✅ handleRoundEnd を wrapper 関数でラップ
-      const handleRoundEndWrapper = (roomId, gameState) => {
+      const handleRoundEndWrapper = (io, games, roomId, gameState) => {
         const { handleRoundEnd } = require('./roundHandler');
         handleRoundEnd(io, games, roomId, gameState);
       };
