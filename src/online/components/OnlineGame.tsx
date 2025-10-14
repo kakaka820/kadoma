@@ -144,9 +144,7 @@ useEffect(() => {
     );
   }
 
-  if (gameStatus === 'waiting') {
-    return <WaitingRoom />;
-  }
+ if (gameStatus === 'playing') {
 
   return (
     <GameBoard
@@ -172,4 +170,10 @@ useEffect(() => {
       disconnectNotification={notification}
     />
   );
+}
+
+if (gameStatus === 'waiting') {
+  return <WaitingRoom />;
+}
+return <WaitingRoom />;
 }
