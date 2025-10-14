@@ -79,17 +79,14 @@ export function OnlineGame() {
     if (!socket) return;
 
      //userId がない場合は待つ
-  if (!user?.id) {
-    console.warn('[OnlineGame] userId not ready yet');
-    return;
-  }
-
-    const playerName = localStorage.getItem('kadoma_username') || 'Player';
-    console.log('[OnlineGame] handleStartMatch - userId:', user?.id);
-
-    socket.emit('join_room', { playerName, userId: user?.id });
-    setIsInRoom(true);
-  };
+  const userId = user?.id || localStorage.getItem('kadoma_user_id');
+  const playerName = localStorage.getItem('kadoma_username') || 'Player';
+  
+  console.log('[OnlineGame] handleStartMatch - userId:', userId);
+  
+  socket.emit('join_room', { playerName, userId });
+  setIsInRoom(true);
+};
 
 
 // ✅ rejoin_success を受信したら isInRoom を true に
@@ -115,8 +112,10 @@ useEffect(() => {
   //再戦する
   const handleRematch = () => {
     if (!socket) return;
-    const playerName = localStorage.getItem('kadoma_username') || 'Player';
-    socket.emit('join_room', { playerName, userId: user?.id });
+   const userId = user?.id || localStorage.getItem('kadoma_user_id');
+  const playerName = localStorage.getItem('kadoma_username') || 'Player';
+  
+  socket.emit('join_room', { playerName, userId });
     // gameStatus は自動的に 'waiting' に変わる
   };
 
