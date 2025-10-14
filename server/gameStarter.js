@@ -19,6 +19,29 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
   gameState.roomId = roomId;
   gameState.players = room.players;
   gameState.playerSelections = [false, false, false];
+
+
+//プレイヤー情報に userId を追加
+  room.players.forEach((player, idx) => {
+    if (!player.isBot) {
+      const socket = io.sockets.sockets.get(player.id);
+      if (socket) {
+        gameState.players[idx].userId = socket.userId;
+        console.log(`[Game] Player ${idx} userId:`, socket.userId);
+      }
+    }
+  });
+  
+  games.set(roomId, gameState);
+  console.log(`[Game] GameState created:`, {
+    roomId: gameState.roomId,
+    hands: gameState.hands.length,
+    players: gameState.players.length,
+    scores: gameState.scores
+  });
+
+
+
   
   games.set(roomId, gameState);
   console.log(`[Game] GameState created:`, {

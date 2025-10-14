@@ -121,6 +121,23 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
 
     // 全員選択したか確認
     if (currentGameState.playerSelections.every(Boolean)) {
+
+      //代理Bot の場合は即公開・即処理
+      if (isProxy) {
+        console.log('[Bot] Proxy bot triggered instant reveal');
+        
+        // 即座に cards_revealed 送信
+        currentGameState.players.forEach((player, idx) => {
+          io.to(player.id).emit('cards_revealed', {
+            fieldCards: currentGameState.fieldCards,
+            hand: currentGameState.hands[idx]
+          });
+        });
+
+        // 即座に handleRoundEnd（遅延なし）
+        handleRoundEndCallback(io, games, roomId, currentGameState);
+        return;
+      }
       setTimeout(() => {
         handleRoundEndCallback(roomId, currentGameState);
       }, 1500);
