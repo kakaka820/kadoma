@@ -23,7 +23,6 @@ export function OnlineGame() {
   const { user } = useAuth();
   const [isInRoom, setIsInRoom] = useState(false);
 
-   useRejoinGame({ socket, isConnected, userId: user?.id });
 
 
   
