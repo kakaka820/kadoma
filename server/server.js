@@ -130,6 +130,7 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
   let disconnectInfo = null;
   
   for (const [oldSocketId, info] of Object.entries(gameState.disconnectedPlayers || {})) {
+     console.log(`[Server] Checking disconnectInfo:`, { oldSocketId, info });
     if (info.userId === userId) {
       playerIndex = info.playerIndex;
       disconnectInfo = info;

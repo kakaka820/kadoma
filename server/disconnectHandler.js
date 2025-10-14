@@ -78,6 +78,12 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
 
     // 復帰待機タイマー（ゲーム終了まで）
     gameState.disconnectedPlayers = gameState.disconnectedPlayers || {};
+    console.log(`[Disconnect] Saving disconnectInfo:`, {
+  playerIndex,
+  originalName: disconnectedPlayer.name,
+  userId: disconnectedPlayer.userId,
+  disconnectedAt: Date.now()
+});
     gameState.disconnectedPlayers[socket.id] = {
       playerIndex,
       originalName: disconnectedPlayer.name,
