@@ -145,7 +145,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
         return;
       }
       setTimeout(() => {
-        handleRoundEndCallback(roomId, currentGameState);
+        handleRoundEndCallback(io, games, roomId, currentGameState);
       }, 1500);
     }
   }, delay);
