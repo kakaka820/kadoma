@@ -11,7 +11,7 @@ const { drawCardsForNextTurn } = require('../utils/draw');
 const { checkJokerInHands, checkGameEnd, shouldReshuffleAfterSet } = require('../game/joker');
 const { rankToValue } = require('./cardValue');
 const { createDeck, shuffleDeck } = require('./deckLogic');
-const { ANTE } = require('../config');
+const { ANTE, MAX_JOKER_COUNT } = require('../config');
 
 /**
  * ゲーム初期化
@@ -221,8 +221,11 @@ function prepareNextTurn(gameState, newPreviousTurnResult) {
     points: scores[idx],
     wins: wins[idx]
   }));
+
+  //maxJokerCount を roomConfig から取得
+const maxJokerCount = gameState.roomConfig?.maxJokerCount || MAX_JOKER_COUNT;
   
-  const gameEndCheck = checkGameEnd(allHandsEmpty, newJokerCount, players);
+  const gameEndCheck = checkGameEnd(allHandsEmpty, newJokerCount, players, maxJokerCount);
   
   return {
     ...gameState,
