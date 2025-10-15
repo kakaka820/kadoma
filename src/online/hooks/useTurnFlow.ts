@@ -31,18 +31,44 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
 
     console.log('[useTurnFlow] Setting up event listeners');
 
+    // ✅ rejoin_success でタイマー復元
+    socket.on('rejoin_success', (data) => {
+      console.log('[useTurnFlow] rejoin_success received:', data.gameState);
+      setCurrentMultiplier(data.gameState.currentMultiplier || 1);
+      setFieldCards(data.gameState.fieldCards || [null, null, null]);
+      setPlayerSelections(data.gameState.playerSelections || [false, false, false]);
+      setSetTurnIndex(data.gameState.setTurnIndex || 0);
+// ✅ サーバーから受け取った残り時間を使う
+      if (data.gameState.timeRemaining !== undefined) {
+        setTimeRemaining(data.gameState.timeRemaining);
+        console.log('[useTurnFlow] Timer restored:', data.gameState.timeRemaining);
+      }
+      if (data.gameState.timeLimit !== undefined) {
+        setTimeLimit(data.gameState.timeLimit);
+      }
+    });
+
+
      //再接続時のゲーム状態復元
   socket.on('reconnect_success', (data) => {
     console.log('[useTurnFlow] reconnect_success received:', data.gameState);
     setCurrentMultiplier(data.gameState.currentMultiplier);
     setFieldCards(data.gameState.fieldCards);
     setPlayerSelections(data.gameState.playerSelections);
+    setSetTurnIndex(data.gameState.setTurnIndex || 0);
+    if (data.gameState.timeRemaining !== undefined) {
+        setTimeRemaining(data.gameState.timeRemaining);
+      }
+      if (data.gameState.timeLimit !== undefined) {
+        setTimeLimit(data.gameState.timeLimit);
+      }
   });
 
    //全員選択後の一斉開示
     socket.on('cards_revealed', (data) => {
       console.log('[useTurnFlow] cards_revealed received:', data);
       setFieldCards(data.fieldCards);
+      setTimeRemaining(0); 
     });
 
     // ターン更新（選択状態、倍率、場札）
@@ -74,6 +100,7 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
     // クリーンアップ
     return () => {
       console.log('[useTurnFlow] Cleaning up event listeners');
+      socket.off('rejoin_success');
       socket.off('cards_revealed');
       socket.off('turn_update');
       socket.off('round_result');

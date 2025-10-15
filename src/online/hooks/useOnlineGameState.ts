@@ -30,6 +30,11 @@ interface UseOnlineGameStateReturn {
     finalScores: number[];
     winner: number;
   } | null;
+  scores: number[];
+  wins: number[];
+  currentMultiplier: number;
+  fieldCards: (Card | null)[];
+  playerSelections: boolean[];
 }
 
 export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
@@ -44,6 +49,11 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     finalScores: number[];
     winner: number;
   } | null>(null);
+  const [scores, setScores] = useState<number[]>([0, 0, 0]);
+  const [wins, setWins] = useState<number[]>([0, 0, 0]);
+  const [currentMultiplier, setCurrentMultiplier] = useState<number>(1);
+  const [fieldCards, setFieldCards] = useState<(Card | null)[]>([null, null, null]);
+  const [playerSelections, setPlayerSelections] = useState<boolean[]>([false, false, false]);
 
 
 
@@ -60,6 +70,11 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       setMyHand(data.hand);
       setPlayers(data.players);
       setOpponentHands(data.opponentHands || []);
+      setScores(data.scores || [0, 0, 0]);
+      setWins(data.wins || [0, 0, 0]);
+      setCurrentMultiplier(data.currentMultiplier || 1);
+      setFieldCards(data.fieldCards || [null, null, null]);
+      setPlayerSelections(data.playerSelections || [false, false, false]);
       setGameStatus('playing');
       setGameOverData(null);
       if (data.roomId) {
@@ -77,6 +92,11 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     setMyHand(data.gameState.hand);
     setPlayers(data.gameState.players || []);
     setOpponentHands(data.gameState.opponentHands || []);
+    setScores(data.gameState.scores || [0, 0, 0]);
+      setWins(data.gameState.wins || [0, 0, 0]);
+      setCurrentMultiplier(data.gameState.currentMultiplier || 1);
+      setFieldCards(data.gameState.fieldCards || [null, null, null]);
+      setPlayerSelections(data.gameState.playerSelections || [false, false, false]);
     setGameStatus('playing');
     if (data.roomId) {
       localStorage.setItem('kadoma_active_room', data.roomId);
@@ -88,6 +108,11 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     console.log('[useOnlineGameState] reconnect_success received:', data);
     setPlayerIndex(data.playerIndex);
     setMyHand(data.gameState.hand);
+    setScores(data.gameState.scores || [0, 0, 0]);
+    setWins(data.gameState.wins || [0, 0, 0]);
+    setCurrentMultiplier(data.gameState.currentMultiplier || 1);
+    setFieldCards(data.gameState.fieldCards || [null, null, null]);
+    setPlayerSelections(data.gameState.playerSelections || [false, false, false]);
     setGameStatus('playing');
     if (data.roomId) {
     localStorage.setItem('kadoma_active_room', data.roomId);
@@ -97,16 +122,15 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
 
   // 場札公開時に手札を更新
 socket.on('cards_revealed', (data) => {
-  console.log('[useOnlineGameState] cards_revealed received:', data);  // ✅ data全体を表示
-  
-  //data.hand が存在する場合のみ更新
-  if (data.hand !== undefined) {
-    console.log('[useOnlineGameState] Updating hand to:', data.hand);
-    setMyHand(data.hand);
-  } else {
-    console.warn('[useOnlineGameState] cards_revealed: hand is undefined');
-  }
-});
+      console.log('[useOnlineGameState] cards_revealed received:', data);
+      
+      if (data.hand !== undefined) {
+        console.log('[useOnlineGameState] Updating hand to:', data.hand);
+        setMyHand(data.hand);
+      } else {
+        console.warn('[useOnlineGameState] cards_revealed: hand is undefined');
+      }
+    });
 
 
   // 手札更新
@@ -114,6 +138,24 @@ socket.on('cards_revealed', (data) => {
       console.log('[useOnlineGameState] hand_update received:', data);
       setMyHand(data.hand);
       setOpponentHands(data.opponentHands || []);
+    });
+
+    //turn_update イベントで状態更新
+    socket.on('turn_update', (data) => {
+      console.log('[useOnlineGameState] turn_update received:', data);
+      
+      if (data.currentMultiplier !== undefined) {
+        setCurrentMultiplier(data.currentMultiplier);
+      }
+      if (data.fieldCards !== undefined) {
+        setFieldCards(data.fieldCards);
+      }
+      if (data.scores !== undefined) {
+        setScores(data.scores);
+      }
+      if (data.playerSelections !== undefined) {
+        setPlayerSelections(data.playerSelections);
+      }
     });
 
 
@@ -140,6 +182,7 @@ socket.on('cards_revealed', (data) => {
       socket.off('reconnect_success');
       socket.off('cards_revealed');
       socket.off('hand_update');
+      socket.off('turn_update');
       socket.off('game_over');
     };
   }, [socket]);
@@ -152,5 +195,10 @@ socket.on('cards_revealed', (data) => {
     gameStatus,
     opponentHands,
     gameOverData,
+    scores,
+    wins,
+    currentMultiplier,
+    fieldCards,
+    playerSelections,
   };
 }
