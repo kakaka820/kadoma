@@ -22,7 +22,7 @@ try {
   if (typeof window !== 'undefined' && window.JokerLogic) {
     JokerLogic = window.JokerLogic;
   } else {
-    JokerLogic = require('../../../shared/joker');
+    JokerLogic = require('../shared/joker');
   }
 } catch (e) {
   console.warn('[useCardPlay] JokerLogic not loaded yet');
