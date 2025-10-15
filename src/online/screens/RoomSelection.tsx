@@ -113,9 +113,9 @@ export function RoomSelection({ onBack, onRoomJoined }: RoomSelectionProps) {
                   
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-400">レート:</span>
+                      <span className="text-gray-400">場代:</span>
                       <span className="text-white font-semibold">
-                        {(room.ante * room.anteMultiplier).toLocaleString()} G
+                        {room.ante} G
                       </span>
                     </div>
                     
