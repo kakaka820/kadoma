@@ -17,6 +17,10 @@ function startTurnTimer(io, games, roomId, handleRoundEndCallback) {
   }
   
   console.log(`[Timer] Starting ${TURN_TIME_LIMIT}s timer for ${roomId}`);
+
+  //タイマー終了時刻を記録
+  gameState.turnTimerStartTime = Date.now();
+  gameState.turnTimerEndTime = Date.now() + (TURN_TIME_LIMIT * 1000);
   
   // タイマー開始をクライアントに通知
   io.to(roomId).emit('timer_start', {
@@ -25,11 +29,15 @@ function startTurnTimer(io, games, roomId, handleRoundEndCallback) {
 
   // タイマー設定
   gameState.turnTimer = setTimeout(() => {
-    // ✅ 最新の gameState を取得
+    //最新の gameState を取得
     const currentGameState = games.get(roomId);
     if (!currentGameState) return;
     
     console.log('[Timer] Time up!');
+
+    //タイマー終了時刻をクリア
+    currentGameState.turnTimerStartTime = null;
+    currentGameState.turnTimerEndTime = null;
     
     //まだ選択していないプレイヤーを取得（最新状態から）
     const unselectedPlayers = currentGameState.playerSelections
@@ -85,7 +93,7 @@ function startTurnTimer(io, games, roomId, handleRoundEndCallback) {
       });
     });
 
-    //ラウンド終了処理（引数4つ）
+    //ラウンド終了処理
      handleRoundEndCallback(io, games, roomId, currentGameState);
   }, TURN_TIME_LIMIT * 1000);
   

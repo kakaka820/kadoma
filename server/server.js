@@ -9,6 +9,7 @@ const { startGame, handleRoundEnd } = require('./gameManager');
 const { handleJoinRoom, handleDisconnect } = require('./roomManager');
 const { handlePlayCard } = require('./cardHandler');
 const { handlePlayerReconnect } = require('./disconnectHandler');
+const { TURN_TIME_LIMIT } = require('../shared/config');
 
 
 console.log('[server.js] authHandler を読み込み中...');
@@ -166,10 +167,21 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
   }
   
   socket.join(targetRoomId);
+
+  // ✅ タイマー残り時間を計算
+  let timeRemaining = 0;
+  let timeLimit = TURN_TIME_LIMIT;
+  
+  if (gameState.turnTimerEndTime) {
+    const now = Date.now();
+    const remaining = gameState.turnTimerEndTime - now;
+    timeRemaining = Math.max(0, Math.ceil(remaining / 1000));
+    console.log(`[Server] Timer remaining: ${timeRemaining}s`);
+  }
   
   // 成功を通知
   socket.emit('rejoin_success', {
-    roomId: targetRoomId,  // ✅ 正しい roomId を返す
+    roomId: targetRoomId,
     playerIndex,
     gameState: {
       hand: gameState.hands[playerIndex],
@@ -185,6 +197,8 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
       return hand.map(() => ({ visible: false }));
     }),
     wins: gameState.wins || [0, 0, 0],
+    timeRemaining: timeRemaining,
+    timeLimit: timeLimit
     }
   });
 
