@@ -10,7 +10,8 @@ const { handleJoinRoom, handleDisconnect } = require('./roomManager');
 const { handlePlayCard } = require('./cardHandler');
 const { handlePlayerReconnect } = require('./disconnectHandler');
 const { TURN_TIME_LIMIT, MULTI_ROOMS } = require('../shared/config');
-
+const { createBotPlayer, BOT_STRATEGIES } = require('./botPlayer');
+const { BOT_WAIT_TIME_MS } = require('../shared/config');
 
 console.log('[server.js] authHandler を読み込み中...');
 const { registerUser, loginWithTransferCode, loginWithUserId, checkSufficientChips, updateUserChips} = require('./authHandler');
@@ -83,7 +84,7 @@ io.on('connection', (socket) => {
   }
 );
 
- // ルーム作成または参加
+ // ルーム作成または参加（部屋参加処理）
   socket.on('join_room', (data) => {
     handleJoinRoom(
       io, 
@@ -123,15 +124,83 @@ socket.on('join_multi_room', async (data, callback) => {
     return;
   }
   
-  // 部屋参加処理
-  handleJoinRoom(
-    io, 
-    rooms, 
-    games, 
-    socket, 
-    { ...data, roomConfig: room }, 
-    (roomId, room) => startGame(io, games, roomId, room)
-  );
+
+// ★ 特定の部屋に参加させる処理を追加
+  let targetRoom = rooms.get(roomId);
+  
+  if (!targetRoom) {
+    // 部屋が存在しなければ作成
+    rooms.set(roomId, { players: [], roomConfig: room });
+    targetRoom = rooms.get(roomId);
+  }
+  
+  // 既に3人いたら拒否
+  if (targetRoom.players.length >= 3) {
+    callback({ success: false, error: '部屋が満員です' });
+    return;
+  }
+
+  // プレイヤー追加
+  targetRoom.players.push({
+    id: socket.id,
+    name: username,
+    userId: userId,
+    isBot: false
+  });
+  
+  socket.join(roomId);
+  socket.roomId = roomId;
+  
+  // 全員に通知
+  io.to(roomId).emit('room_update', {
+    roomId,
+    players: targetRoom.players,
+    isFull: targetRoom.players.length === 3
+  });
+
+  // 3人未満ならBot投入タイマー
+  if (targetRoom.players.length < 3) {
+    if (targetRoom.botTimer) {
+      clearTimeout(targetRoom.botTimer);
+    }
+    
+    targetRoom.botTimer = setTimeout(() => {
+      const currentRoom = rooms.get(roomId);
+      if (!currentRoom) return;
+      
+      // Bot追加
+      while (currentRoom.players.length < 3) {
+        const botNumber = currentRoom.players.length + 1;
+        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber, BOT_STRATEGIES.RANDOM, false);
+        currentRoom.players.push(bot);
+      }
+
+     io.to(roomId).emit('room_update', {
+        roomId,
+        players: currentRoom.players,
+        isFull: true
+      });
+      
+      io.to(roomId).emit('game_ready', { roomId });
+      
+      setTimeout(() => {
+        startGame(io, games, roomId, currentRoom);
+      }, 1000);
+    }, BOT_WAIT_TIME_MS);
+  }
+
+// 3人揃ったら即開始
+  if (targetRoom.players.length === 3) {
+    if (targetRoom.botTimer) {
+      clearTimeout(targetRoom.botTimer);
+    }
+    
+    io.to(roomId).emit('game_ready', { roomId });
+    
+    setTimeout(() => {
+      startGame(io, games, roomId, targetRoom);
+    }, 1000);
+  }
   
   callback({ success: true });
 });
