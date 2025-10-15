@@ -2,15 +2,13 @@
 import React, { useState } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import { useAuth } from '../contexts/AuthContext';
+const config = require('../../shared/config');
 
 let MULTI_ROOMS: RoomConfig[] = [];
 
-try {
-  const config = require('../shared/config');
+
   MULTI_ROOMS = config.MULTI_ROOMS;
-} catch (e) {
-  console.warn('[RoomSelection] config not loaded');
-}
+
 
 interface RoomConfig {
   id: string;
