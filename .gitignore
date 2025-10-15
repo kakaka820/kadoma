@@ -26,3 +26,6 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+# シンボリックリンク（実体はshared/フォルダなので除外）
+/src/shared
