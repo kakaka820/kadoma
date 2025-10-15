@@ -88,7 +88,7 @@ function hasPlayerBelowMinPoints(players) {
  * @param {Array} players - プレイヤー配列
  * @returns {Object} 終了条件と理由 { shouldEnd, reason }
  */
-function checkGameEnd(allHandsEmpty, jokerCount, players) {
+function checkGameEnd(allHandsEmpty, jokerCount, players, maxJokerCount = MAX_JOKER_COUNT) {
   // 条件1: 誰かの得点が0以下
   if (hasPlayerBelowMinPoints(players)) {
     const bankruptPlayer = players.find(p => p.points <= MIN_POINTS);
@@ -99,10 +99,10 @@ function checkGameEnd(allHandsEmpty, jokerCount, players) {
   }
 
   // 条件2: 全員の手札が空 かつ JOKERが規定回数以上出た
-  if (allHandsEmpty && jokerCount >= MAX_JOKER_COUNT) {
+  if (allHandsEmpty && jokerCount >= maxJokerCount) {
     return {
       shouldEnd: true,
-      reason: `JOKERが${MAX_JOKER_COUNT}回出ました`
+      reason: `JOKERが${maxJokerCount}回出ました`
     };
   }
 
