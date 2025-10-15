@@ -2,11 +2,13 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
+type NavigationType = 'online' | 'multi' | 'custom' | 'friend';
+
 interface HomeScreenProps {
-  onStartMatch: () => void;
+  onNavigate: (type: NavigationType) => void;
 }
 
-export function HomeScreen({ onStartMatch }: HomeScreenProps) {
+export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { user, logout } = useAuth();
   const [showTransferCode, setShowTransferCode] = React.useState(false);
 
@@ -48,10 +50,38 @@ export function HomeScreen({ onStartMatch }: HomeScreenProps) {
           </div>
         </div>
 
-        {/* オンライン対戦ボタン */}
+        {/* 対戦モード選択ボタン */}
+        <div className="space-y-3 mb-4">
+          <button
+            onClick={() => onNavigate('multi')}
+            className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xl rounded-lg transition"
+            data-testid="button-multi-match"
+          >
+            マルチ対戦
+          </button>
+          
+          <button
+            onClick={() => onNavigate('custom')}
+            className="w-full py-4 bg-green-600 hover:bg-green-700 text-white font-bold text-xl rounded-lg transition"
+            data-testid="button-custom-match"
+          >
+            カスタム戦
+          </button>
+          
+          <button
+            onClick={() => onNavigate('friend')}
+            className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xl rounded-lg transition"
+            data-testid="button-friend-match"
+          >
+            フレンド戦
+          </button>
+        </div>
+
+        {/* オンライン対戦ボタン（将来削除予定） */}
         <button
-          onClick={onStartMatch}
+          onClick={() => onNavigate('online')}
           className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-lg transition mb-4"
+          data-testid="button-online-match"
         >
           オンライン対戦
         </button>
@@ -60,6 +90,7 @@ export function HomeScreen({ onStartMatch }: HomeScreenProps) {
         <button
           onClick={logout}
           className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
+          data-testid="button-logout"
         >
           ログアウト
         </button>
