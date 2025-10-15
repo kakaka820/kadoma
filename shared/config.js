@@ -33,7 +33,7 @@ const RECONNECT_NOTIFY_DURATION_MS = 3000;  // 復帰通知表示時間（3秒�
 const RECONNECT_WAIT_TIME = 300;    // 復帰待機時間（秒）= 5分
 const DISCONNECT_PENALTY_RATE = 1.0; // 没収率（1.0 = 全額）
 
-// shared/config.js の上部に追加
+
 
 // ==================== マルチ部屋設定 ====================
 const MULTI_ROOMS = [
@@ -124,7 +124,6 @@ if (typeof module !== 'undefined' && module.exports) {
 
     // マルチ部屋
     MULTI_ROOMS,
-    DEFAULT_ROOM_CONFIG
   };
 }
 
@@ -164,6 +163,5 @@ if (typeof window !== 'undefined') {
 
     // マルチ部屋
     MULTI_ROOMS,
-    DEFAULT_ROOM_CONFIG
   };
 }
