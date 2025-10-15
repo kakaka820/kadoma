@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
+import * as JokerLogicModule from '../../shared/game/joker';
+
 
 interface JokerModule {
   canPlayJoker: (card: any, setTurnIndex: number) => boolean;
@@ -18,11 +20,12 @@ declare global {
 // JokerLogic初期化
 let JokerLogic: JokerModule | null = null;
 
+
 try {
   if (typeof window !== 'undefined' && window.JokerLogic) {
     JokerLogic = window.JokerLogic;
   } else {
-    JokerLogic = require('../shared/joker');
+    JokerLogic = JokerLogicModule as JokerModule;
   }
 } catch (e) {
   console.warn('[useCardPlay] JokerLogic not loaded yet');
