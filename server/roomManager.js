@@ -13,11 +13,13 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   const playerName = typeof data === 'string' ? data : data.playerName;
   const userId = data.userId;
   const difficulty = data.difficulty || 'normal';
+   const roomConfig = data.roomConfig || null;
 
   console.log('[RoomManager] Extracted data:', {
     playerName,
     userId,
-    difficulty
+    difficulty,
+    roomConfig
   });
   
   if (!playerName) {
@@ -38,7 +40,7 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
   // なければ新規ルーム作成
   if (!targetRoom) {
     const newRoomId = `room_${Date.now()}`;
-    rooms.set(newRoomId, { players: [] });
+    rooms.set(newRoomId, { players: [], roomConfig: roomConfig });
     targetRoom = { roomId: newRoomId, room: rooms.get(newRoomId) };
   }
 

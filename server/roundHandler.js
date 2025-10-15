@@ -9,6 +9,39 @@ const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
 const { botAutoPlay } = require('./botPlayer');
+const { updateUserChips } = require('./authHandler');
+
+
+
+async function distributeChips(gameState) {
+  // マルチ部屋でない場合はスキップ
+  if (!gameState.roomConfig) {
+    return null;
+  }
+  
+  const results = [];
+  
+  for (let i = 0; i < gameState.players.length; i++) {
+    const player = gameState.players[i];
+    const score = gameState.scores[i];
+    // Botはスキップ
+    if (player.isBot || !player.userId) {
+      continue;
+    }
+    
+    // 得点が+の場合のみチップ配分
+    if (score > 0) {
+      const chipChange = score;
+      await updateUserChips(player.userId, chipChange);
+      results.push({
+        userId: player.userId,
+        username: player.name,
+        change: chipChange
+      });
+    }
+  }
+  return results;
+}
 
 /**
  * ラウンド終了処理
@@ -37,7 +70,7 @@ function handleRoundEnd(io, games, roomId, gameState) {
     wins: updatedState.wins
   });
   
-  setTimeout(() => {
+  setTimeout(async() => {
     // previousTurnResultを保存
     let previousTurnResult = null;
     if (updatedState.roundResult) {
@@ -76,8 +109,10 @@ function handleRoundEnd(io, games, roomId, gameState) {
     games.set(roomId, nextState);
     
     if (nextState.isGameOver) {
+      //チップ配分処理を追加
+  const chipResults = await distributeChips(nextState);
 
-      // ✅ 履歴保存（非同期だけど待たない）
+      //履歴保存（非同期だけど待たない）
   saveGameHistory(roomId, nextState).catch(err => {
     console.error('[game_over] 履歴保存失敗:', err);
   });
@@ -86,7 +121,8 @@ function handleRoundEnd(io, games, roomId, gameState) {
   io.to(roomId).emit('game_over', {
     reason: nextState.gameOverReason,
     finalScores: nextState.scores,
-    winner: nextState.scores.indexOf(Math.max(...nextState.scores))
+    winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
+    chipResults: chipResults
   });
   games.delete(roomId);
 } else {

@@ -2,7 +2,7 @@
 // ゲーム開始処理
 
 const { initializeGame } = require('../shared/core/gameFlow');
-const { ANTE_MULTIPLIER } = require('../shared/config');
+const { ANTE,ANTE_MULTIPLIER, MAX_JOKER_COUNT } = require('../shared/config');
 const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
@@ -14,11 +14,32 @@ const { botAutoPlay } = require('./botPlayer');
 function startGame(io, games, roomId, room, handleRoundEndCallback) {
   console.log(`[Game] Starting game in room ${roomId}`);
   console.log(`[Game] Players:`, room.players);
+
+  //部屋設定から値を取得（デフォルト値も設定）
+  const anteMultiplier = room.roomConfig?.anteMultiplier || ANTE_MULTIPLIER;
+  const maxJokerCount = room.roomConfig?.maxJokerCount || MAX_JOKER_COUNT;
+  const ante = room.roomConfig?.ante || ANTE;
   
-  const gameState = initializeGame(3, ANTE_MULTIPLIER);
+  console.log(`[Game] Room config:`, {
+    ante,
+    anteMultiplier,
+    maxJokerCount,
+    requiredChips: room.roomConfig?.requiredChips
+  });
+
+  //ゲーム初期化
+  const gameState = initializeGame(3, anteMultiplier);
   gameState.roomId = roomId;
   gameState.players = room.players;
   gameState.playerSelections = [false, false, false];
+
+  //部屋設定を gameState に保存
+  gameState.roomConfig = {
+    ante,
+    anteMultiplier,
+    maxJokerCount,
+    requiredChips: room.roomConfig?.requiredChips || (ante * anteMultiplier)
+  };
 
 
 //プレイヤー情報に userId を追加
@@ -38,17 +59,6 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
     scores: gameState.scores
   });
 
-
-
-  
-  games.set(roomId, gameState);
-  console.log(`[Game] GameState created:`, {
-    roomId: gameState.roomId,
-    hands: gameState.hands.length,
-    players: gameState.players.length,
-    scores: gameState.scores
-  });
-  
   // 全プレイヤーの手札情報を作成
   const allHandsInfo = createAllHandsInfo(gameState.hands);
 

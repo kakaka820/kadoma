@@ -9,11 +9,11 @@ const { startGame, handleRoundEnd } = require('./gameManager');
 const { handleJoinRoom, handleDisconnect } = require('./roomManager');
 const { handlePlayCard } = require('./cardHandler');
 const { handlePlayerReconnect } = require('./disconnectHandler');
-const { TURN_TIME_LIMIT } = require('../shared/config');
+const { TURN_TIME_LIMIT, MULTI_ROOMS } = require('../shared/config');
 
 
 console.log('[server.js] authHandler を読み込み中...');
-const { registerUser, loginWithTransferCode, loginWithUserId} = require('./authHandler');
+const { registerUser, loginWithTransferCode, loginWithUserId, checkSufficientChips, updateUserChips} = require('./authHandler');
 require('dotenv').config();
 console.log('[server.js] authHandler 読み込み成功');
 
@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
   }
 );
 
-  // ルーム作成または参加
+ // ルーム作成または参加
   socket.on('join_room', (data) => {
     handleJoinRoom(
       io, 
@@ -94,6 +94,50 @@ io.on('connection', (socket) => {
       (roomId, room) => startGame(io, games, roomId, room)
     );
       });
+
+  // マルチのルーム作成または参加
+socket.on('join_multi_room', async (data, callback) => {
+  const { roomId, userId, username } = data;
+  
+  console.log(`[MultiRoom] Join request: ${username} → ${roomId}`);
+  
+  // 部屋情報取得
+  const room = MULTI_ROOMS.find(r => r.id === roomId);
+  if (!room) {
+    callback({ success: false, error: '部屋が見つかりません' });
+    return;
+  }
+  
+  // チップ残高チェック
+  const chipCheck = await checkSufficientChips(userId, room.requiredChips);
+  
+  if (!chipCheck.sufficient) {
+    console.log(`[MultiRoom] Insufficient chips: ${chipCheck.current}/${chipCheck.required}`);
+    callback({ 
+      success: false, 
+      error: 'チップが不足しています',
+      current: chipCheck.current,
+      required: chipCheck.required,
+      shortage: chipCheck.shortage
+    });
+    return;
+  }
+  
+  // 部屋参加処理
+  handleJoinRoom(
+    io, 
+    rooms, 
+    games, 
+    socket, 
+    { ...data, roomConfig: room }, 
+    (roomId, room) => startGame(io, games, roomId, room)
+  );
+  
+  callback({ success: true });
+});
+
+
+
 
 
   // カード出す処理（同時プレイ版）

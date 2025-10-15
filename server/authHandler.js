@@ -78,6 +78,7 @@ async function registerUser(username) {
       id: data.id,
       username: data.username,
       currency: data.currency,
+      chips: data.chips || 10000,
       transferCode: data.transfer_code
     }
   };
@@ -152,10 +153,81 @@ async function loginWithUserId(userId) {
     }
   };
 }
+// チップ残高取得
+async function getUserChips(userId) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('chips')
+    .eq('id', userId)
+    .single();
+  
+  if (error || !data) {
+    return { success: false, chips: 0 };
+  }
+  
+  return { success: true, chips: data.chips || 0 };
+}
+
+// チップ更新（増減）
+async function updateUserChips(userId, chipChange) {
+  // 現在のチップを取得
+  const { data: current } = await supabase
+    .from('users')
+    .select('chips')
+    .eq('id', userId)
+    .single();
+  
+  if (!current) {
+    return { success: false, error: 'ユーザーが見つかりません' };
+  }
+  
+  const newChips = (current.chips || 0) + chipChange;
+  
+  // 更新
+  const { data, error } = await supabase
+    .from('users')
+    .update({ chips: newChips })
+    .eq('id', userId)
+    .select()
+    .single();
+  
+  if (error) {
+    return { success: false, error: '更新に失敗しました' };
+  }
+  
+  return { success: true, chips: data.chips };
+}
+
+// チップ残高チェック
+async function checkSufficientChips(userId, requiredChips) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('chips')
+    .eq('id', userId)
+    .single();
+  
+  if (error || !data) {
+    return { sufficient: false, current: 0, required: requiredChips };
+  }
+  
+  const current = data.chips || 0;
+  
+  return {
+    sufficient: current >= requiredChips,
+    current: current,
+    required: requiredChips,
+    shortage: Math.max(0, requiredChips - current)
+  };
+}
+
+
 
 module.exports = {
   registerUser,
   loginWithTransferCode,
   loginWithUserId,
-  checkUsernameExists
+  checkUsernameExists,
+  getUserChips,
+  updateUserChips,
+  checkSufficientChips
 };
