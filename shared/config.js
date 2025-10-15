@@ -33,6 +33,61 @@ const RECONNECT_NOTIFY_DURATION_MS = 3000;  // 復帰通知表示時間（3秒�
 const RECONNECT_WAIT_TIME = 300;    // 復帰待機時間（秒）= 5分
 const DISCONNECT_PENALTY_RATE = 1.0; // 没収率（1.0 = 全額）
 
+// shared/config.js の上部に追加
+
+// ==================== マルチ部屋設定 ====================
+const MULTI_ROOMS = [
+  {
+    id: 'room_1',
+    name: '部屋1',
+    ante: 10,
+    anteMultiplier: 200,
+    maxJokerCount: 3,
+    requiredChips: 10 * 200  // 2000チップ
+  },
+  {
+    id: 'room_2',
+    name: '部屋2',
+    ante: 10,
+    anteMultiplier: 600,
+    maxJokerCount: 5,
+    requiredChips: 10 * 600  // 6000チップ
+  },
+  {
+    id: 'room_3',
+    name: '部屋3',
+    ante: 10,
+    anteMultiplier: 1300,
+    maxJokerCount: 10,
+    requiredChips: 10 * 1300  // 13000チップ
+  },
+  {
+    id: 'room_4',
+    name: '部屋4',
+    ante: 10,
+    anteMultiplier: 300,
+    maxJokerCount: 3,
+    requiredChips: 10 * 300  // 3000チップ
+  },
+  {
+    id: 'room_5',
+    name: '部屋5',
+    ante: 10,
+    anteMultiplier: 800,
+    maxJokerCount: 5,
+    requiredChips: 10 * 800  // 8000チップ
+  },
+  {
+    id: 'room_6',
+    name: '部屋6',
+    ante: 10,
+    anteMultiplier: 1500,
+    maxJokerCount: 10,
+    requiredChips: 10 * 1500  // 15000チップ
+  }
+];
+
+
 // ==================== CommonJS Export (Node.js用) ====================
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -65,7 +120,11 @@ if (typeof module !== 'undefined' && module.exports) {
     
     // 切断・復帰
     RECONNECT_WAIT_TIME,
-    DISCONNECT_PENALTY_RATE
+    DISCONNECT_PENALTY_RATE,
+
+    // マルチ部屋
+    MULTI_ROOMS,
+    DEFAULT_ROOM_CONFIG
   };
 }
 
@@ -101,6 +160,10 @@ if (typeof window !== 'undefined') {
     
     // 切断・復帰
     RECONNECT_WAIT_TIME,
-    DISCONNECT_PENALTY_RATE
+    DISCONNECT_PENALTY_RATE,
+
+    // マルチ部屋
+    MULTI_ROOMS,
+    DEFAULT_ROOM_CONFIG
   };
 }
