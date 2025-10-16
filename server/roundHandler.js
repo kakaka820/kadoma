@@ -44,12 +44,108 @@ async function distributeChips(gameState) {
 }
 
 /**
+ * 次のターンを準備・実行する共通処理
+ */
+async function performNextTurn(io, games, roomId, state) {
+  // ★ Step 1: previousTurnResult を作成
+  let previousTurnResult = null;
+  if (state.roundResult) {
+    const { winnerIndex, loserIndex, isDraw } = state.roundResult;
+    previousTurnResult = {
+      winnerIndex: winnerIndex !== undefined ? winnerIndex : -1,
+      loserIndex: loserIndex !== undefined ? loserIndex : -1,
+      isDraw: isDraw || false
+    };
+  }
+
+// ★ Step 2: 手札が空か判定
+  const allHandsEmpty = state.hands.every(h => h.length === 0);
+  const isSetEnd = allHandsEmpty && state.setTurnIndex === 4;
+  
+  // ★ Step 3: セット終了時は警告クリア
+  if (isSetEnd) {
+    console.log('[警告] セット終了、警告クリア');
+    io.to(roomId).emit('clear_warnings');
+  }
+  // ★ Step 4: 次のターン状態を作成
+  const nextState = prepareNextTurn(state, previousTurnResult);
+
+// ★ Step 5: 場代を計算・徴収
+  if (previousTurnResult) {
+    const fees = calculateAllTableFees(previousTurnResult, nextState.hands.length);
+    nextState.scores = nextState.scores.map((score, idx) => score - fees[idx]);
+    console.log('[場代] 新ターン開始時徴収:', fees, '結果:', nextState.scores);
+  }
+  
+  // ★ Step 6: 選択状態をリセット
+  nextState.playerSelections = [false, false, false];
+  
+  // ★ Step 7: ゲーム状態を保存
+  games.set(roomId, nextState);
+
+
+
+// ★ Step 8: ゲーム終了か判定
+  if (nextState.isGameOver) {
+    // ゲーム終了処理
+    const chipResults = await distributeChips(nextState);
+    saveGameHistory(roomId, nextState).catch(err => {
+      console.error('[game_over] 履歴保存失敗:', err);
+    });
+    
+    io.to(roomId).emit('game_over', {
+      reason: nextState.gameOverReason,
+      finalScores: nextState.scores,
+      winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
+      chipResults: chipResults
+    });
+    games.delete(roomId);
+  } else {
+
+// ★ Step 9: 手札を送信
+    const allHandsInfo = createAllHandsInfo(nextState.hands);
+    nextState.players.forEach((player, idx) => {
+      io.to(player.id).emit('hand_update', {
+        hand: nextState.hands[idx],
+        opponentHands: allHandsInfo
+      });
+    });
+    
+    // ★ Step 10: 警告を送信
+    if (allHandsEmpty) {
+      checkAndSendWarnings(io, nextState, nextState.players);
+    }
+
+// ★ Step 11: ターン情報を送信
+    io.to(roomId).emit('turn_update', {
+      currentMultiplier: nextState.currentMultiplier,
+      fieldCards: nextState.fieldCards,
+      scores: nextState.scores, 
+      playerSelections: nextState.playerSelections,
+      setTurnIndex: nextState.setTurnIndex,
+    });
+    
+    // ★ Step 12: タイマー開始
+    startTurnTimer(io, games, roomId, handleRoundEnd);
+    // ★ Step 13: Botの自動選択
+    nextState.players.forEach((player, idx) => {
+      if (player.isBot) {
+        botAutoPlay(io, games, roomId, idx, handleRoundEnd);
+      }
+    });
+  }
+}
+
+
+
+
+/**
  * ラウンド終了処理
  */
 function handleRoundEnd(io, games, roomId, gameState) {
   
 //gameStateチェック
-  if (!gameState) {
+   if (!gameState) {
     console.error('[roundHandler] gameState is undefined for room:', roomId);
     return;
   }
@@ -69,98 +165,17 @@ function handleRoundEnd(io, games, roomId, gameState) {
     scores: updatedState.scores,
     wins: updatedState.wins
   });
-  
-  setTimeout(async() => {
-    // previousTurnResultを保存
-    let previousTurnResult = null;
-    if (updatedState.roundResult) {
-      const { winnerIndex, loserIndex, isDraw } = updatedState.roundResult;
-      previousTurnResult = {
-        winnerIndex: winnerIndex !== undefined ? winnerIndex : -1,
-        loserIndex: loserIndex !== undefined ? loserIndex : -1,
-        isDraw: isDraw || false
-      };
-    }
 
-    const allHandsEmpty = updatedState.hands.every(h => h.length === 0);
-    const isSetEnd = allHandsEmpty && updatedState.setTurnIndex === 4;
-    
-    // セット終了時は警告をクリア
-    if (isSetEnd) {
-      console.log('[警告] セット終了、警告クリア');
-      io.to(roomId).emit('clear_warnings');
-    }
-
-    const nextState = prepareNextTurn(updatedState, previousTurnResult);
-
-    // 新ターン開始時に場代徴収
-    if (previousTurnResult) {
-      const fees = calculateAllTableFees(
-        previousTurnResult, 
-        nextState.hands.length
-      );
-      nextState.scores = nextState.scores.map((score, idx) => score - fees[idx]);
-      console.log('[場代] 新ターン開始時徴収:', fees, '結果:', nextState.scores);
-    }
-    
-    // 選択状態をリセット
-    nextState.playerSelections = [false, false, false];
-    
-    games.set(roomId, nextState);
-    
-    if (nextState.isGameOver) {
-      //チップ配分処理を追加
-  const chipResults = await distributeChips(nextState);
-
-      //履歴保存（非同期だけど待たない）
-  saveGameHistory(roomId, nextState).catch(err => {
-    console.error('[game_over] 履歴保存失敗:', err);
-  });
-  
-  // TODO: アカウント実装後、Bot代替中のプレイヤーにペナルティ処理
-  io.to(roomId).emit('game_over', {
-    reason: nextState.gameOverReason,
-    finalScores: nextState.scores,
-    winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
-    chipResults: chipResults
-  });
-  games.delete(roomId);
-} else {
-
-      // 全プレイヤーの手札情報を作成
-      const allHandsInfo = createAllHandsInfo(nextState.hands);
-      
-      // 新しい手札を各プレイヤーに送信
-      nextState.players.forEach((player, idx) => {
-        io.to(player.id).emit('hand_update', {
-          hand: nextState.hands[idx],
-          opponentHands: allHandsInfo
-        });
-      });
-      
-      if (allHandsEmpty) {
-        checkAndSendWarnings(io, nextState, nextState.players);
-      }
-      
-      // 新ラウンドの情報を全員に送信
-      io.to(roomId).emit('turn_update', {
-        currentMultiplier: nextState.currentMultiplier,
-        fieldCards: nextState.fieldCards,
-        scores: nextState.scores, 
-        playerSelections: nextState.playerSelections,
-        setTurnIndex: nextState.setTurnIndex,
-      });
-      
-      startTurnTimer(io, games, roomId, handleRoundEnd);
-
-      // Botプレイヤーに自動選択させる
-      nextState.players.forEach((player, idx) => {
-        if (player.isBot) {
-          botAutoPlay(io, games, roomId, idx, handleRoundEnd);
-        }
-      });
-    }
-  }, ROUND_RESULT_DISPLAY_MS);
+  //全員選択済みなら即座に次のラウンド開始
+if (updatedState.playerSelections.every(Boolean)) {
+    console.log('[roundHandler] All players selected, starting next turn immediately');
+    performNextTurn(io, games, roomId, updatedState);
+  } else {
+    // ✅ 通常：結果表示後に実行
+    setTimeout(() => {
+      performNextTurn(io, games, roomId, updatedState);
+    }, ROUND_RESULT_DISPLAY_MS);
+  }
 }
 
 module.exports = {
