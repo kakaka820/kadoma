@@ -266,9 +266,9 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
   for (const [gameRoomId, gameState] of games.entries()) {
     if (!gameState.disconnectedPlayers) continue;
     
-    for (const [oldSocketId, info] of Object.entries(gameState.disconnectedPlayers)) {
-      console.log(`[Server] Checking disconnectInfo in ${gameRoomId}:`, { oldSocketId, info });
-      if (info.userId === userId) {
+   const info = gameState.disconnectedPlayers[userId];
+    console.log(`[Server] Checking disconnectInfo in ${gameRoomId}:`, { userId, info });
+      if (info) {
         targetRoomId = gameRoomId;
         playerIndex = info.playerIndex;
         disconnectInfo = info;
@@ -276,10 +276,7 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
       }
     }
     
-    if (targetRoomId) break;
-  }
-  
-  if (!targetRoomId || playerIndex === -1) {
+    if (!targetRoomId || playerIndex === -1) {
     socket.emit('rejoin_failed', { 
       message: 'プレイヤー情報が見つかりません' 
     });
