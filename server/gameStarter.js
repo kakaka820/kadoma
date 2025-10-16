@@ -42,12 +42,14 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
   };
 
 
-//プレイヤー情報に userId を追加
+//プレイヤー情報
   room.players.forEach((player, idx) => {
     if (!player.isBot && player.userId) {
        gameState.players[idx].userId = player.userId;
         console.log(`[Game] Player ${idx} userId:`, player.userId);
-      }
+      gameState.players[idx].buyIn = player.buyIn;
+      console.log(`[Game] Player ${idx} buyIn:`, player.buyIn);
+    }
     }
   );
   

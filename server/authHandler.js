@@ -220,7 +220,38 @@ async function checkSufficientChips(userId, requiredChips) {
   };
 }
 
-
+/**
+ * ユーザーの通貨（currency）を更新
+ */
+async function updateUserCurrency(userId, currencyChange) {
+  // 現在の通貨を取得
+  const { data: current } = await supabase
+    .from('users')
+    .select('currency')
+    .eq('id', userId)
+    .single();
+  
+  if (!current) {
+    return { success: false, error: 'ユーザーが見つかりません' };
+  }
+  
+  const newCurrency = (current.currency || 0) + currencyChange;
+  
+  // 更新
+  const { data, error } = await supabase
+    .from('users')
+    .update({ currency: newCurrency })
+    .eq('id', userId)
+    .select()
+    .single();
+  
+  if (error) {
+    return { success: false, error: '更新に失敗しました' };
+  }
+  
+  console.log(`[認証] User ${userId} currency updated: ${newCurrency}`);
+  return { success: true, currency: data.currency };
+}
 
 module.exports = {
   registerUser,
@@ -229,5 +260,6 @@ module.exports = {
   checkUsernameExists,
   getUserChips,
   updateUserChips,
-  checkSufficientChips
+  checkSufficientChips,
+  updateUserCurrency
 };

@@ -9,7 +9,7 @@ const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
 const { botAutoPlay } = require('./botPlayer');
-const { updateUserChips } = require('./authHandler');
+const { updateUserCurrency } = require('./authHandler');
 
 
 
@@ -30,16 +30,20 @@ async function distributeChips(gameState) {
     }
     
     // 得点が+の場合のみチップ配分
-    if (score > 0) {
-      const chipChange = score;
-      await updateUserChips(player.userId, chipChange);
-      results.push({
-        userId: player.userId,
-        username: player.name,
-        change: chipChange
-      });
+     //profit = max(0, finalScore)
+    const profit = Math.max(0, score);
+    
+    //profit だけをユーザーに配分
+    if (profit > 0) {
+      await updateUserCurrency(player.userId, profit);
     }
+    
+    results.push({
+      userId: player.userId,
+      profit: profit
+    });
   }
+  
   return results;
 }
 

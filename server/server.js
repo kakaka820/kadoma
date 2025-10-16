@@ -14,7 +14,7 @@ const { createBotPlayer, BOT_STRATEGIES } = require('./botPlayer');
 const { BOT_WAIT_TIME_MS } = require('../shared/config');
 
 console.log('[server.js] authHandler を読み込み中...');
-const { registerUser, loginWithTransferCode, loginWithUserId, checkSufficientChips, updateUserChips} = require('./authHandler');
+const { registerUser, loginWithTransferCode, loginWithUserId, checkSufficientChips, updateUserChips, updateUserCurrency } = require('./authHandler');
 require('dotenv').config();
 console.log('[server.js] authHandler 読み込み成功');
 
@@ -170,8 +170,13 @@ socket.on('join_multi_room', async (data, callback) => {
     id: socket.id,
     name: username,
     userId: userId,
-    isBot: false
+    isBot: false,
+    deducted: true, //ほんまか？
+    buyIn: room.requiredChips
   });
+
+  await updateUserCurrency(userId, -(room.requiredChips));
+console.log(`[MultiRoom] Deducted ${room.requiredChips} currency from ${userId}`);
   
   socket.join(actualRoomId);
   socket.roomId = actualRoomId;
@@ -347,11 +352,57 @@ delete gameState.disconnectedPlayers[userId];
   console.log(`[Server] rejoin_success: Player ${playerIndex} in ${targetRoomId}`);
 });
   
+
+  // マッチングキャンセル処理
+  socket.on('cancel_matching', async (data, callback) => {
+    const { roomId, userId } = data;
+    
+    console.log(`[MultiRoom] Cancel request: ${userId} in ${roomId}`);
+    
+    const room = rooms.get(roomId);
+    
+    if (!room) {
+      callback({ success: false, error: 'ルームが見つかりません' });
+      return;
+    }
+    
+    // プレイヤーを探す
+    const playerIndex = room.players.findIndex(p => p.userId === userId);
+    
+    if (playerIndex === -1) {
+      callback({ success: false, error: 'プレイヤーが見つかりません' });
+      return;
+    }
+    
+    const player = room.players[playerIndex];
+    
+    // ✅ 差し引かれている場合のみ返金
+    if (player.deducted && player.buyIn) {
+      await updateUserCurrency(userId, player.buyIn);
+      console.log(`[MultiRoom] Refunded ${player.buyIn} currency to ${userId}`);
+    }
+    
+    // プレイヤー削除
+    room.players.splice(playerIndex, 1);
+    socket.leave(roomId);
+    
+    // 全員に通知
+    io.to(roomId).emit('room_update', {
+      roomId: roomId,
+      players: room.players,
+      isFull: room.players.length === 3
+    });
+    
+    callback({ success: true, refunded: player.buyIn || 0 });
+    console.log(`[MultiRoom] Player ${userId} cancelled matching in ${roomId}`);
+  });
+
   // 切断時の処理
   socket.on('disconnect', () => {
     handleDisconnect(io, rooms, games, socket);
   });
 });
+
 
 
 

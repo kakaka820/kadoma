@@ -21,8 +21,10 @@ async function saveGameHistory(roomId, gameState) {
     }
     
     const finalScore = scores[i];
-    const buyIn = 1000; // 今は固定（後で可変に）
-    const profit = finalScore; // 簡易計算（後で改善）
+    //buy-in = 参加料（持ち込み金：ANTE*ANTE_MULTIPLIER)
+    const buyIn = player.buyIn || gameState.roomConfig?.requiredChips || 1000;
+    //profit = 最終得点 - 参加料
+    const profit = finalScore - buyIn;
 
     // ✅ 仮UUID生成（アカウント実装まで）
     const tempUserId = uuidv4();
