@@ -153,7 +153,7 @@ socket.on('join_multi_room', async (data, callback) => {
   }
    // 空き部屋がなければ新規作成
   if (!targetRoom) {
-    actualRoomId = `${roomId}_${Date.now()}`;  // 例: room_1_1760613216137
+    actualRoomId = `${roomId}_${Date.now()}`;
     rooms.set(actualRoomId, { players: [], roomConfig: room });
     targetRoom = rooms.get(actualRoomId);
     console.log(`[MultiRoom] Created new room: ${actualRoomId}`);
@@ -311,6 +311,10 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
   // ✅ タイマー残り時間を計算
   let timeRemaining = 0;
   let timeLimit = TURN_TIME_LIMIT;
+
+  console.log(`[Server] rejoin_game - turnTimerEndTime:`, gameState.turnTimerEndTime);
+    console.log(`[Server] rejoin_game - turnTimerStartTime:`, gameState.turnTimerStartTime);
+    console.log(`[Server] rejoin_game - playerSelections:`, gameState.playerSelections);
   
   if (gameState.turnTimerEndTime) {
     const now = Date.now();
