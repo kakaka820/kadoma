@@ -50,7 +50,7 @@ async function distributeChips(gameState) {
 /**
  * 次のターンを準備・実行する共通処理
  */
-async function performNextTurn(io, games, roomId, state) {
+async function performNextTurn(io, games, roomId, state, rooms) {
   // ★ Step 1: previousTurnResult を作成
   let previousTurnResult = null;
   if (state.roundResult) {
@@ -106,7 +106,9 @@ async function performNextTurn(io, games, roomId, state) {
       winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
       chipResults: chipResults
     });
-    games.delete(roomId);
+     games.delete(roomId);
+     rooms.delete(roomId);
+     console.log(`[GameOver] Room ${roomId} deleted from rooms and games`);
   } else {
 
 // ★ Step 9: 手札を送信
@@ -176,11 +178,11 @@ function handleRoundEnd(io, games, roomId, gameState) {
   //全員選択済みなら即座に次のラウンド開始
 if (updatedState.playerSelections.every(Boolean)) {
     console.log('[roundHandler] All players selected, starting next turn immediately');
-    performNextTurn(io, games, roomId, updatedState);
+    performNextTurn(io, games, roomId, updatedState, rooms);
   } else {
     // ✅ 通常：結果表示後に実行
     setTimeout(() => {
-      performNextTurn(io, games, roomId, updatedState);
+      performNextTurn(io, games, roomId, updatedState, rooms);
     }, ROUND_RESULT_DISPLAY_MS);
   }
 }

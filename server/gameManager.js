@@ -7,8 +7,10 @@ const { handleRoundEnd } = require('./roundHandler');
 /**
  * ゲーム開始（handleRoundEndを自動注入）
  */
-function startGame(io, games, roomId, room) {
-  startGameCore(io, games, roomId, room, handleRoundEnd);
+function startGame(io, games, roomId, room, rooms) {
+   startGameCore(io, games, roomId, room, (io, games, roomId, gameState) => {
+    handleRoundEnd(io, games, roomId, gameState, rooms);
+  });
 }
 
 module.exports = {

@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
       games, 
       socket, 
       data, 
-      (roomId, room) => startGame(io, games, roomId, room)
+      (roomId, room) => startGame(io, games, roomId, room, rooms)
     );
       });
 
@@ -216,7 +216,7 @@ console.log(`[MultiRoom] Deducted ${room.requiredChips} currency from ${userId}`
       io.to(actualRoomId).emit('game_ready', { roomId: actualRoomId });
       
       setTimeout(() => {
-        startGame(io, games, actualRoomId, currentRoom);
+        startGame(io, games, actualRoomId, currentRoom, rooms);
       }, 1000);
     }, BOT_WAIT_TIME_MS);
   }
@@ -230,7 +230,7 @@ console.log(`[MultiRoom] Deducted ${room.requiredChips} currency from ${userId}`
     io.to(actualRoomId).emit('game_ready', { roomId: actualRoomId });
     
     setTimeout(() => {
-      startGame(io, games, actualRoomId, targetRoom);
+      startGame(io, games, actualRoomId, targetRoom, rooms);
     }, 1000);
   }
   
