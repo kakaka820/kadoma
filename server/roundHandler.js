@@ -151,7 +151,7 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 /**
  * ラウンド終了処理
  */
-function handleRoundEnd(io, games, roomId, gameState) {
+function handleRoundEnd(io, games, roomId, gameState, rooms) {
   
 //gameStateチェック
    if (!gameState) {
