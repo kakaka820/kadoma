@@ -83,6 +83,9 @@ async function performNextTurn(io, games, roomId, state) {
   // ★ Step 7: ゲーム状態を保存
   games.set(roomId, nextState);
 
+  //切断情報をクリア（新しいラウンド開始時）
+  nextState.disconnectedPlayers = {};
+
 
 
 // ★ Step 8: ゲーム終了か判定
