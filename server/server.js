@@ -125,13 +125,25 @@ socket.on('join_multi_room', async (data, callback) => {
   }
   
 
-// ★ 特定の部屋に参加させる処理を追加
-  let targetRoom = rooms.get(roomId);
-  
+ // ★ 空き部屋を探す or 新規作成
+  let targetRoom = null;
+  let actualRoomId = null;
+  // 同じ設定の空き部屋を探す
+  for (const [id, room_] of rooms.entries()) {
+    // room_config.id で部屋タイプをチェック（room_1, room_2など）
+    if (room_.roomConfig?.id === roomId && room_.players.length < 3) {
+      targetRoom = room_;
+      actualRoomId = id;
+      console.log(`[MultiRoom] Found available room: ${id}`);
+      break;
+    }
+  }
+   // 空き部屋がなければ新規作成
   if (!targetRoom) {
-    // 部屋が存在しなければ作成
-    rooms.set(roomId, { players: [], roomConfig: room });
-    targetRoom = rooms.get(roomId);
+    actualRoomId = `${roomId}_${Date.now()}`;  // 例: room_1_1760613216137
+    rooms.set(actualRoomId, { players: [], roomConfig: room });
+    targetRoom = rooms.get(actualRoomId);
+    console.log(`[MultiRoom] Created new room: ${actualRoomId}`);
   }
   
   // 既に3人いたら拒否
@@ -148,12 +160,12 @@ socket.on('join_multi_room', async (data, callback) => {
     isBot: false
   });
   
-  socket.join(roomId);
-  socket.roomId = roomId;
+  socket.join(actualRoomId);
+  socket.roomId = actualRoomId;
   
   // 全員に通知
-  io.to(roomId).emit('room_update', {
-    roomId,
+   io.to(actualRoomId).emit('room_update', {
+    roomId: actualRoomId,
     players: targetRoom.players,
     isFull: targetRoom.players.length === 3
   });
@@ -165,9 +177,11 @@ socket.on('join_multi_room', async (data, callback) => {
     }
     
     targetRoom.botTimer = setTimeout(() => {
-      const currentRoom = rooms.get(roomId);
+      const currentRoom = rooms.get(actualRoomId);
       if (!currentRoom) return;
       
+
+
       // Bot追加
       while (currentRoom.players.length < 3) {
         const botNumber = currentRoom.players.length + 1;
@@ -175,16 +189,16 @@ socket.on('join_multi_room', async (data, callback) => {
         currentRoom.players.push(bot);
       }
 
-     io.to(roomId).emit('room_update', {
-        roomId,
+     io.to(actualRoomId).emit('room_update', {
+        roomId: actualRoomId,
         players: currentRoom.players,
         isFull: true
       });
       
-      io.to(roomId).emit('game_ready', { roomId });
+      io.to(actualRoomId).emit('game_ready', { roomId: actualRoomId });
       
       setTimeout(() => {
-        startGame(io, games, roomId, currentRoom);
+        startGame(io, games, actualRoomId, currentRoom);
       }, 1000);
     }, BOT_WAIT_TIME_MS);
   }
@@ -195,10 +209,10 @@ socket.on('join_multi_room', async (data, callback) => {
       clearTimeout(targetRoom.botTimer);
     }
     
-    io.to(roomId).emit('game_ready', { roomId });
+    io.to(actualRoomId).emit('game_ready', { roomId: actualRoomId });
     
     setTimeout(() => {
-      startGame(io, games, roomId, targetRoom);
+      startGame(io, games, actualRoomId, targetRoom);
     }, 1000);
   }
   
