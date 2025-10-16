@@ -84,11 +84,12 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
   userId: disconnectedPlayer.userId,
   disconnectedAt: Date.now()
 });
-    gameState.disconnectedPlayers[socket.id] = {
+    gameState.disconnectedPlayers[disconnectedPlayer.userId] = {
       playerIndex,
       originalName: disconnectedPlayer.name,
       userId: disconnectedPlayer.userId,
-      disconnectedAt: Date.now()
+      disconnectedAt: Date.now(),
+      socketId: socket.id
     };
 
   } else {
@@ -121,7 +122,18 @@ function handlePlayerReconnect(io, rooms, games, socket, roomId) {
     return;
   }
 
-  const disconnectInfo = gameState.disconnectedPlayers?.[socket.id];
+  // ✅ socket.id ではなく、全エントリを見て original を探す
+  let disconnectInfo = null;
+  let userIdKey = null;
+  
+  for (const [key, info] of Object.entries(gameState.disconnectedPlayers || {})) {
+    if (info.socketId === socket.id || key === socket.id) {
+      disconnectInfo = info;
+      userIdKey = key;
+      break;
+    }
+  }
+
   if (!disconnectInfo) {
     socket.emit('reconnect_failed', { reason: '切断情報が見つかりません' });
     return;
@@ -138,20 +150,23 @@ function handlePlayerReconnect(io, rooms, games, socket, roomId) {
     const restoredPlayer = {
       id: socket.id,
       name: disconnectInfo.originalName,
-      isBot: false
+      isBot: false,
+      userId: disconnectInfo.userId  // ✅ 追加
     };
 
     room.players[playerIndex] = restoredPlayer;
     gameState.players[playerIndex] = restoredPlayer;
 
-    // 切断情報を削除
-    delete gameState.disconnectedPlayers[socket.id];
+    // ✅ disconnectedPlayers から削除（userIdKey を使う）
+    if (userIdKey) {
+      delete gameState.disconnectedPlayers[userIdKey];
+    }
 
     // ルームに再参加
     socket.join(roomId);
     socket.roomId = roomId;
 
-     //タイマー残り時間を計算
+    //タイマー残り時間を計算
     const { TURN_TIME_LIMIT } = require('../shared/config');
     let timeRemaining = 0;
     let timeLimit = TURN_TIME_LIMIT;

@@ -299,12 +299,7 @@ socket.on('rejoin_game', ({ roomId, userId }) => {
   gameState.players[playerIndex] = restoredPlayer;
 
   // disconnectedPlayers から削除
-  const oldSocketId = Object.keys(gameState.disconnectedPlayers).find(
-    key => gameState.disconnectedPlayers[key].userId === userId
-  );
-  if (oldSocketId) {
-    delete gameState.disconnectedPlayers[oldSocketId];
-  }
+delete gameState.disconnectedPlayers[userId];
   
   socket.join(targetRoomId);
 
