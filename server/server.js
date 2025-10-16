@@ -123,6 +123,19 @@ socket.on('join_multi_room', async (data, callback) => {
     });
     return;
   }
+
+  //既に参加済みかチェック
+  for (const [id, room_] of rooms.entries()) {
+    const alreadyJoined = room_.players.some(p => p.userId === userId);
+    if (alreadyJoined) {
+      console.log(`[MultiRoom] User ${userId} already joined in room ${id}`);
+      callback({ 
+        success: false, 
+        error: '既にこの部屋タイプのマッチングに参加しています。' 
+      });
+      return;
+    }
+  }
   
 
  // ★ 空き部屋を探す or 新規作成

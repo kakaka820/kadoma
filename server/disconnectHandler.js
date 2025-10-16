@@ -151,6 +151,18 @@ function handlePlayerReconnect(io, rooms, games, socket, roomId) {
     socket.join(roomId);
     socket.roomId = roomId;
 
+     //タイマー残り時間を計算
+    const { TURN_TIME_LIMIT } = require('../shared/config');
+    let timeRemaining = 0;
+    let timeLimit = TURN_TIME_LIMIT;
+
+    if (gameState.turnTimerEndTime) {
+      const now = Date.now();
+      const remaining = gameState.turnTimerEndTime - now;
+      timeRemaining = Math.max(0, Math.ceil(remaining / 1000));
+      console.log(`[Reconnect] Timer remaining: ${timeRemaining}s`);
+    }
+
     // 復帰成功通知
     socket.emit('reconnect_success', {
       playerIndex,
@@ -160,7 +172,10 @@ function handlePlayerReconnect(io, rooms, games, socket, roomId) {
         wins: gameState.wins,
         currentMultiplier: gameState.currentMultiplier,
         fieldCards: gameState.fieldCards,
-        playerSelections: gameState.playerSelections
+        playerSelections: gameState.playerSelections,
+        setTurnIndex: gameState.setTurnIndex,
+        timeRemaining: timeRemaining,
+        timeLimit: timeLimit
       }
     });
 
