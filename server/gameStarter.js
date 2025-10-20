@@ -21,6 +21,7 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
   const ante = room.roomConfig?.ante || ANTE;
   
   console.log(`[Game] Room config:`, {
+    id: room.roomConfig?.id, 
     ante,
     anteMultiplier,
     maxJokerCount,
@@ -35,6 +36,7 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
 
   //部屋設定を gameState に保存
   gameState.roomConfig = {
+    id: room.roomConfig?.id || 'normal',
     ante,
     anteMultiplier,
     maxJokerCount,
