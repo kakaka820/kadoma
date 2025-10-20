@@ -29,6 +29,13 @@ interface UseOnlineGameStateReturn {
     reason: string;
     finalScores: number[];
     winner: number;
+    roomConfig?: {
+      id: string;
+      ante: number;
+      anteMultiplier: number;
+      maxJokerCount: number;
+      requiredChips: number;
+    };
   } | null;
   scores: number[];
   wins: number[];
@@ -48,6 +55,13 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     reason: string;
     finalScores: number[];
     winner: number;
+    roomConfig?: {
+    id: string;
+    ante: number;
+    anteMultiplier: number;
+    maxJokerCount: number;
+    requiredChips: number;
+  };
   } | null>(null);
   const [scores, setScores] = useState<number[]>([0, 0, 0]);
   const [wins, setWins] = useState<number[]>([0, 0, 0]);
@@ -166,7 +180,8 @@ socket.on('cards_revealed', (data) => {
       setGameOverData({ // データ保存（alert 削除）
         reason: data.reason,
         finalScores: data.finalScores,
-        winner: data.winner
+        winner: data.winner,
+        roomConfig: data.roomConfig,
       });
 
       localStorage.removeItem('kadoma_active_room');
