@@ -20,7 +20,12 @@ import { ResultScreen } from '../screens/ResultScreen';
 
 type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result';
 
-export function OnlineGame() {
+
+interface OnlineGameProps {
+  onSwitchToLocal?: () => void;
+}
+
+export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const { socket, isConnected } = useSocket();
   const { user } = useAuth();
   const [isInRoom, setIsInRoom] = useState(false);
@@ -76,20 +81,22 @@ export function OnlineGame() {
   const { notification } = useDisconnectNotification({ socket });
 
   // 画面遷移ハンドラー
-  const handleNavigate = (type: 'online' | 'multi' | 'custom' | 'friend') => {
+  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend') => {
     if (type === 'multi') {
       setScreen('room-selection');
     } else if (type === 'custom') {
       alert('カスタム戦は準備中です');
     } else if (type === 'friend') {
       alert('フレンド戦は準備中です');
-    } else if (type === 'online') {
-      handleStartMatch();
+    } else if (type === 'local') {
+      if (onSwitchToLocal) {
+        onSwitchToLocal();
+      }
     }
   };
 
 
-
+/*
   //オンライン対戦開始
   const handleStartMatch = () => {
     if (!socket) return;
@@ -103,6 +110,8 @@ export function OnlineGame() {
   socket.emit('join_room', { playerName, userId });
   setIsInRoom(true);
 };
+
+*/
 
 // マルチ対戦の部屋参加成功
   const handleRoomJoined = () => {
