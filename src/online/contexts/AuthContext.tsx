@@ -21,7 +21,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) { // ✅ socket props 削除
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { socket, isConnected } = useSocket();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);

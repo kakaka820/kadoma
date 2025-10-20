@@ -66,13 +66,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     });
 
 
-    // ✅ エラーハンドリング追加
+    //エラーハンドリング追加
     newSocket.on('connect_error', (error) => {
       console.error('[SocketContext] 接続エラー:', error);
       setIsConnected(false);
     });
 
-    // ✅ rejoin_failed イベント（reconnect_failed じゃない！）
+    //rejoin_failed イベント（reconnect_failed じゃない！）
     newSocket.on('rejoin_failed', (data) => {
       console.log('[SocketContext] 復帰失敗:', data.message);
       localStorage.removeItem('kadoma_active_room');
