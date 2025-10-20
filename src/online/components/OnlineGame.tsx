@@ -147,14 +147,17 @@ useEffect(() => {
     if (!socket) return;
    const userId = user?.id || localStorage.getItem('kadoma_user_id');
   const playerName = localStorage.getItem('kadoma_username') || 'Player';
-  
+   console.log('[OnlineGame] handleRematch - gameOverData:', gameOverData);
+  console.log('[OnlineGame] handleRematch - roomConfig:', gameOverData?.roomConfig);
   if (gameOverData?.roomConfig) {
+    console.log('[OnlineGame] Sending join_multi_room with roomId:', gameOverData.roomConfig.id);
     // マルチ部屋の再戦
     socket.emit('join_multi_room', { 
       roomId: gameOverData.roomConfig.id,
       userId, 
       username: playerName 
     }, (response: any) => {
+      console.log('[OnlineGame] join_multi_room response:', response);
       if (response.success) {
         setIsInRoom(true);
         setScreen('waiting');
