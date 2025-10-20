@@ -49,6 +49,12 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   
 
   // 選択状態を送信
+  console.log('[cardHandler] Sending turn_update:', {
+  currentMultiplier: gameState.currentMultiplier,
+  scores: gameState.scores,
+  playerSelections: gameState.playerSelections,
+  setTurnIndex: gameState.setTurnIndex
+});
   io.to(roomId).emit('turn_update', {
     currentMultiplier: gameState.currentMultiplier,
     scores: gameState.scores,
