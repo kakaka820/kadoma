@@ -305,7 +305,7 @@ delete gameState.disconnectedPlayers[userId];
   
   socket.join(targetRoomId);
 
-  // ✅ タイマー残り時間を計算
+  //タイマー残り時間を計算
   let timeRemaining = 0;
   let timeLimit = TURN_TIME_LIMIT;
 
@@ -350,6 +350,13 @@ delete gameState.disconnectedPlayers[userId];
   });
 
   console.log(`[Server] rejoin_success: Player ${playerIndex} in ${targetRoomId}`);
+
+//全員選択済みなら次のターンに進む
+  if (gameState.playerSelections.every(Boolean)) {
+    console.log('[Server] rejoin_game: All players selected, triggering round end');
+    const { handleRoundEnd } = require('./gameManager');
+    handleRoundEnd(io, games, targetRoomId, gameState, rooms);
+}
 });
   
 
@@ -401,9 +408,8 @@ delete gameState.disconnectedPlayers[userId];
   socket.on('disconnect', () => {
     handleDisconnect(io, rooms, games, socket);
   });
+
 });
-
-
 
 
 
