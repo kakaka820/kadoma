@@ -54,7 +54,7 @@ export const drawCardsForNextTurn = (
   const playerCount = players.length;
   const drawCount = 5;
 
-  // ✅ reshuffleForced が true のとき、無条件でリセット実行
+  //reshuffleForced が true のとき、無条件でリセット実行
   if (reshuffleForced) {
     console.log('[draw] JOKER検出により山札リセット');
     const newDeck = shuffleDeck(createDeck());
@@ -93,16 +93,16 @@ export const drawCardsForNextTurn = (
     // 均等配布
     const tempPlayers = evenlyDistribute(deck, players);
 
-    // ✅ 全カード（54枚）を定義
+    //全カード（54枚）を定義
     const allCards = createDeck();
 
-    // ✅ 現在プレイヤーが持っているカード
+    //現在プレイヤーが持っているカード
     const cardsInHands = tempPlayers.flatMap(p => p.hand);
 
-    // ✅ 現在の山札に残っているカード
+    //現在の山札に残っているカード
     const cardsInDeck = deck;
 
-    // ✅ 使用済みカード = 全カード - 手札 - 山札
+    //使用済みカード = 全カード - 手札 - 山札
     const usedCards = allCards.filter(card => 
       !cardExistsIn(card, cardsInHands) && !cardExistsIn(card, cardsInDeck)
     );
