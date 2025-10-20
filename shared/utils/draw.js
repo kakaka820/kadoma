@@ -59,7 +59,7 @@ const drawCardsForNextTurn = (
   const playerCount = players.length;
   const drawCount = 5;
 
-  // ✅ reshuffleForced が true のとき、無条件でリセット実行
+  //reshuffleForced が true のとき、無条件でリセット実行
   if (reshuffleForced) {
     console.log('[draw] JOKER検出により山札リセット');
     const newDeck = shuffleDeck(createDeck());
