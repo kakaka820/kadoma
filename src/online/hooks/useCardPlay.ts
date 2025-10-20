@@ -54,7 +54,7 @@ export function useCardPlay({
   setTurnIndex,
 }: UseCardPlayProps) : UseCardPlayReturn {
 
-  // ✅ 選択したカードのインデックスを保存
+  //選択したカードのインデックスを保存
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
 
   const playCard = (cardIndex: number) => {

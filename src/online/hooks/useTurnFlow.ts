@@ -31,14 +31,14 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
 
     console.log('[useTurnFlow] Setting up event listeners');
 
-    // ✅ rejoin_success でタイマー復元
+    //rejoin_success でタイマー復元
     socket.on('rejoin_success', (data) => {
       console.log('[useTurnFlow] rejoin_success received:', data.gameState);
       setCurrentMultiplier(data.gameState.currentMultiplier || 1);
       setFieldCards(data.gameState.fieldCards || [null, null, null]);
       setPlayerSelections(data.gameState.playerSelections || [false, false, false]);
       setSetTurnIndex(data.gameState.setTurnIndex || 0);
-// ✅ サーバーから受け取った残り時間を使う
+//サーバーから受け取った残り時間を使う
       if (data.gameState.timeRemaining !== undefined) {
         setTimeRemaining(data.gameState.timeRemaining);
         console.log('[useTurnFlow] Timer restored:', data.gameState.timeRemaining);

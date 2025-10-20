@@ -176,6 +176,7 @@ socket.on('cards_revealed', (data) => {
     // ゲーム終了
     socket.on('game_over', (data) => {
       console.log('[useOnlineGameState] game_over received:', data);
+      console.log('[useOnlineGameState] data.roomConfig:', data.roomConfig);
       setGameStatus('finished');
       setGameOverData({ // データ保存（alert 削除）
         reason: data.reason,
@@ -184,6 +185,13 @@ socket.on('cards_revealed', (data) => {
         roomConfig: data.roomConfig,
       });
 
+
+      console.log('[useOnlineGameState] gameOverData set to:', {  
+    reason: data.reason,
+    finalScores: data.finalScores,
+    winner: data.winner,
+    roomConfig: data.roomConfig,
+  });
       localStorage.removeItem('kadoma_active_room');
   console.log('[useOnlineGameState] Removed roomId from localStorage');
     });

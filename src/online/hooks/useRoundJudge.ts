@@ -26,13 +26,13 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
 
     console.log('[useRoundJudge] Setting up event listeners');
 
-    // ✅ cards_revealed でショーダウン開始
+    //cards_revealed でショーダウン開始
     socket.on('cards_revealed', () => {
       console.log('[useRoundJudge] cards_revealed - ショーダウン開始');
       setIsShowdown(true);
     });
 
-    // ✅ 初期スコア受信（ゲーム開始時）
+    //初期スコア受信（ゲーム開始時）
     socket.on('game_start', (data) => {
       console.log('[useRoundJudge] game_start - 初期スコア:', data.scores);
       setScores(data.scores);
