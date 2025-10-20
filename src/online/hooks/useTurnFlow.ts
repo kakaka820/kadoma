@@ -76,7 +76,7 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       console.log('[useTurnFlow] turn_update received:', data);
       setCurrentMultiplier(data.currentMultiplier || 1);
       setPlayerSelections(data.playerSelections || [false, false, false]);
-      setSetTurnIndex(data.setTurnIndex);
+      if (data.setTurnIndex !== undefined) {setSetTurnIndex(data.setTurnIndex);}
     });
 
     //ラウンド結果後、2秒待って場札クリア
