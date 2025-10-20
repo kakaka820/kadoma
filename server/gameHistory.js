@@ -26,7 +26,7 @@ async function saveGameHistory(roomId, gameState) {
     //profit = 最終得点 - 参加料
     const profit = finalScore - buyIn;
 
-    // ✅ 仮UUID生成（アカウント実装まで）
+    //仮UUID生成（アカウント実装まで）
     const tempUserId = uuidv4();
     
     try {

@@ -60,7 +60,7 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
     if (!gameState.playerSelections[playerIndex]) {
       console.log(`[Disconnect] Triggering proxy bot for player ${playerIndex}`);
       // handleRoundEnd を取得
-      // ✅ handleRoundEnd を wrapper 関数でラップ
+      //handleRoundEnd を wrapper 関数でラップ
       const handleRoundEndWrapper = (io, games, roomId, gameState) => {
         const { handleRoundEnd } = require('./roundHandler');
         handleRoundEnd(io, games, roomId, gameState);
@@ -122,7 +122,7 @@ function handlePlayerReconnect(io, rooms, games, socket, roomId) {
     return;
   }
 
-  // ✅ socket.id ではなく、全エントリを見て original を探す
+  //socket.id ではなく、全エントリを見て original を探す
   let disconnectInfo = null;
   let userIdKey = null;
   
@@ -151,13 +151,13 @@ function handlePlayerReconnect(io, rooms, games, socket, roomId) {
       id: socket.id,
       name: disconnectInfo.originalName,
       isBot: false,
-      userId: disconnectInfo.userId  // ✅ 追加
+      userId: disconnectInfo.userId
     };
 
     room.players[playerIndex] = restoredPlayer;
     gameState.players[playerIndex] = restoredPlayer;
 
-    // ✅ disconnectedPlayers から削除（userIdKey を使う）
+    //disconnectedPlayers から削除（userIdKey を使う）
     if (userIdKey) {
       delete gameState.disconnectedPlayers[userIdKey];
     }

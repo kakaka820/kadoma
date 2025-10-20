@@ -112,7 +112,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
 
     console.log(`[Bot] Player ${botIndex} (${strategy}, proxy: ${isProxyBot}) played:`, card);
 
-    // ✅ 代理Bot の場合は即座に場札を公開（handleRoundEnd は呼ばない）
+    //代理Bot の場合は即座に場札を公開（handleRoundEnd は呼ばない）
   if (isProxyBot) {
     console.log('[Bot] Proxy bot - revealing card immediately');
     
@@ -132,7 +132,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
       });
     });
     
-    // ✅ ここで return（handleRoundEnd は呼ばない）
+    //ここで return（handleRoundEnd は呼ばない）
     return;
   }
     

@@ -187,7 +187,7 @@ if (updatedState.playerSelections.every(Boolean)) {
     console.log('[roundHandler] All players selected, starting next turn immediately');
     performNextTurn(io, games, roomId, updatedState, rooms);
   } else {
-    // ✅ 通常：結果表示後に実行
+    //通常：結果表示後に実行
     setTimeout(() => {
       performNextTurn(io, games, roomId, updatedState, rooms);
     }, ROUND_RESULT_DISPLAY_MS);
