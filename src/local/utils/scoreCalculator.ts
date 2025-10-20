@@ -13,7 +13,7 @@ import { rankToValue } from './cardValue';
 
 // 基本的な得点計算
 function calculateBaseScore(winnerCard: Card, loserCard:Card, multiplier: number): number {
-  // ✅ 勝者のカードの数値 * 2 * multiplier * ANTE
+  //勝者のカードの数値 * 2 * multiplier * ANTE
   return (rankToValue(winnerCard) - rankToValue(loserCard)) * 2 * multiplier * ANTE;
 }
 
