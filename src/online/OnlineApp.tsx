@@ -13,7 +13,7 @@ const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
 function OnlineAppContent() {
   const { user, isLoading } = useAuth();
 
-  // ✅ ローディング中
+  //ローディング中
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -22,12 +22,12 @@ function OnlineAppContent() {
     );
   }
 
-  // ✅ 未ログイン → ログイン画面
+  //未ログイン → ログイン画面
   if (!user) {
     return <LoginScreen />;
   }
 
-  // ✅ ログイン済み → ゲーム画面
+  //ログイン済み → ゲーム画面
     return <OnlineGame />;  
 }
 
