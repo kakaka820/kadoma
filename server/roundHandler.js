@@ -94,6 +94,12 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 
 // ★ Step 8: ゲーム終了か判定
   if (nextState.isGameOver) {
+    console.log('[GameOver] nextState.roomConfig:', nextState.roomConfig);
+  console.log('[GameOver] Full nextState:', JSON.stringify({
+    roomConfig: nextState.roomConfig,
+    isGameOver: nextState.isGameOver,
+    gameOverReason: nextState.gameOverReason
+  }));
     // ゲーム終了処理
     const chipResults = await distributeChips(nextState);
     saveGameHistory(roomId, nextState).catch(err => {
