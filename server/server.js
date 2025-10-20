@@ -1,7 +1,7 @@
 //server/server.js
 //WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
-
+const MAINTENANCE_MODE = process.env.MAINTENANCE_MODE === 'true';
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -39,6 +39,14 @@ const games = new Map();
 
 // Socket.IOイベント処理
 io.on('connection', (socket) => {
+
+  if (MAINTENANCE_MODE) {
+    socket.emit('maintenance_mode', { 
+      message: 'メンテナンス中です。しばらくお待ちください。' 
+    });
+    socket.disconnect();
+    return;
+  }
   console.log('User connected:', socket.id);
 
   //ユーザー登録
