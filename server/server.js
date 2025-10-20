@@ -383,7 +383,7 @@ delete gameState.disconnectedPlayers[userId];
     
     const player = room.players[playerIndex];
     
-    // ✅ 差し引かれている場合のみ返金
+    //差し引かれている場合のみ返金
     if (player.deducted && player.buyIn) {
       await updateUserCurrency(userId, player.buyIn);
       console.log(`[MultiRoom] Refunded ${player.buyIn} currency to ${userId}`);
@@ -392,6 +392,54 @@ delete gameState.disconnectedPlayers[userId];
     // プレイヤー削除
     room.players.splice(playerIndex, 1);
     socket.leave(roomId);
+
+    //部屋が空なら削除（Bot タイマーもクリア）
+  if (room.players.length === 0) {
+    if (room.botTimer) {
+      clearTimeout(room.botTimer);
+      room.botTimer = null;
+    }
+    rooms.delete(roomId);
+    console.log(`[MultiRoom] Room ${roomId} deleted (empty after cancel)`);
+    callback({ success: true, refunded: player.buyIn || 0 });
+    return;
+  }
+
+  //まだプレイヤーが残っている場合は Bot タイマーを再起動
+  if (room.players.length < 3 && room.players.length > 0) {
+    // 既存のタイマーをクリア
+    if (room.botTimer) {
+      clearTimeout(room.botTimer);
+    }
+    
+    // 新しいタイマーを開始
+    room.botTimer = setTimeout(() => {
+      const currentRoom = rooms.get(roomId);
+      if (!currentRoom) return;
+      
+      // Bot追加
+      while (currentRoom.players.length < 3) {
+        const botNumber = currentRoom.players.length + 1;
+        const roomConfig = currentRoom.roomConfig;
+        const bot = createBotPlayer(`bot_${roomConfig.id}_${botNumber}`, botNumber, BOT_STRATEGIES.RANDOM, false);
+        currentRoom.players.push(bot);
+      }
+
+      io.to(roomId).emit('room_update', {
+        roomId: roomId,
+        players: currentRoom.players,
+        isFull: true
+      });
+      
+      io.to(roomId).emit('game_ready', { roomId: roomId });
+      
+      setTimeout(() => {
+        startGame(io, games, roomId, currentRoom, rooms);
+      }, 1000);
+    }, BOT_WAIT_TIME_MS);
+    
+    console.log(`[MultiRoom] Restarted bot timer for ${roomId}`);
+  }
     
     // 全員に通知
     io.to(roomId).emit('room_update', {

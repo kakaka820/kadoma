@@ -52,7 +52,8 @@ function handlePlayCard(io, games, socket, data, handleRoundEndCallback) {
   io.to(roomId).emit('turn_update', {
     currentMultiplier: gameState.currentMultiplier,
     scores: gameState.scores,
-    playerSelections: gameState.playerSelections
+    playerSelections: gameState.playerSelections,
+    setTurnIndex: gameState.setTurnIndex
   });
   
   // 全員選択したか確認

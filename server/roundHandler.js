@@ -104,7 +104,8 @@ async function performNextTurn(io, games, roomId, state, rooms) {
       reason: nextState.gameOverReason,
       finalScores: nextState.scores,
       winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
-      chipResults: chipResults
+      chipResults: chipResults,
+      roomConfig: nextState.roomConfig,
     });
      games.delete(roomId);
      rooms.delete(roomId);
