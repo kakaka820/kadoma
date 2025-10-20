@@ -10,7 +10,11 @@ import LoginScreen from './screens/LoginScreen';
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
 
 
-function OnlineAppContent() {
+interface OnlineAppProps {
+  onSwitchToLocal?: () => void;
+}
+
+function OnlineAppContent({ onSwitchToLocal }: OnlineAppProps) {
   const { user, isLoading } = useAuth();
 
   //ローディング中
@@ -28,16 +32,16 @@ function OnlineAppContent() {
   }
 
   //ログイン済み → ゲーム画面
-    return <OnlineGame />;  
+    return <OnlineGame onSwitchToLocal={onSwitchToLocal} />;
 }
 
-export default function OnlineApp() {
+export default function OnlineApp({ onSwitchToLocal }: OnlineAppProps) {
   
 
   return (
     <SocketProvider>
     <AuthProvider>    
-      <OnlineAppContent />
+      <OnlineAppContent onSwitchToLocal={onSwitchToLocal} />  
       </AuthProvider>
       </SocketProvider>
   );
