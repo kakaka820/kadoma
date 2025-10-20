@@ -21,7 +21,7 @@ export function ResultScreen({
   onRematch
 }: ResultScreenProps) {
 
-// ✅ マウント時に localStorage を削除
+//マウント時に localStorage を削除
   useEffect(() => {
     localStorage.removeItem('kadoma_active_room');
     console.log('[ResultScreen] Removed roomId from localStorage');
