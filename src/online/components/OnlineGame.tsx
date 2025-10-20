@@ -169,6 +169,7 @@ useEffect(() => {
     // 通常部屋の再戦
     socket.emit('join_room', { playerName, userId });
     setIsInRoom(true);
+    setScreen('waiting');
   }
       // gameStatus は自動的に 'waiting' に変わる
 };
