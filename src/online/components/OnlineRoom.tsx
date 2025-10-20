@@ -91,7 +91,7 @@ return (
           >
             マッチング開始
           </button>
-          {!isConnected && (  // ✅ isConnected 使用
+          {!isConnected && (  //isConnected 使用
             <p className="text-orange-500 mt-4">サーバー接続中...</p>)}
         </div>
       )}

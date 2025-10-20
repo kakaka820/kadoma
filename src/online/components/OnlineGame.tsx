@@ -117,7 +117,7 @@ export function OnlineGame() {
   };
 
 
-// ✅ rejoin_success を受信したら isInRoom を true に
+//rejoin_success を受信したら isInRoom を true に
 useEffect(() => {
   if (!socket) return;
 
@@ -195,7 +195,7 @@ useEffect(() => {
     return <HomeScreen onNavigate={handleNavigate} />;
   }
 
-  // ✅ ゲーム終了 → 結果画面
+  //ゲーム終了 → 結果画面
   if (gameStatus === 'finished' && gameOverData) {
     return (
       <ResultScreen
