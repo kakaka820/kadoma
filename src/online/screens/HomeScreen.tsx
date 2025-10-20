@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-type NavigationType = 'online' | 'multi' | 'custom' | 'friend';
+type NavigationType = 'local' | 'multi' | 'custom' | 'friend';
 
 interface HomeScreenProps {
   onNavigate: (type: NavigationType) => void;
@@ -77,13 +77,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           </button>
         </div>
 
-        {/* オンライン対戦ボタン（将来削除予定） */}
+        
         <button
-          onClick={() => onNavigate('online')}
+          onClick={() => onNavigate('local')}
           className="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xl rounded-lg transition mb-4"
           data-testid="button-online-match"
         >
-          オンライン対戦
+          ローカル対戦
         </button>
 
         {/* ログアウトボタン */}
