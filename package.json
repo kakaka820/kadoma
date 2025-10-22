@@ -22,7 +22,7 @@
   "scripts": {
     "start": "react-app-rewired start",
     "server": "node server.js",
-    "build": "react-app-rewired build",
+    "build": "react-app-rewired build && node fix-manifest.js",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
