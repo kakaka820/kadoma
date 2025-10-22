@@ -6,6 +6,7 @@ import { OnlineGame } from './components/OnlineGame';
 import { AuthProvider, useAuth } from './contexts/AuthContext'; 
 import { SocketProvider } from './contexts/SocketContext';
 import LoginScreen from './screens/LoginScreen';
+import MaintenanceScreen from './screens/MaintenanceScreen';
 
 const SERVER_URL = process.env.REACT_APP_SERVER_URL || 'http://localhost:3001';
 
@@ -15,7 +16,14 @@ interface OnlineAppProps {
 }
 
 function OnlineAppContent({ onSwitchToLocal }: OnlineAppProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isMaintenanceMode } = useAuth();
+
+
+  //メンテナンス中
+  if (isMaintenanceMode) {
+    return <MaintenanceScreen />;
+  }
+
 
   //ローディング中
   if (isLoading) {
