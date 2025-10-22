@@ -66,7 +66,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     });
 
 
-    //エラーハンドリング追加
+    //エラーハンドリング
     newSocket.on('connect_error', (error) => {
       console.error('[SocketContext] 接続エラー:', error);
       setIsConnected(false);

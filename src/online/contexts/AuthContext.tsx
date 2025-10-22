@@ -13,6 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isMaintenanceMode: boolean;
   login: (user: User) => void;
   logout: () => void;
   register: (username: string) => Promise<{ success: boolean; error?: string }>;
@@ -25,20 +26,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { socket, isConnected } = useSocket();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+
+
+  //メンテナンスモード監視
+  useEffect(() => {
+    if (!socket) return;
+    const handleMaintenanceMode = (data: any) => {
+      console.log('[AuthContext] メンテナンスモード検出:', data.message);
+      setIsMaintenanceMode(true);
+      setIsLoading(false);
+    };
+    socket.on('maintenance_mode', handleMaintenanceMode);
+    return () => {
+      socket.off('maintenance_mode', handleMaintenanceMode);
+    };
+  }, [socket]);
 
   // 起動時: 自動ログイン
+
+
+  //自動ログイン（メンテナンス中はスキップ）
   useEffect(() => {
     console.log('[AuthContext] useEffect 実行, socket:', socket, 'isConnected:', isConnected);
-  if (!socket || !isConnected) {
+    
+    if (!socket || !isConnected) {
       console.log('[AuthContext] socket or isConnected is false, waiting...');
       return;
-  }
+    }
+     //メンテナンス中なら自動ログインをスキップ
+    if (isMaintenanceMode) {
+      console.log('[AuthContext] メンテナンス中のため自動ログインをスキップ');
+      setIsLoading(false);
+      return;
+    }
+
+
 
     const userId = localStorage.getItem('kadoma_user_id');
     
     if (userId) {
       console.log('[認証] 自動ログイン試行:', userId);
+      const timeout = setTimeout(() => {
+      console.log('[認証] 自動ログインタイムアウト（サーバー起動中の可能性）');
+      setIsLoading(false);
+    }, 60000);
       socket.emit('auto_login', { userId }, (response: any) => {
+        clearTimeout(timeout);
+
         if (response.success) {
           console.log('[認証] 自動ログイン成功:', response.user);
           setUser(response.user);
@@ -53,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[認証] ローカルデータなし');
       setIsLoading(false);
     }
-  }, [socket, isConnected]);
+  }, [socket, isConnected, isMaintenanceMode]);
 
 
   // ログイン（ローカルストレージに保存）
@@ -125,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, register, loginWithCode }}>
+    <AuthContext.Provider value={{ user, isLoading, isMaintenanceMode, login, logout, register, loginWithCode }}>
       {children}
     </AuthContext.Provider>
   );
