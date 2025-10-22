@@ -103,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[認証] ローカルデータなし');
       setIsLoading(false);
     }
-  }, [socket, isConnected, isMaintenanceMode]);
+  }, [socket?.id, isConnected, isMaintenanceMode]);
 
 
   // ログイン（ローカルストレージに保存）
