@@ -67,10 +67,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (userId) {
       console.log('[認証] 自動ログイン試行:', userId);
+      let retryCount = 0;
+    const maxRetries = 3;
+    const attemptLogin = () => {
       const timeout = setTimeout(() => {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`[認証] リトライ ${retryCount}/${maxRetries}`);
+          attemptLogin();  // 再試行
+        } else {
       console.log('[認証] 自動ログインタイムアウト（サーバー起動中の可能性）');
       setIsLoading(false);
-    }, 60000);
+        }
+    }, 90000);
       socket.emit('auto_login', { userId }, (response: any) => {
         clearTimeout(timeout);
 
@@ -78,12 +87,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('[認証] 自動ログイン成功:', response.user);
           setUser(response.user);
           localStorage.setItem('kadoma_user_id', response.user.id);
+        } else  if (retryCount < maxRetries) {
+          retryCount++;
+          console.log(`[認証] ログイン失敗、リトライ ${retryCount}/${maxRetries}`);
+          setTimeout(attemptLogin, 5000);  // 5秒後に再試行
         } else {
           console.log('[認証] 自動ログイン失敗、ローカルデータ削除');
           localStorage.removeItem('kadoma_user_id');
+          setIsLoading(false);
         }
-        setIsLoading(false);
       });
+    };
+    attemptLogin();
     } else {
       console.log('[認証] ローカルデータなし');
       setIsLoading(false);
