@@ -37,7 +37,8 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       reconnection: true,
       reconnectionAttempts:10,
       reconnectionDelay:3500,
-      timeout:20000,
+      reconnectionDelayMax: 10000,
+      timeout:120000,
     });
     
     newSocket.on('connect', () => {
