@@ -46,7 +46,7 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
 
   const { roomId, room } = targetRoom;
 
-  // プレイヤー情報追加
+  // プレイヤー情報
   room.players.push({
     id: socket.id,
     name: playerName,
