@@ -203,4 +203,5 @@ module.exports = {
   botAutoPlay,
   createBotPlayer,
   BOT_STRATEGIES
+
 };
