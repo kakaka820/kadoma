@@ -3,11 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+
+    <!--PWA設定（横画面固定-->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!--画面向き（横画面優先）-->
+    <meta name="screen-orientation" content="landscape" />
+    <meta name="x5-orientation" content="landscape" />
+
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="The kadoma β"
     />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
@@ -24,7 +34,68 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>kadoma</title>
+   <style>
+      /* 縦画面時の全画面オーバーレイ */
+      @media (orientation: portrait) {
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.98);
+          z-index: 99999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+ body::after {
+          content: '📱\A\A横画面でプレイしてください\A\APlease rotate your device';
+          white-space: pre;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 24px;
+          font-weight: bold;
+          text-align: center;
+          z-index: 100000;
+          line-height: 1.8;
+        }
+      }
+
+      /* PC用: 最小幅確保 */
+      @media (min-width: 768px) {
+        body {
+          min-width: 1024px;
+          overflow-x: auto;
+        }
+      }
+      
+      /* 基本スタイル */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+body {
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+      }
+      
+      #root {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+
+
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
