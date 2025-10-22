@@ -15,8 +15,9 @@ interface OnlineAppProps {
   onSwitchToLocal?: () => void;
 }
 
-function OnlineAppContent({ onSwitchToLocal }: OnlineAppProps) {
+export default function OnlineApp({ onSwitchToLocal }: OnlineAppProps) {
   const { user, isLoading, isMaintenanceMode } = useAuth();
+  
 
 
   //メンテナンス中
@@ -41,16 +42,4 @@ function OnlineAppContent({ onSwitchToLocal }: OnlineAppProps) {
 
   //ログイン済み → ゲーム画面
     return <OnlineGame onSwitchToLocal={onSwitchToLocal} />;
-}
-
-export default function OnlineApp({ onSwitchToLocal }: OnlineAppProps) {
-  
-
-  return (
-    <SocketProvider>
-    <AuthProvider>    
-      <OnlineAppContent onSwitchToLocal={onSwitchToLocal} />  
-      </AuthProvider>
-      </SocketProvider>
-  );
 }
