@@ -8,7 +8,7 @@ const { ROUND_RESULT_DISPLAY_MS } = require('../shared/config');
 const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
-const { botAutoPlay } = require('./botPlayer');
+const { botAutoPlay } = require('./bot/botPlayer');
 const { updateUserCurrency } = require('./authHandler');
 
 

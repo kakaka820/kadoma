@@ -3,7 +3,7 @@
 
 const { handlePlayerDisconnect } = require('./disconnectHandler');
 const { BOT_WAIT_TIME_MS } = require('../shared/config');
-const { createBotPlayer, BOT_STRATEGIES } = require('./botPlayer');
+const { createBotPlayer, BOT_STRATEGIES } = require('./bot/botPlayer');
 
 /**
  * プレイヤーのルーム参加処理

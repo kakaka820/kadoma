@@ -6,7 +6,7 @@ const { ANTE,ANTE_MULTIPLIER, MAX_JOKER_COUNT } = require('../shared/config');
 const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
-const { botAutoPlay } = require('./botPlayer');
+const { botAutoPlay } = require('./bot/botPlayer');
 
 /**
  * ゲーム開始処理
