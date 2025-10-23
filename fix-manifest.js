@@ -17,7 +17,7 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 // 必要な設定を追加・上書き
 manifest.orientation = 'landscape';
 manifest.short_name = 'kadoma';
-manifest.name = 'kadoma - ジョーカー β';
+manifest.name = 'kadoma β';
 
 // 保存
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
@@ -25,4 +25,4 @@ fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 console.log('✅ manifest.json を修正しました');
 console.log('  - orientation: landscape');
 console.log('  - short_name: kadoma');
-console.log('  - name: kadoma - ジョーカー β');
+console.log('  - name: kadoma  β');
