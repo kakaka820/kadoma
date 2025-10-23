@@ -1,11 +1,13 @@
-// server/bot/strategies/randomStrategy.js
-// ランダム戦略：手札からランダムに選択
+// server/bot/strategies/passiveStrategy.js
+// 弱気戦略：小さいカードから出す
+
+const { rankToValue } = require('../../../shared/core/cardValue');
 
 /**
- * ランダム戦略でカードを選択
+ * 弱気戦略でカードを選択（小さい順）
  * @param {Array} hand - 手札
  * @param {number} setTurnIndex - セット内ターン（0-4）
- * @param {Object} gameState - ゲーム状態（必要に応じて使用）
+ * @param {Object} gameState - ゲーム状態
  * @returns {number} 選択したカードのインデックス
  */
 function selectCard(hand, setTurnIndex, gameState = {}) {
@@ -21,9 +23,9 @@ function selectCard(hand, setTurnIndex, gameState = {}) {
     }
   }
 
-  // ランダム選択
-  const randomIdx = Math.floor(Math.random() * validCards.length);
-  return validCards[randomIdx].idx;
+  // 小さいカードから選択
+  validCards.sort((a, b) => rankToValue(a.card) - rankToValue(b.card));
+  return validCards[0].idx;
 }
 
 module.exports = { selectCard };
