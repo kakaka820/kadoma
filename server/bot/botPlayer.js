@@ -3,7 +3,10 @@
 
 const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../../shared/config');
 const { rankToValue } = require('../../shared/core/cardValue');
-
+const randomStrategy = require('./strategies/randomStrategy');
+const aggressiveStrategy = require('./strategies/aggressiveStrategy');
+const passiveStrategy = require('./strategies/passiveStrategy');
+const adaptiveStrategy = require('./strategies/adaptiveStrategy');
 
 // Bot戦略の定義
 const BOT_STRATEGIES = {
@@ -13,7 +16,13 @@ const BOT_STRATEGIES = {
   ADAPTIVE: 'adaptive'   // 適応型（毎セット変更）
 };
 
-
+// 戦略マッピング
+const STRATEGY_MAP = {
+  [BOT_STRATEGIES.RANDOM]: randomStrategy,
+  [BOT_STRATEGIES.AGGRESSIVE]: aggressiveStrategy,
+  [BOT_STRATEGIES.PASSIVE]: passiveStrategy,
+  [BOT_STRATEGIES.ADAPTIVE]: adaptiveStrategy
+};
 
 
 /**
@@ -24,38 +33,9 @@ const BOT_STRATEGIES = {
  * @param {number} setNumber - セット番号（0-4）
  * @returns {number} 選択したカードのインデックス
  */
-function selectCardByStrategy(hand, setTurnIndex, strategy, setNumber = 0) {
-  if (hand.length === 0) return -1;
-  // セットの1ターン目はJOKER除外
-  let validCards = hand.map((card, idx) => ({ card, idx }));
-  
-  if (setTurnIndex === 0) {
-    validCards = validCards.filter(item => !item.card.rank?.startsWith('JOKER'));
-    if (validCards.length === 0) validCards = hand.map((card, idx) => ({ card, idx }));
-  }
-
-  // 適応型の場合、セットごとに戦略を変更
-  let activeStrategy = strategy;
-  if (strategy === BOT_STRATEGIES.ADAPTIVE) {
-    const strategies = [BOT_STRATEGIES.RANDOM, BOT_STRATEGIES.AGGRESSIVE, BOT_STRATEGIES.PASSIVE];
-    activeStrategy = strategies[setNumber % 3];
-    console.log(`[Bot] Adaptive strategy for set ${setNumber}: ${activeStrategy}`);
-  }
-  switch (activeStrategy) {
-    case BOT_STRATEGIES.AGGRESSIVE:
-      // 強気：大きいカードから出す
-      validCards.sort((a, b) => rankToValue(b.card) - rankToValue(a.card));
-      return validCards[0].idx;
-    case BOT_STRATEGIES.PASSIVE:
-      // 弱気：小さいカードから出す
-      validCards.sort((a, b) => rankToValue(a.card) - rankToValue(b.card));
-      return validCards[0].idx;
-    case BOT_STRATEGIES.RANDOM:
-    default:
-      // ランダム選択
-      const randomIdx = Math.floor(Math.random() * validCards.length);
-      return validCards[randomIdx].idx;
-  }
+function selectCardByStrategy(hand, setTurnIndex, strategy, gameState = {}) {
+  const strategyModule = STRATEGY_MAP[strategy] || randomStrategy;
+  return strategyModule.selectCard(hand, setTurnIndex, gameState);
 }
 
 /**
@@ -99,7 +79,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
     const hand = currentGameState.hands[botIndex];
 
     //戦略に基づいて選択
-    const cardIndex = selectCardByStrategy(hand, currentGameState.setTurnIndex, strategy, setNumber);
+    const cardIndex = selectCardByStrategy(hand, currentGameState.setTurnIndex, strategy, currentGameState);
     if (cardIndex === -1) return;
     const card = hand[cardIndex];
 
@@ -203,5 +183,4 @@ module.exports = {
   botAutoPlay,
   createBotPlayer,
   BOT_STRATEGIES
-
 };
