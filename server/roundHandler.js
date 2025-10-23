@@ -100,12 +100,34 @@ async function performNextTurn(io, games, roomId, state, rooms) {
     isGameOver: nextState.isGameOver,
     gameOverReason: nextState.gameOverReason
   }));
+
     // ゲーム終了処理
+
+    // ランキングを計算
+  const rankings = nextState.players
+    .map((player, index) => ({
+      playerIndex: index,
+      userId: player.userId,
+      buyIn: player.buyIn || nextState.roomConfig?.requiredChips || 1000,
+      finalScore: nextState.scores[index],
+      profit: nextState.scores[index] - (player.buyIn || nextState.roomConfig?.requiredChips || 1000),
+      isDisconnected: player.isBot && player.isProxy  // 代理Botかチェック
+    }))
+    .sort((a, b) => b.finalScore - a.finalScore)  // スコア順にソート
+    .map((player, index) => ({
+      ...player,
+      rank: player.isDisconnected ? null : index + 1  // 切断なら null、それ以外は順位
+    }));
+
+    console.log('[GameOver] rankings:', rankings);
+
+    //チップ配分
     const chipResults = await distributeChips(nextState);
-    saveGameHistory(roomId, nextState).catch(err => {
+    saveGameHistory(roomId, nextState, rankings).catch(err => {
       console.error('[game_over] 履歴保存失敗:', err);
     });
-    
+
+    //ゲーム終了通知
     io.to(roomId).emit('game_over', {
       reason: nextState.gameOverReason,
       finalScores: nextState.scores,
