@@ -96,22 +96,6 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   };
 
 
-/*
-  //オンライン対戦開始
-  const handleStartMatch = () => {
-    if (!socket) return;
-
-     //userId がない場合は待つ
-  const userId = user?.id || localStorage.getItem('kadoma_user_id');
-  const playerName = localStorage.getItem('kadoma_username') || 'Player';
-  
-  console.log('[OnlineGame] handleStartMatch - userId:', userId);
-  
-  socket.emit('join_room', { playerName, userId });
-  setIsInRoom(true);
-};
-
-*/
 
 // マルチ対戦の部屋参加成功
   const handleRoomJoined = () => {
@@ -248,7 +232,7 @@ useEffect(() => {
 }
 
 if (gameStatus === 'waiting') {
-  return <WaitingRoom />;
+  return <WaitingRoom onCancel={handleBackToHome} />;
 }
-return <WaitingRoom />;
+return <WaitingRoom onCancel={handleBackToHome} />;
 }
