@@ -4,26 +4,32 @@
 const { updateUserCurrency } = require('../authHandler');
 
 async function handleCancelMatching(socket, io,rooms, data, callback) {
-  const { roomId, userId } = data;
+  const { userId } = data;
   
-  console.log(`[Matching] Cancel request: ${userId} in ${roomId}`);
+  console.log(`[Matching] Cancel request: ${userId}`);
   
-  const room = rooms.get(roomId);
+ let targetRoom = null;
+  let targetRoomId = null;
+  let playerIndex = -1;
   
-  if (!room) {
-    callback({ success: false, error: 'ルームが見つかりません' });
+  
+  for (const [roomId, room] of rooms.entries()) {
+    const idx = room.players.findIndex(p => p.userId === userId);
+    if (idx !== -1) {
+      targetRoom = room;
+      targetRoomId = roomId;
+      playerIndex = idx;
+      break;
+    }
+  }
+  // 部屋が見つからない場合（すでにキャンセル済みの可能性）
+  if (!targetRoom) {
+    console.log(`[Matching] No room found for user ${userId} (already cancelled?)`);
+    callback({ success: true }); // ← 成功扱い
     return;
   }
   
-  // プレイヤーを探す
-  const playerIndex = room.players.findIndex(p => p.userId === userId);
-  
-  if (playerIndex === -1) {
-    callback({ success: false, error: 'プレイヤーが見つかりません' });
-    return;
-  }
-  
-  const player = room.players[playerIndex];
+  const player = targetRoom.players[playerIndex];
   
   // 差し引かれている場合のみ返金
   if (player.deducted && player.buyIn) {
@@ -32,24 +38,24 @@ async function handleCancelMatching(socket, io,rooms, data, callback) {
   }
   
   // プレイヤー削除
-  room.players.splice(playerIndex, 1);
-  socket.leave(roomId);
+  targetRoom.players.splice(playerIndex, 1);
+  socket.leave(targetRoomId);
 
   // 部屋が空なら削除（Botタイマーもクリア）
-  if (room.players.length === 0) {
-    if (room.botTimer) {
-      clearTimeout(room.botTimer);
-      room.botTimer = null;
-    }
-    rooms.delete(roomId);
-    console.log(`[Matching] Room ${roomId} deleted`);
-  } else {
-    io.to(roomId).emit('room_update', {
-      roomId,
-      players: room.players,
-      isFull: false
-    });
+  if (targetRoom.players.length === 0) {
+  if (targetRoom.botTimer) {
+    clearTimeout(targetRoom.botTimer);
+    targetRoom.botTimer = null;
   }
+  rooms.delete(targetRoomId);
+  console.log(`[Matching] Room ${targetRoomId} deleted`);
+} else {
+  io.to(targetRoomId).emit('room_update', {
+    roomId: targetRoomId,
+    players: targetRoom.players,
+    isFull: false
+  });
+}
   
   callback({ success: true });
 }
