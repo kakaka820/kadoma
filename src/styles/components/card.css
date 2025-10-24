@@ -1,0 +1,55 @@
+/* client/src/styles/components/card.css */
+/* カード関連のスタイル */
+
+.game-card {
+  position: relative;
+  background: var(--card-face);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  aspect-ratio: 2.5 / 3.5;
+}
+
+.game-card-joker {
+  background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+}
+
+.game-card-number {
+  background: var(--card-face);
+}
+
+.game-card-selected {
+  ring: 4px solid var(--card-selected);
+  transform: translateY(-0.5rem);
+}
+
+.game-card-hover:hover {
+  transform: translateY(-0.25rem);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+}
+
+.game-card-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* カードサイズバリエーション */
+.game-card-sm {
+  width: 3rem;
+  height: 4rem;
+}
+
+.game-card-md {
+  width: 4rem;
+  height: 6rem;
+}
+
+.game-card-lg {
+  width: 5rem;
+  height: 7rem;
+}
+
+.game-card-xl {
+  width: 6rem;
+  height: 8rem;
+}
