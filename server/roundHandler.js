@@ -164,14 +164,18 @@ async function performNextTurn(io, games, roomId, state, rooms) {
     });
     
     // ★ Step 12: タイマー開始
-    startTurnTimer(io, games, roomId, handleRoundEnd);
+    startTurnTimer(io, games, roomId, (io, games, roomId, gameState) => {
+    handleRoundEnd(io, games, roomId, gameState, rooms);
+    });
     // ★ Step 13: Botの自動選択
     nextState.players.forEach((player, idx) => {
-      if (player.isBot) {
-        botAutoPlay(io, games, roomId, idx, handleRoundEnd);
-      }
-    });
-  }
+  if (player.isBot) {
+    botAutoPlay(io, games, roomId, idx, (io, games, roomId, gameState) => {
+      handleRoundEnd(io, games, roomId, gameState, rooms);
+     });
+   }
+  });
+ }
 }
 
 
