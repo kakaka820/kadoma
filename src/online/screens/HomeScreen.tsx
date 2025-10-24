@@ -2,7 +2,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-type NavigationType = 'local' | 'multi' | 'custom' | 'friend';
+type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats';
 
 interface HomeScreenProps {
   onNavigate: (type: NavigationType) => void;
