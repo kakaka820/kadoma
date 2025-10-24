@@ -8,15 +8,18 @@ const { supabase } = require('./supabaseClient');
 async function updateUserStats(userId, buyIn, finalScore, rank, profit) {
   try {
     // 現在の統計を取得
-    const { data: stats } = await supabase
+    const { data: stats, error: selectError } = await supabase
       .from('user_stats')
       .select('*')
       .eq('user_id', userId)
       .single();
-      if (!stats) {
+
+      if (selectError && selectError.code === 'PGRST116') {
       // user_stats が存在しない場合は作成
       console.log('[統計更新] 新規作成:', userId);
-      await supabase.from('user_stats').insert({
+      const { data, error: insertError } = await supabase
+        .from('user_stats')
+        .insert({
         user_id: userId,
         total_games: 1,
         total_buy_in: buyIn,
@@ -25,10 +28,22 @@ async function updateUserStats(userId, buyIn, finalScore, rank, profit) {
         total_wins: rank === 1 ? 1 : 0,
         total_profit: profit
       });
-    } else {
+
+
+      if (insertError) {
+        console.error('[統計更新] 新規作成エラー:', insertError);
+      } else {
+        console.log('[統計更新] 新規作成成功:', userId);
+      }
+    } else if (stats) {
+
+
+
       // 既存の統計を更新
       console.log('[統計更新] 更新:', userId);
-      await supabase.from('user_stats').update({
+      const { data, error: updateError } = await supabase
+        .from('user_stats')
+        .update({
         total_games: stats.total_games + 1,
         total_buy_in: stats.total_buy_in + buyIn,
         total_final_score: stats.total_final_score + finalScore,
@@ -36,12 +51,18 @@ async function updateUserStats(userId, buyIn, finalScore, rank, profit) {
         total_wins: stats.total_wins + (rank === 1 ? 1 : 0),
         total_profit: stats.total_profit + profit
       }).eq('user_id', userId);
+    if (updateError) {
+        console.error('[統計更新] 更新エラー:', updateError);
+      } else {
+        console.log('[統計更新] 更新成功:', userId);
+      }
+    } else if (selectError) {
+      console.error('[統計更新] 取得エラー:', selectError);
     }
   } catch (err) {
-    console.error('[統計更新] エラー:', err);
+    console.error('[統計更新] 予期しないエラー:', err);
   }
 }
-
 
 
 
