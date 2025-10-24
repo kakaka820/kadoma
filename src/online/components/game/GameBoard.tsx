@@ -74,7 +74,7 @@ export function GameBoard(props: GameBoardProps) {
       <div 
         className="h-screen w-screen overflow-hidden relative"
         style={{
-          backgroundImage: 'https://github.com/kakaka820/kadoma/blob/main/public/assets/backgrounds/%E5%AF%BE%E6%88%A6%E7%94%BB%E9%9D%A2%E8%83%8C%E6%99%AF.png', 
+          backgroundImage: 'url(/assets/backgrounds/対戦画面背景.png)', 
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
