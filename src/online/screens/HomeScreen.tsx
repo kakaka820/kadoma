@@ -85,6 +85,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         >
           ローカル対戦
         </button>
+        <button 
+        onClick={() => onNavigate('stats' as any)}
+        className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl rounded-lg transition mb-4"
+        >
+        戦績・履歴
+        </button>
 
         {/* ログアウトボタン */}
         <button
