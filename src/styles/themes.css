@@ -1,0 +1,42 @@
+/* src/styles/themes.css */
+/* テーマカラー定義 */
+
+:root {
+  /* メインカラー */
+  --color-primary: #8B5CF6;
+  --color-secondary: #10B981;
+  --color-accent: #F59E0B;
+  
+  /* 状態カラー */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
+  
+  /* カード関連 */
+  --card-back: #1F2937;
+  --card-face: #FFFFFF;
+  --card-selected: #8B5CF6;
+  --card-hover: #6D28D9;
+  
+  /* ボード関連 */
+  --board-bg: #111827;
+  --board-field: #1F2937;
+  --board-player: #374151;
+  
+  /* スペーシング */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* フォントサイズ */
+  --font-xs: 0.75rem;
+  --font-sm: 0.875rem;
+  --font-md: 1rem;
+  --font-lg: 1.125rem;
+  --font-xl: 1.25rem;
+  --font-2xl: 1.5rem;
+  --font-3xl: 1.875rem;
+}
