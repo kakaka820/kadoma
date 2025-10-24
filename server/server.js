@@ -57,38 +57,49 @@ app.get('/api/stats/:userId', async (req, res) => {
   console.log('[API] /api/stats request:', userId);
   
   try {
-    // game_history から全データを取得
-    const { data: games, error: gamesError } = await supabase
+    // user_stats から取得（1行のみ）
+    const { data: stats, error } = await supabase
+      .from('user_stats')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) {
+      // user_stats が存在しない場合は空データを返す
+      console.log('[API] /api/stats user_stats not found:', userId);
+      return res.json({
+        totalGames: 0,
+        totalBuyIn: 0,
+        totalFinalScore: 0,
+        firstPlaceCount: 0,
+        winCount: 0
+      });
+    }
+// winCount を計算（profit >= 0 の数）
+    const { data: gameHistory } = await supabase
       .from('game_history')
-      .select('buy_in, final_score, profit, rank')
+      .select('profit')
       .eq('user_id', userId);
     
-    if (gamesError) {
-      console.error('[API] /api/stats error:', gamesError);
-      throw gamesError;
-    }
-
-// 集計
-    const totalGames = games.length;
-    const totalBuyIn = games.reduce((sum, g) => sum + (g.buy_in || 0), 0);
-    const totalFinalScore = games.reduce((sum, g) => sum + (g.final_score || 0), 0);
-    const firstPlaceCount = games.filter(g => g.rank === 1).length;
-    const winCount = games.filter(g => (g.profit || 0) >= 0).length;
+    const winCount = gameHistory ? gameHistory.filter(g => (g.profit || 0) >= 0).length : 0;
     
-    const stats = {
-      totalGames,
-      totalBuyIn,
-      totalFinalScore,
-      firstPlaceCount,
-      winCount
+    const result = {
+      totalGames: stats.total_games || 0,
+      totalBuyIn: stats.total_buy_in || 0,
+      totalFinalScore: stats.total_final_score || 0,
+      firstPlaceCount: stats.first_place_count || 0,
+      winCount: winCount
     };
-console.log('[API] /api/stats response:', stats);
-    res.json(stats);
+    
+    console.log('[API] /api/stats response:', result);
+    res.json(result);
   } catch (err) {
     console.error('[API] /api/stats error:', err);
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });
+
+
 /**
  * GET /api/history/:userId
  * ユーザーのゲーム履歴を取得（最新10件）
