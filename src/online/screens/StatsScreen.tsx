@@ -99,7 +99,7 @@ export function StatsScreen({ onBack }: StatsScreenProps) {
   }
 
   return (
-    <div className="h-screen  h-screen overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 p-4">
+    <div className="h-screen overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 p-4">
       <div className="max-w-2xl mx-auto pb-8">
         {/* ヘッダー */}
         <div className="text-center mb-6">
