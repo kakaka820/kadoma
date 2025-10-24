@@ -17,8 +17,9 @@ import { GameBoard } from './game/GameBoard';
 import { HomeScreen } from '../screens/HomeScreen';
 import { RoomSelection } from '../screens/RoomSelection';
 import { ResultScreen } from '../screens/ResultScreen';
+import { StatsScreen } from '../screens/StatsScreen';
 
-type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result';
+type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats';
 
 
 interface OnlineGameProps {
@@ -81,7 +82,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const { notification } = useDisconnectNotification({ socket });
 
   // 画面遷移ハンドラー
-  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend') => {
+  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats') => {
     if (type === 'multi') {
       setScreen('room-selection');
     } else if (type === 'custom') {
@@ -92,6 +93,9 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
       if (onSwitchToLocal) {
         onSwitchToLocal();
       }
+    }
+    else if (type === 'stats') { 
+      setScreen('stats');
     }
   };
 
@@ -171,6 +175,10 @@ useEffect(() => {
   // UI分岐
   if (!isConnected) {
     return <ConnectionStatus />;
+  }
+  // 戦績画面
+  if (screen === 'stats') {
+    return <StatsScreen onBack={handleBackToHome} />;
   }
 
     // 部屋選択画面
