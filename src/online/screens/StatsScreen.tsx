@@ -99,8 +99,8 @@ export function StatsScreen({ onBack }: StatsScreenProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen  h-screen overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 p-4">
+      <div className="max-w-2xl mx-auto pb-8">
         {/* ヘッダー */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-white mb-2">戦績・履歴</h1>
