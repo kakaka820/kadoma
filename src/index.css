@@ -1,4 +1,148 @@
+/* client/src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* グローバルスタイル */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    /* スクロールを有効化 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* スムーススクロール */
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-900 text-white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    /* スクロールを有効化 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* 最小高さを設定 */
+    min-height: 100vh;
+  }
+
+  #root {
+    /* root要素もスクロール可能に */
+    min-height: 100vh;
+  }
+
+  /* スクロールバーのカスタマイズ */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+  }
+
+  /* Firefox用スクロールバー */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #4B5563 #1F2937;
+  }
+}
+
+/* ユーティリティクラス */
+@layer utilities {
+  /* モバイル安全領域対応 */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* スクロールバーを隠す */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 1画面固定用 */
+  .screen-fixed {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* スクロール可能 */
+  .screen-scrollable {
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* コンポーネント用のカスタムスタイル */
+@layer components {
+  /* ボタンの基本スタイル */
+  .btn {
+    @apply px-6 py-3 rounded-lg font-bold transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-purple-600 text-white;
+    @apply hover:bg-purple-700 focus:ring-purple-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-700 text-white;
+    @apply hover:bg-gray-600 focus:ring-gray-500;
+  }
+
+  .btn-success {
+    @apply bg-green-600 text-white;
+    @apply hover:bg-green-700 focus:ring-green-500;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white;
+    @apply hover:bg-red-700 focus:ring-red-500;
+  }
+
+  .btn-lg {
+    @apply text-xl py-4;
+  }
+
+  .btn-sm {
+    @apply text-sm py-2 px-4;
+  }
+
+  /* カードの基本スタイル */
+  .card {
+    @apply relative bg-white rounded-lg shadow-lg transition-all duration-300;
+  }
+
+  .card-selected {
+    @apply ring-4 ring-purple-500 transform -translate-y-2;
+  }
+
+  .card-hover {
+    @apply hover:transform hover:-translate-y-1 hover:shadow-xl;
+  }
+
+  /* ゲームコンテナ */
+  .game-container {
+    @apply h-screen overflow-hidden flex flex-col;
+  }
+}
