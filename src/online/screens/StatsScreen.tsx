@@ -76,7 +76,7 @@ export function StatsScreen({ onBack }: StatsScreenProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
+      <div className="fixed inset-0  bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center">
         <div className="text-white text-2xl">読み込み中...</div>
       </div>
     );
