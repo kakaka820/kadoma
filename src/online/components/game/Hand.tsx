@@ -15,25 +15,34 @@ interface HandProps {
 export default function Hand({ cards, onCardClick, disabled, selectedCardIndex, isShowdown = false }: HandProps) {
   return (
     <div>
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="flex gap-3 justify-center">
         {cards.map((card, idx) => (
           <div
             key={idx}
             onClick={() => !disabled && onCardClick(idx)}
-            style={{
-              padding: '8px',
-              border: '1px solid black',
-              minWidth: '40px',
-              textAlign: 'center',
-              cursor: disabled ? 'not-allowed' : 'pointer',
-              userSelect: 'none',
-              opacity: disabled ? 0.5 : 1,
-              visibility: (isShowdown && selectedCardIndex === idx) 
-              ? 'hidden' 
-              : 'visible', 
-            }}
+          className={`
+            relative rounded-lg border-2 transition-all select-none
+            w-[12vw] h-[14vh]
+            max-w-[90px] max-h-[120px]
+            min-w-[65px] min-h-[90px]
+            flex items-center justify-center
+            ${disabled 
+              ? 'border-gray-600 bg-gray-700 opacity-50 cursor-not-allowed' 
+              : 'border-gray-400 bg-white cursor-pointer hover:border-yellow-400 hover:-translate-y-2 hover:shadow-lg'
+            }
+            ${(isShowdown && selectedCardIndex === idx) ? 'invisible' : 'visible'}
+          `}
           >
-            {card.suit ? `${card.rank}${card.suit}` : card.rank}
+            <span className="text-2xl font-bold text-gray-900">
+            {card.suit ? (
+              <>
+                {card.rank}
+                <span className="ml-0.5">{card.suit}</span>
+              </>
+            ) : (
+              card.rank
+            )}
+            </span>
           </div>
         ))}
       </div>
