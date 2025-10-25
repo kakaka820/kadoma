@@ -69,7 +69,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center p-4">
       <div className="bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full">
         <h1 className="text-3xl font-bold text-white text-center mb-8">KADOMA</h1>
 

@@ -1,7 +1,7 @@
 // src/online/screens/MaintenanceScreen.tsx
 export default function MaintenanceScreen() {
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
       <div className="bg-gray-800 p-8 rounded-xl max-w-md text-center">
         <h1 className="text-3xl font-bold text-yellow-400 mb-4">
           🔧 メンテナンス中
