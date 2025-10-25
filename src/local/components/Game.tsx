@@ -147,8 +147,7 @@ const {
   const playersWhoCanPlay = fieldCards.map(card => card === null);
 
   return (
-    <div className="fixed inset-0  bg-gradient-to-b from-gray-900 to-gray-800 p-4">
-        <h1 className="text-4xl font-bold text-white mb-4">ローカル対戦</h1>
+    <div className=" bg-gradient-to-b from-gray-900 to-gray-800 p-4">
        <div className="grid grid-cols-3 gap-4 mb-6">
        <div className="bg-gray-800 rounded-lg p-4 text-center">
        <p className="text-gray-400 text-xs mb-1">残り山札</p>
