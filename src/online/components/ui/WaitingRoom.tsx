@@ -39,7 +39,7 @@ if (response.success) {
 
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+    <div className="fixed inset-0 bg-gray-900 text-white flex items-center justify-center">
       <div className="text-center max-w-md w-full px-4">
         <div className="text-2xl mb-4">マッチング中...</div>
         <div className="text-lg mb-8">プレイヤーを待っています</div>
