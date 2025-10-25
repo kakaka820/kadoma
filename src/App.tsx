@@ -21,7 +21,7 @@ export default function App() {
           <OnlineApp onSwitchToLocal={() => setMode('local')} />
         ) : (
           <div className="App">
-            <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
+            <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 px-1 py-4">
               <button 
                 onClick={() => setMode('online')}
                 className="mb-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition"
