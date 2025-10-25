@@ -13,8 +13,8 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const [showTransferCode, setShowTransferCode] = React.useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center px-4">
+      <div className="max-w-md w-full mx-auto">
         {/* ヘッダー */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">KADOMA</h1>
