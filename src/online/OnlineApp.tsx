@@ -29,7 +29,7 @@ export default function OnlineApp({ onSwitchToLocal }: OnlineAppProps) {
   //ローディング中
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
         <div className="text-white text-2xl">Loading...</div>
       </div>
     );
