@@ -1,16 +1,15 @@
 // src/components/Game.tsx 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Hand from './Hand';
 import Field from './Field';
-import { createDeck, shuffleDeck, Card, Player } from '../utils/deck';
+import { createDeck, shuffleDeck } from '../utils/deck';
 import { calculateScore } from '../utils/scoreCalculator';
-import { WAIT_TIME_MS, ANTE, MAX_JOKER_COUNT } from '../config';
+import { WAIT_TIME_MS, ANTE } from '../config';
 import { drawCardsForNextTurn } from '../utils/draw';
 import { calculateNextMultiplier } from '../utils/multiplier';
 import { judgeWinner } from '../utils/judgeWinner';
 import { checkJokerInHands, checkGameEnd, shouldReshuffleAfterSet, canPlayJoker } from '../utils/joker';
 import { calculateAllTableFees} from '../utils/feeCalculator';
-import { PreviousTurnResult } from '../types/game';
 import { rankToValue } from '../utils/cardValue';
 import { determineWinnerAndLoser } from '../utils/battleResolver';
 import { useGameState } from '../hooks/useGameState';
@@ -65,9 +64,7 @@ const {
   calculateNextMultiplier,
 });
   const { 
-  previousTurnResult, 
   setPreviousTurnResult, 
-  feeCollected, 
   setFeeCollected 
 } = useTableFees({
   turnCount,
@@ -150,28 +147,51 @@ const {
   const playersWhoCanPlay = fieldCards.map(card => card === null);
 
   return (
-    <div>
-      <h1>トランプ</h1>
-      <p>残り山札: {deck.length}</p>
-      <p>ターン数: {turnCount}</p>
-      <p>現在の倍率: x{currentMultiplier}</p>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
+        <h1 className="text-4xl font-bold text-white mb-4">ローカル対戦</h1>
+       <div className="grid grid-cols-3 gap-4 mb-6">
+       <div className="bg-gray-800 rounded-lg p-4 text-center">
+       <p className="text-gray-400 text-xs mb-1">残り山札</p>
+       <p className="text-white text-xl font-bold">{deck.length}枚</p>
+        </div>
+       <div className="bg-gray-800 rounded-lg p-4 text-center">
+       <p className="text-gray-400 text-xs mb-1">ターン数</p>
+       <p className="text-white text-xl font-bold">{turnCount}</p>
+        </div>
+       <div className="bg-gray-800 rounded-lg p-4 text-center">
+       <p className="text-gray-400 text-xs mb-1">現在の倍率</p>
+       <p className="text-yellow-400 text-xl font-bold">x{currentMultiplier}</p>
+       </div>
+       </div>
       {jokerDealtThisSet && (
-        <p style={{ color: 'orange', fontWeight: 'bold' }}>
-          ⚠ ジョーカーが配られました！このセット終了後に山札がリセットされます
-        </p>
-      )}
+        <div className="bg-orange-900 border-2 border-orange-500 rounded-lg p-4 mb-4">
+            <p className="text-orange-200 font-bold">
+              ⚠ ジョーカーが配られました！このセット終了後に山札がリセットされます
+            </p>
+          </div>
+        )}
 
       {gameOver && (
-        <div style={{ color: 'red', fontWeight: 'bold' }}>
-          🎉{gameOverReason} ！ゲーム終了！
-        </div>
-      )}
-      {roundResult && <p style={{ fontWeight: 'bold', color: 'green' }}>{roundResult}</p>}
+        <div className="bg-red-900 border-2 border-red-500 rounded-lg p-4 mb-4">
+        <p className="text-red-200 text-xl font-bold">
+              🎉{gameOverReason} ！ゲーム終了！
+            </p>
+          </div>
+        )}
+      {roundResult && (
+      <div className="bg-green-900 border-2 border-green-500 rounded-lg p-4 mb-4">
+            <p className="text-green-200 font-bold">{roundResult}</p>
+          </div>
+        )}
       {lastRoundWarning && (
-        <p style={{ color: 'red', fontWeight: 'bold' }}>※ 残り山札が15枚未満。次の補充が最後です！</p>
-      )}
+        <div className="bg-red-900 border-2 border-red-500 rounded-lg p-4 mb-4">
+            <p className="text-red-200 font-bold">
+              ※ 残り山札が15枚未満。次の補充が最後です！
+            </p>
+          </div>
+        )}
 
-      <div>
+      <div className="mb-8">
         {players.map((player, i) => (
           <Hand
             key={i}
