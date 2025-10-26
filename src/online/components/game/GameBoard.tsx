@@ -165,21 +165,11 @@ export function GameBoard(props: GameBoardProps) {
 
           {/* 場札 */}
           <div className="flex gap-4">
-            {fieldCards.map((card, idx) =>
-              card ? (
-                <div
-                  key={idx}
-                  className="w-24 h-32 bg-white rounded-lg shadow-2xl flex items-center justify-center text-gray-900 font-bold text-3xl border-2 border-gray-300"
-                >
-                  {card.suit ? `${card.rank}${card.suit}` : card.rank}
-                </div>
-              ) : (
-                <div
-                  key={idx}
-                  className="w-24 h-32 bg-gray-700/50 rounded-lg border-2 border-dashed border-gray-500"
-                />
-              )
-            )}
+            <Field 
+            fieldCards={fieldCards}
+            playerNames={players}
+            playerIndex={playerIndex ?? 0}
+            />
           </div>
         </div>
 
