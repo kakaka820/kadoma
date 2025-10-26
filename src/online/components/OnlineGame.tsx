@@ -159,7 +159,20 @@ useEffect(() => {
         setIsInRoom(true);
         setScreen('waiting');
       } else {
-        alert(response.error || 'マッチング失敗');
+       if (response.shortage) {
+          alert(
+            `チップが不足しています！\n\n` +
+            `必要: ${response.required?.toLocaleString()} G\n` +
+            `現在: ${response.current?.toLocaleString()} G\n` +
+            `不足: ${response.shortage?.toLocaleString()} G`
+          );
+        } else {
+          alert(response.error || 'マッチング失敗');
+        }
+        
+        // ホーム画面に戻る
+        setIsInRoom(false);
+        setScreen('home');
       }
     });
   } else {
