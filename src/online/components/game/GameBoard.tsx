@@ -199,7 +199,7 @@ export function GameBoard(props: GameBoardProps) {
 
         {/* 左下: 自分の情報 */}
         <div className="absolute bottom-8 left-8 bg-blue-700/90 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
-          <div className="font-bold mb-1">{players[playerIndex || 0]} (あなた)</div>
+          <div className="font-bold mb-1">{players[playerIndex || 0]} </div>
           <div className="text-xs">スコア: {scores[playerIndex || 0]}</div>
           <div className="text-xs">勝利: {wins[playerIndex || 0]}</div>
         </div>
