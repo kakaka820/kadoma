@@ -2,27 +2,38 @@
 // マルチルーム参加処理
 
 const { MULTI_ROOMS, BOT_WAIT_TIME_MS } = require('../../shared/config');
-const { checkSufficientChips, updateUserCurrency } = require('../authHandler');
+const { checkSufficientCurrency, updateUserCurrency } = require('../authHandler');
 const { createBotPlayer, BOT_STRATEGIES } = require('../bot/botPlayer');
 const { startGame } = require('../gameManager');
 const { findAvailableRoom, createRoom } = require('../../shared/utils/roomUtils');
 
+
+console.log('[MultiRoom] Module loaded, checkSufficientCurrency:', typeof checkSufficientCurrency);
+
 async function handleMultiRoomJoin(socket, io, rooms, games, data, callback) {
+  console.log('[MultiRoom] handleMultiRoomJoin called with data:', data);
   const { roomId, userId, username } = data;
   
   console.log(`[MultiRoom] Join request: ${username} → ${roomId}`);
+  console.log(`[MultiRoom] userId:`, userId);
+  console.log(`[MultiRoom] userId: ${userId}, type: ${typeof userId}`);
   
   // 部屋情報取得
   const room = MULTI_ROOMS.find(r => r.id === roomId);
   if (!room) {
+    console.log('[MultiRoom] Room not found:', roomId);
     callback({ success: false, error: '部屋が見つかりません' });
     return;
   }
+   console.log(`[MultiRoom] Room found:`, room);
+  console.log(`[MultiRoom] Required chips: ${room.requiredChips}`);
   
   // チップ残高チェック
-  const chipCheck = await checkSufficientChips(userId, room.requiredChips);
+  const chipCheck = await checkSufficientCurrency(userId, room.requiredChips);
+  console.log(`[MultiRoom] chipCheck result:`, chipCheck);
   
   if (!chipCheck.sufficient) {
+    console.log(`[MultiRoom] Insufficient chips - current: ${chipCheck.current}, required: ${chipCheck.required}`); 
     callback({ 
       success: false, 
       error: 'チップが不足しています',
@@ -32,6 +43,7 @@ async function handleMultiRoomJoin(socket, io, rooms, games, data, callback) {
     });
     return;
   }
+  console.log(`[MultiRoom] Chip check passed!`);
 
   // 既に参加済みかチェック
   for (const [id, room_] of rooms.entries()) {
