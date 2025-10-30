@@ -46,6 +46,11 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
 
 //プレイヤー情報
   room.players.forEach((player, idx) => {
+
+    gameState.players[idx].id = player.id;
+  gameState.players[idx].name = player.name;
+  gameState.players[idx].isBot = player.isBot;
+
     if (!player.isBot && player.userId) {
        gameState.players[idx].userId = player.userId;
         console.log(`[Game] Player ${idx} userId:`, player.userId);

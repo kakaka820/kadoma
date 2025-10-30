@@ -205,11 +205,9 @@ async function checkSufficientCurrency(userId, requiredAmount) {
   console.log(`[checkSufficientCurrency] userId: ${userId}, requiredAmount: ${requiredAmount}`);
   const { data, error } = await supabase
     .from('users')
-    .select('currency')  // ← currency に変更
+    .select('currency')
     .eq('id', userId)
     .single();
-
-    console.log(`[checkSufficientCurrency] Supabase query result:`, { data, error });
 
   
   if (error || !data) {

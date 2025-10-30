@@ -9,7 +9,7 @@ const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
 const { botAutoPlay } = require('./bot/botPlayer');
-const { updateUserCurrency } = require('./authHandler');
+const { distributeGameReward } = require('./utils/currencyHelper');
 
 
 
@@ -35,7 +35,7 @@ async function distributeChips(gameState) {
     
     //profit だけをユーザーに配分
     if (profit > 0) {
-      await updateUserCurrency(player.userId, profit);
+      await distributeGameReward(player.userId, gameState.roomId, profit);
     }
     
     results.push({
