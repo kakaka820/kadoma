@@ -2,7 +2,8 @@
 // マルチルーム参加処理
 
 const { MULTI_ROOMS, BOT_WAIT_TIME_MS } = require('../../shared/config');
-const { checkSufficientCurrency, updateUserCurrency } = require('../authHandler');
+const { checkSufficientCurrency } = require('../authHandler');
+const { deductRoomFee } = require('./currencyHelper');
 const { createBotPlayer, BOT_STRATEGIES } = require('../bot/botPlayer');
 const { startGame } = require('../gameManager');
 const { findAvailableRoom, createRoom } = require('../../shared/utils/roomUtils');
@@ -88,9 +89,7 @@ async function handleMultiRoomJoin(socket, io, rooms, games, data, callback) {
   });
 
   // 通貨を差し引く
-  await updateUserCurrency(userId, -(room.requiredChips));
-  console.log(`[MultiRoom] Deducted ${room.requiredChips} currency from ${userId}`);
-  
+  await deductRoomFee(userId, actualRoomId, room.requiredChips);  
   socket.join(actualRoomId);
   socket.roomId = actualRoomId;
   

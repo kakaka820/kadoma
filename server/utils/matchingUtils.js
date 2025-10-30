@@ -1,7 +1,7 @@
 // server/utils/matchingUtils.js
 // マッチングキャンセル処理
 
-const { updateUserCurrency } = require('../authHandler');
+const { refundRoomFee } = require('./currencyHelper');
 
 async function handleCancelMatching(socket, io,rooms, data, callback) {
   const { userId } = data;
@@ -33,8 +33,7 @@ async function handleCancelMatching(socket, io,rooms, data, callback) {
   
   // 差し引かれている場合のみ返金
   if (player.deducted && player.buyIn) {
-    await updateUserCurrency(userId, player.buyIn);
-    console.log(`[Matching] Refunded ${player.buyIn} currency to ${userId}`);
+    await refundRoomFee(userId, targetRoomId, player.buyIn);
   }
   
   // プレイヤー削除
