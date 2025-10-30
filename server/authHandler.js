@@ -199,24 +199,33 @@ async function updateUserChips(userId, chipChange) {
 }
 
 // チップ残高チェック
-async function checkSufficientChips(userId, requiredChips) {
+// server/authHandler.js に新しい関数を追加
+
+async function checkSufficientCurrency(userId, requiredAmount) {
+  console.log(`[checkSufficientCurrency] userId: ${userId}, requiredAmount: ${requiredAmount}`);
   const { data, error } = await supabase
     .from('users')
-    .select('chips')
+    .select('currency')  // ← currency に変更
     .eq('id', userId)
     .single();
+
+    console.log(`[checkSufficientCurrency] Supabase query result:`, { data, error });
+
   
   if (error || !data) {
-    return { sufficient: false, current: 0, required: requiredChips };
+    console.log(`[checkSufficientCurrency] Error or no data found`);
+    return { sufficient: false, current: 0, required: requiredAmount };
   }
   
-  const current = data.chips || 0;
+  const current = data.currency || 0;
+  console.log(`[checkSufficientCurrency] Current currency: ${current}`);
+  console.log(`[checkSufficientCurrency] Sufficient: ${current >= requiredAmount}`);
   
   return {
-    sufficient: current >= requiredChips,
+    sufficient: current >= requiredAmount,
     current: current,
-    required: requiredChips,
-    shortage: Math.max(0, requiredChips - current)
+    required: requiredAmount,
+    shortage: Math.max(0, requiredAmount - current)
   };
 }
 
@@ -260,6 +269,6 @@ module.exports = {
   checkUsernameExists,
   getUserChips,
   updateUserChips,
-  checkSufficientChips,
+  checkSufficientCurrency,
   updateUserCurrency
 };
