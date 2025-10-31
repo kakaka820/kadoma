@@ -222,7 +222,17 @@ function handleRoundEnd(io, games, roomId, gameState, rooms) {
     gameState.turnTimer = null;
   }
   
-  const updatedState = processRound(gameState);
+const playerNames = gameState.players.map(player => {
+    if (player.isBot) {
+      return player.name || 'Bot';
+    }
+    return player.username || player.name || 'Player';
+  });
+  
+  console.log('[handleRoundEnd] playerNames:', playerNames);
+
+
+  const updatedState = processRound(gameState, playerNames);
   games.set(roomId, updatedState);
   
   io.to(roomId).emit('round_result', {
