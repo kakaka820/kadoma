@@ -219,8 +219,22 @@ useEffect(() => {
     return <HomeScreen onNavigate={handleNavigate} />;
   }
 
+  //ゲーム終了 → 結果画面
+  if (gameStatus === 'finished' && gameOverData) {
+    return (
+      <ResultScreen
+        playerIndex={playerIndex}
+        finalScores={gameOverData.finalScores}
+        winner={gameOverData.winner}
+        players={players}
+        reason={gameOverData.reason}
+        onReturnHome={handleReturnHome}
+        onRematch={handleRematch}
+      />
+    );
+  }
 
-if (gameStatus === 'playing') {
+ if (gameStatus === 'playing') {
 
   return (
     <GameBoard
@@ -247,28 +261,6 @@ if (gameStatus === 'playing') {
     />
   );
 }
-
- if (screen === 'waiting') {
-  return <WaitingRoom onCancel={handleBackToHome} />;
-}
-
-  //ゲーム終了 → 結果画面
-  if (gameStatus === 'finished' && gameOverData) {
-    return (
-      <ResultScreen
-        playerIndex={playerIndex}
-        finalScores={gameOverData.finalScores}
-        winner={gameOverData.winner}
-        players={players}
-        reason={gameOverData.reason}
-        onReturnHome={handleReturnHome}
-        onRematch={handleRematch}
-      />
-    );
-  }
-
- 
- 
 
 if (gameStatus === 'waiting') {
   return <WaitingRoom onCancel={handleBackToHome} />;
