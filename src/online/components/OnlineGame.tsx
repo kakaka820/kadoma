@@ -118,6 +118,16 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
 useEffect(() => {
   if (!socket) return;
 
+  //待機室復帰成功
+  socket.on('rejoin_waiting_success', (data) => {
+    console.log('[OnlineGame] rejoin_waiting_success:', data);
+    setIsInRoom(true);
+    setScreen('waiting');
+    
+    // status を更新
+    localStorage.setItem('kadoma_active_room_status', 'waiting');
+  });
+
   socket.on('rejoin_success', (data) => {
   console.log('[OnlineGame] rejoin_success - setting isInRoom to true');
   console.log('[OnlineGame] rejoin_success data:', data);
