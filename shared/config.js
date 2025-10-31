@@ -41,17 +41,17 @@ const MULTI_ROOMS = [
     id: 'room_1',
     name: '部屋1',
     ante: 10,
-    anteMultiplier: 200,
+    anteMultiplier: 300,
     maxJokerCount: 3,
-    requiredChips: 10 * 200  // 2000チップ
+    requiredChips: 10 * 300  // 3000チップ
   },
   {
     id: 'room_2',
     name: '部屋2',
     ante: 10,
-    anteMultiplier: 600,
+    anteMultiplier: 700,
     maxJokerCount: 5,
-    requiredChips: 10 * 600  // 6000チップ
+    requiredChips: 10 * 700  // 7000チップ
   },
   {
     id: 'room_3',
@@ -64,26 +64,26 @@ const MULTI_ROOMS = [
   {
     id: 'room_4',
     name: '部屋4',
-    ante: 10,
+    ante: 20,
     anteMultiplier: 300,
     maxJokerCount: 3,
-    requiredChips: 10 * 300  // 3000チップ
+    requiredChips: 20 * 300  // 6000チップ
   },
   {
     id: 'room_5',
     name: '部屋5',
-    ante: 10,
-    anteMultiplier: 800,
+    ante: 20,
+    anteMultiplier: 700,
     maxJokerCount: 5,
-    requiredChips: 10 * 800  // 8000チップ
+    requiredChips: 20 * 700  // 14000チップ
   },
   {
     id: 'room_6',
     name: '部屋6',
-    ante: 10,
-    anteMultiplier: 1500,
+    ante: 20,
+    anteMultiplier: 1400,
     maxJokerCount: 10,
-    requiredChips: 10 * 1500  // 15000チップ
+    requiredChips: 20 * 1400  // 28000チップ
   }
 ];
 
