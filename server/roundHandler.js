@@ -10,6 +10,7 @@ const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');
 const { botAutoPlay } = require('./bot/botPlayer');
 const { distributeGameReward } = require('./utils/currencyHelper');
+const { supabase } = require('./supabaseClient');
 
 
 
@@ -95,7 +96,7 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 // ★ Step 8: ゲーム終了か判定
   if (nextState.isGameOver) {
     console.log('[GameOver] nextState.roomConfig:', nextState.roomConfig);
-  console.log('[GameOver] Full nextState:', JSON.stringify({
+    console.log('[GameOver] Full nextState:', JSON.stringify({
     roomConfig: nextState.roomConfig,
     isGameOver: nextState.isGameOver,
     gameOverReason: nextState.gameOverReason
@@ -123,6 +124,27 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 
     //チップ配分
     const chipResults = await distributeChips(nextState);
+    const updatedCurrencies = {};
+if (chipResults) {
+  for (const result of chipResults) {
+    if (result.userId) {
+      // DBから最新の currency を取得
+      const { data, error } = await supabase
+        .from('users')
+        .select('currency')
+        .eq('id', result.userId)
+        .single();
+      
+      if (data && !error) {
+        updatedCurrencies[result.userId] = data.currency;
+        console.log(`[GameOver] Updated currency for ${result.userId}: ${data.currency}`);
+      } else {
+        console.error(`[GameOver] Failed to get currency for ${result.userId}:`, error);
+      }
+    }
+  }
+}
+console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
     saveGameHistory(roomId, nextState, rankings).catch(err => {
       console.error('[game_over] 履歴保存失敗:', err);
     });
@@ -134,6 +156,7 @@ async function performNextTurn(io, games, roomId, state, rooms) {
       winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
       chipResults: chipResults,
       roomConfig: nextState.roomConfig,
+      updatedCurrencies: updatedCurrencies
     });
      games.delete(roomId);
      rooms.delete(roomId);
