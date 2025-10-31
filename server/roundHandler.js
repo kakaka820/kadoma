@@ -88,7 +88,7 @@ async function performNextTurn(io, games, roomId, state, rooms) {
   games.set(roomId, nextState);
 
   //切断情報をクリア（新しいラウンド開始時）
-  nextState.disconnectedPlayers = {};
+  nextState.disconnectedPlayers = state.disconnectedPlayers || {};
 
 
 
