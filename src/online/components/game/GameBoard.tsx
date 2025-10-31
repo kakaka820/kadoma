@@ -81,7 +81,7 @@ export function GameBoard(props: GameBoardProps) {
       >
         {/* 左上: 対戦相手1の情報 */}
         {opponents[0] && (
-          <div className="absolute top-4 left-4 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
+           <div className="absolute top-4 left-4 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
             <div className="font-bold mb-1">{opponents[0].name}</div>
             <div className="text-xs">スコア: {scores[opponents[0].idx]}</div>
             <div className="text-xs">勝利: {wins[opponents[0].idx]}</div>
