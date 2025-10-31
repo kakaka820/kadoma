@@ -214,18 +214,14 @@ useEffect(() => {
     );
   }
   
-  //マッチング待機中の画面表示
-  if (screen === 'waiting') {
-  return <WaitingRoom onCancel={handleBackToHome} />;
-}
-  
   //ルームに入ってない → ホーム画面
   if (!isInRoom) {
     return <HomeScreen onNavigate={handleNavigate} />;
   }
 
-  // ✅ 修正: screen === 'playing' をチェック
-if (screen === 'playing' || gameStatus === 'playing') {
+
+if (gameStatus === 'playing') {
+
   return (
     <GameBoard
       isConnected={isConnected}
@@ -252,6 +248,10 @@ if (screen === 'playing' || gameStatus === 'playing') {
   );
 }
 
+ if (screen === 'waiting') {
+  return <WaitingRoom onCancel={handleBackToHome} />;
+}
+
   //ゲーム終了 → 結果画面
   if (gameStatus === 'finished' && gameOverData) {
     return (
@@ -267,5 +267,11 @@ if (screen === 'playing' || gameStatus === 'playing') {
     );
   }
 
+ 
+ 
+
+if (gameStatus === 'waiting') {
+  return <WaitingRoom onCancel={handleBackToHome} />;
+}
 return <WaitingRoom onCancel={handleBackToHome} />;
 }
