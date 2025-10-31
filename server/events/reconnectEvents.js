@@ -2,15 +2,57 @@
 //復帰処理担当
 
 
-const { handlePlayerReconnect } = require('../disconnectHandler');
 const { handleRoundEnd } = require('../gameManager');
 const { TURN_TIME_LIMIT } = require('../../shared/config');
 
 function setupReconnectEvents(socket, io, rooms, games) {
-  // 復帰処理（切断→再接続）
-  socket.on('reconnect_to_game', (data) => {
-    handlePlayerReconnect(io, rooms, games, socket, data.roomId);
+
+    //待機室復帰処理
+  socket.on('rejoin_waiting_room', ({ roomId, userId }) => {
+    console.log(`[Reconnect] rejoin_waiting_room: ${userId} → ${roomId}`);
+    
+    const room = rooms.get(roomId);
+    
+    if (!room) {
+      socket.emit('rejoin_failed', { 
+        message: 'ルームが見つかりません（既にゲームが開始された可能性があります）' 
+      });
+      return;
+    }
+    
+    // プレイヤーを検索
+    const playerIndex = room.players.findIndex(p => p.userId === userId);
+    
+    if (playerIndex === -1) {
+      socket.emit('rejoin_failed', { 
+        message: 'プレイヤー情報が見つかりません' 
+      });
+      return;
+    }
+    
+    // socket.id を更新（リロード後の新しい socket）
+    room.players[playerIndex].id = socket.id;
+    socket.join(roomId);
+    socket.roomId = roomId;
+    
+    // 成功通知
+    socket.emit('rejoin_waiting_success', {
+      roomId,
+      players: room.players.map(p => p.name),
+      isFull: room.players.length === 3
+    });
+    
+    // 全員に更新通知
+    io.to(roomId).emit('room_update', {
+      roomId,
+      players: room.players,
+      isFull: room.players.length === 3
+    });
+    
+    console.log(`[Reconnect] Player ${userId} rejoined waiting room`);
   });
+
+  
 
   // リロード後の復帰処理
   socket.on('rejoin_game', ({ roomId, userId }) => {
