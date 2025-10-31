@@ -1,5 +1,7 @@
 // src/online/screens/ResultScreen.tsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSocket } from '../contexts/SocketContext';
+import { useAuth } from '../contexts/AuthContext'; 
 
 interface ResultScreenProps {
   playerIndex: number | null;
@@ -18,8 +20,11 @@ export function ResultScreen({
   players,
   reason,
   onReturnHome,
-  onRematch
+  onRematch,
 }: ResultScreenProps) {
+  const [isRematchClicked, setIsRematchClicked] = useState(false);
+  const { socket } = useSocket();
+  const { user } = useAuth();
 
 //マウント時に localStorage を削除
   useEffect(() => {
@@ -30,6 +35,31 @@ export function ResultScreen({
 
   const isWinner = playerIndex === winner;
   const myScore = playerIndex !== null ? finalScores[playerIndex] : 0;
+
+   const handleRematchClick = () => {
+    if (isRematchClicked) return;
+    setIsRematchClicked(true);
+    onRematch();
+  };
+
+  const handleCancelMatching = () => {
+    if (!socket || !user) return;
+    console.log('[WaitingRoom] Cancelling matching...');
+    
+    socket.emit('cancel_matching', { userId: user.id }, (response: any) => {
+      console.log('[WaitingRoom] cancel_matching response:', response);
+
+
+if (response.success) {
+        console.log('[WaitingRoom] マッチングキャンセル成功');
+        setIsRematchClicked(false);  // ✅ マッチング状態を解除
+      } else {
+        console.error('[ResultScreen] キャンセル失敗:', response.error);
+        alert(response.error || 'キャンセルに失敗しました');
+      }
+    });
+  };
+
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
@@ -73,17 +103,32 @@ export function ResultScreen({
         {/* ボタン */}
         <div className="space-y-3">
           <button
-            onClick={onRematch}
-            className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg transition"
+            onClick={handleRematchClick}
+            disabled={isRematchClicked}
+            className={`w-full py-3 font-bold rounded-lg transition ${
+              isRematchClicked 
+                ? 'bg-gray-600 cursor-not-allowed' 
+                : 'bg-blue-500 hover:bg-blue-600'
+            } text-white`}
           >
-            再戦する
-          </button>
+            {isRematchClicked ? 'マッチング中...' : '再戦する'}
+            </button>
+            {isRematchClicked && (
+            <button
+              onClick={handleCancelMatching}
+              className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition font-semibold"
+            >
+              マッチングをキャンセル
+            </button>
+          )}
+          {!isRematchClicked && (
           <button
             onClick={onReturnHome}
             className="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition"
           >
             ホームへ戻る
           </button>
+          )}
         </div>
       </div>
     </div>
