@@ -49,20 +49,7 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
     });
 
 
-     //再接続時のゲーム状態復元
-  socket.on('reconnect_success', (data) => {
-    console.log('[useTurnFlow] reconnect_success received:', data.gameState);
-    setCurrentMultiplier(data.gameState.currentMultiplier);
-    setFieldCards(data.gameState.fieldCards);
-    setPlayerSelections(data.gameState.playerSelections);
-    setSetTurnIndex(data.gameState.setTurnIndex || 0);
-    if (data.gameState.timeRemaining !== undefined) {
-        setTimeRemaining(data.gameState.timeRemaining);
-      }
-      if (data.gameState.timeLimit !== undefined) {
-        setTimeLimit(data.gameState.timeLimit);
-      }
-  });
+     
 
    //全員選択後の一斉開示
     socket.on('cards_revealed', (data) => {
@@ -105,7 +92,6 @@ export function useTurnFlow({ socket }: UseTurnFlowProps): UseTurnFlowReturn {
       socket.off('turn_update');
       socket.off('round_result');
       socket.off('timer_start');
-      socket.off('reconnect_success');
     };
   }, [socket]);
 

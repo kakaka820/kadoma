@@ -40,13 +40,7 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
       setIsShowdown(false);
     });
 
-    //再接続時のスコア・勝利数復元
-  socket.on('reconnect_success', (data) => {
-    console.log('[useRoundJudge] reconnect_success - スコア復元:', data.gameState);
-    setScores(data.gameState.scores);
-    setWins(data.gameState.wins || [0, 0, 0]);
-    setIsShowdown(false);
-  });
+   
 
     // ラウンド結果
     socket.on('round_result', (data) => {
@@ -73,7 +67,7 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
     return () => {
       console.log('[useRoundJudge] Cleaning up event listeners');
       socket.off('game_start');
-      socket.off('reconnect_success');
+      socket.off('cards_revealed');
       socket.off('round_result');
       socket.off('turn_update');
     };

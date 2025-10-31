@@ -117,21 +117,7 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
     }
   });
 
-    //再接続成功イベント(reconnect_to_game用)
-  socket.on('reconnect_success', (data) => {
-    console.log('[useOnlineGameState] reconnect_success received:', data);
-    setPlayerIndex(data.playerIndex);
-    setMyHand(data.gameState.hand);
-    setScores(data.gameState.scores || [0, 0, 0]);
-    setWins(data.gameState.wins || [0, 0, 0]);
-    setCurrentMultiplier(data.gameState.currentMultiplier || 1);
-    setFieldCards(data.gameState.fieldCards || [null, null, null]);
-    setPlayerSelections(data.gameState.playerSelections || [false, false, false]);
-    setGameStatus('playing');
-    if (data.roomId) {
-    localStorage.setItem('kadoma_active_room', data.roomId);
-  }
-});
+    
 
 
   // 場札公開時に手札を更新
@@ -202,7 +188,6 @@ socket.on('cards_revealed', (data) => {
       console.log('[useOnlineGameState] Cleaning up event listeners');
       socket.off('game_start');
       socket.off('rejoin_success');
-      socket.off('reconnect_success');
       socket.off('cards_revealed');
       socket.off('hand_update');
       socket.off('turn_update');
