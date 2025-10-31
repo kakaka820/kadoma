@@ -93,6 +93,7 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       setGameOverData(null);
       if (data.roomId) {
     localStorage.setItem('kadoma_active_room', data.roomId);
+    localStorage.setItem('kadoma_active_room_status', 'playing');
     console.log('[useOnlineGameState] Saved roomId to localStorage:', data.roomId);
   }
       console.log('[useOnlineGameState] gameStatus set to playing');
