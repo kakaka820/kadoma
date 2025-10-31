@@ -214,28 +214,18 @@ useEffect(() => {
     );
   }
   
+  //マッチング待機中の画面表示
+  if (screen === 'waiting') {
+  return <WaitingRoom onCancel={handleBackToHome} />;
+}
+  
   //ルームに入ってない → ホーム画面
   if (!isInRoom) {
     return <HomeScreen onNavigate={handleNavigate} />;
   }
 
-  //ゲーム終了 → 結果画面
-  if (gameStatus === 'finished' && gameOverData) {
-    return (
-      <ResultScreen
-        playerIndex={playerIndex}
-        finalScores={gameOverData.finalScores}
-        winner={gameOverData.winner}
-        players={players}
-        reason={gameOverData.reason}
-        onReturnHome={handleReturnHome}
-        onRematch={handleRematch}
-      />
-    );
-  }
-
- if (gameStatus === 'playing') {
-
+  // ✅ 修正: screen === 'playing' をチェック
+if (screen === 'playing' || gameStatus === 'playing') {
   return (
     <GameBoard
       isConnected={isConnected}
@@ -262,8 +252,20 @@ useEffect(() => {
   );
 }
 
-if (gameStatus === 'waiting') {
-  return <WaitingRoom onCancel={handleBackToHome} />;
-}
+  //ゲーム終了 → 結果画面
+  if (gameStatus === 'finished' && gameOverData) {
+    return (
+      <ResultScreen
+        playerIndex={playerIndex}
+        finalScores={gameOverData.finalScores}
+        winner={gameOverData.winner}
+        players={players}
+        reason={gameOverData.reason}
+        onReturnHome={handleReturnHome}
+        onRematch={handleRematch}
+      />
+    );
+  }
+
 return <WaitingRoom onCancel={handleBackToHome} />;
 }
