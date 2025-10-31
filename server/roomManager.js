@@ -2,7 +2,7 @@
 // ルーム管理（参加・切断処理）、ルーム管理ロジックを担当
 
 const { handlePlayerDisconnect } = require('./disconnectHandler');
-const { BOT_WAIT_TIME_MS } = require('../shared/config/config');
+const { BOT_WAIT_TIME_MS } = require('../shared/config');
 const { createBotPlayer, BOT_STRATEGIES } = require('./bot/botPlayer');
 
 /**

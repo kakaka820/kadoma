@@ -2,7 +2,7 @@
 // 切断・復帰処理の管理
 
 const { createBotPlayer, BOT_STRATEGIES, botAutoPlay } = require('./bot/botPlayer');
-const { RECONNECT_WAIT_TIME } = require('../shared/config/config');
+const { RECONNECT_WAIT_TIME } = require('../shared/config');
 
 /**
  * プレイヤー切断時の処理（ゲーム中）
