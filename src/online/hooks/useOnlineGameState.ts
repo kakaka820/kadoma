@@ -42,6 +42,7 @@ interface UseOnlineGameStateReturn {
   currentMultiplier: number;
   fieldCards: (Card | null)[];
   playerSelections: boolean[];
+  resetGameState: () => void;
 }
 
 export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnlineGameStateReturn {
@@ -68,6 +69,24 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
   const [currentMultiplier, setCurrentMultiplier] = useState<number>(1);
   const [fieldCards, setFieldCards] = useState<(Card | null)[]>([null, null, null]);
   const [playerSelections, setPlayerSelections] = useState<boolean[]>([false, false, false]);
+
+
+
+  const resetGameState = () => {
+    console.log('[useOnlineGameState] Resetting game state');
+    setGameStatus('waiting');
+    setGameOverData(null);
+    setRoomId('');
+    setPlayerIndex(null);
+    setMyHand([]);
+    setPlayers([]);
+    setOpponentHands([]);
+    setScores([0, 0, 0]);
+    setWins([0, 0, 0]);
+    setCurrentMultiplier(1);
+    setFieldCards([null, null, null]);
+    setPlayerSelections([false, false, false]);
+  };
 
 
 
@@ -209,5 +228,6 @@ socket.on('cards_revealed', (data) => {
     currentMultiplier,
     fieldCards,
     playerSelections,
+    resetGameState,
   };
 }
