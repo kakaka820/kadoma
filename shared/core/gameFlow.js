@@ -64,7 +64,7 @@ function initializeGame(playerCount = 3, anteMultiplier = 200) {
 /**
  * ラウンド処理（勝敗判定 + 得点計算）
  */
-function processRound(gameState) {
+function processRound(gameState, playerNames = null) {
   const { fieldCards, scores, wins, currentMultiplier, previousTurnResult } = gameState;
   
   // 1. 勝敗判定
@@ -104,8 +104,11 @@ function processRound(gameState) {
       newScores[winnerIdx] += scoreChange;
       newScores[loserIdx] -= scoreChange;
       newWins[winnerIdx]++;
+      const winnerName = playerNames && playerNames[winnerIdx] 
+        ? playerNames[winnerIdx] 
+        : `Player ${winnerIdx + 1}`;
       
-      resultMessage = `Player ${winnerIdx + 1} の勝利！${scoreChange}点獲得`;
+      resultMessage = `${winnerName} の勝利！${scoreChange}点獲得`;
     }
   }
   
