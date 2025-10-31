@@ -144,7 +144,9 @@ async function handleMultiRoomJoin(socket, io, rooms, games, data, callback) {
     }, 1000);
   }
   
-  callback({ success: true });
+  callback({ success: true,
+    roomId: actualRoomId
+   });
 }
 
 module.exports = { handleMultiRoomJoin };
