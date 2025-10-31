@@ -48,6 +48,9 @@ export function RoomSelection({ onBack, onRoomJoined }: RoomSelectionProps) {
       
       if (response.success) {
         console.log('[RoomSelection] 部屋参加成功:', room.name);
+        localStorage.setItem('kadoma_active_room', response.roomId);
+        localStorage.setItem('kadoma_active_room_status', 'waiting');
+        console.log('[RoomSelection] Saved roomId to localStorage:', response.roomId);
         onRoomJoined();
       } else {
         console.error('[RoomSelection] 部屋参加失敗:', response.error);
