@@ -50,6 +50,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
     gameStatus,
     opponentHands,
     gameOverData,
+    resetGameState,
   } = useOnlineGameState({ socket });
 
   const {
@@ -144,6 +145,8 @@ useEffect(() => {
 
   //ホームへ戻る（リザルトから）
   const handleReturnHome = () => {
+    console.log('[OnlineGame] Returning home, resetting game state');
+    resetGameState(); 
     setIsInRoom(false);
     setScreen('home');
   };
@@ -153,7 +156,9 @@ useEffect(() => {
   const handleRematch = () => {
     if (!socket) return;
    const userId = user?.id || localStorage.getItem('kadoma_user_id');
-  const playerName = localStorage.getItem('kadoma_username') || 'Player';
+   const playerName = user?.username 
+    || localStorage.getItem('kadoma_username') 
+    || 'Player';
    console.log('[OnlineGame] handleRematch - gameOverData:', gameOverData);
   console.log('[OnlineGame] handleRematch - roomConfig:', gameOverData?.roomConfig);
   if (gameOverData?.roomConfig) {
