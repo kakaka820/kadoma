@@ -1,6 +1,29 @@
 // server/server.js
 // WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
+
+
+
+
+
+// server/server.js の先頭に追加
+const fs = require('fs');
+const path = require('path');
+
+console.log('Current directory:', process.cwd());
+console.log('Server directory exists:', fs.existsSync(path.join(process.cwd(), 'server')));
+console.log('Shared directory exists:', fs.existsSync(path.join(process.cwd(), 'shared')));
+console.log('Config directory exists:', fs.existsSync(path.join(process.cwd(), 'shared/config')));
+console.log('botNames.js exists:', fs.existsSync(path.join(process.cwd(), 'shared/config/botNames.js')));
+
+// shared/config の中身を全て表示
+if (fs.existsSync(path.join(process.cwd(), 'shared/config'))) {
+  console.log('Files in shared/config:', fs.readdirSync(path.join(process.cwd(), 'shared/config')));
+}
+
+
+
+
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
