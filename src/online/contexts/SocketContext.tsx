@@ -56,6 +56,25 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
     newSocket.on('reconnect', (attemptNumber) => {
     console.log('[SocketContext] 再接続成功:', attemptNumber);
+    //追加: ゲーム復帰処理
+  const savedRoomId = localStorage.getItem('kadoma_active_room');
+  const userId = localStorage.getItem('kadoma_user_id');
+  
+  if (savedRoomId && userId) {
+    console.log('[SocketContext] Auto-rejoin after reconnect');
+    console.log('[SocketContext] roomId:', savedRoomId, 'userId:', userId);
+    
+    // 1秒待ってから復帰（サーバー側の準備を待つ）
+    setTimeout(() => {
+      console.log('[SocketContext] Emitting rejoin_game');
+      newSocket.emit('rejoin_game', { 
+        roomId: savedRoomId,
+        userId: userId
+      });
+    }, 1000);
+  } else {
+    console.log('[SocketContext] No saved room or userId, skipping auto-rejoin');
+  }
     });
 
     newSocket.on('reconnect_attempt', (attemptNumber) => {
@@ -77,7 +96,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     newSocket.on('rejoin_failed', (data) => {
       console.log('[SocketContext] 復帰失敗:', data.message);
       localStorage.removeItem('kadoma_active_room');
-      alert(`復帰できませんでした: ${data.message}`);
+      
+      alert(`復帰できませんでした: ${data.message}\nホーム画面に戻ります`);
+      
     });
 
 
