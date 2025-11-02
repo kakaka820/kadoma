@@ -2,7 +2,7 @@
 // 場代の計算（純粋な計算関数、入力→出力）
 // ⚠️ このファイルはフロント・サーバー両方で使用
 
-const { ANTE } = require('../config');
+const { ANTE } = require('../config/config');
 
 
 /**
