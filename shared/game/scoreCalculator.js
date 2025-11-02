@@ -3,7 +3,7 @@
 // ⚠️ このファイルはフロント・サーバー両方で使用
 
 const { rankToValue } = require('../core/cardValue');
-const { ANTE } = require('../config');
+const { ANTE } = require('../config/config');
 /**
  * 基本的な得点計算
  */
