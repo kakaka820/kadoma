@@ -1,7 +1,8 @@
 // server/server.js
 // WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
-
+process.chdir(__dirname + '/..');
+console.log('Changed working directory to:', process.cwd());
 
 const fs = require('fs');
 const path = require('path');
