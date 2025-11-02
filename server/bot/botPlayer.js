@@ -1,7 +1,7 @@
 // server/botPlayer.js
 // Bot プレイヤーのAI処理
 
-const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../../../shared/config');
+const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../../shared/config/config');
 const { rankToValue } = require('../../shared/core/cardValue');
 const randomStrategy = require('./strategies/randomStrategy');
 const aggressiveStrategy = require('./strategies/aggressiveStrategy');
