@@ -26,7 +26,8 @@
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "postinstall": "echo '=== POST INSTALL ===' && pwd && ls -la"
   },
   "eslintConfig": {
     "extends": [
