@@ -18,7 +18,10 @@ if (currentDir.endsWith('/src')) {
 }
 
 const path = require('path');
-const projectRoot = path.resolve(__dirname, '..');
+let projectRoot = path.resolve(__dirname, '../..');
+if (projectRoot.endsWith('/src')) {
+  projectRoot = path.resolve(projectRoot, '..');
+}
 process.chdir(projectRoot);
 console.log('Project root:', projectRoot);
 console.log('Current directory:', process.cwd());
