@@ -11,7 +11,7 @@ const { drawCardsForNextTurn } = require('../utils/draw');
 const { checkJokerInHands, checkGameEnd, shouldReshuffleAfterSet } = require('../game/joker');
 const { rankToValue } = require('./cardValue');
 const { createDeck, shuffleDeck } = require('./deckLogic');
-const { ANTE, MAX_JOKER_COUNT } = require('../config');
+const { ANTE, MAX_JOKER_COUNT } = require('../config/config');
 
 /**
  * ゲーム初期化
