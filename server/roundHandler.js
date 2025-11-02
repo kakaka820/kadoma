@@ -4,7 +4,7 @@
 const { saveGameHistory } = require('./gameHistory');
 const { processRound, prepareNextTurn } = require('../shared/core/gameFlow');
 const { calculateAllTableFees } = require('../shared/utils/feeCalculator');
-const { ROUND_RESULT_DISPLAY_MS } = require('../shared/config');
+const { ROUND_RESULT_DISPLAY_MS } = require('../shared/config/config');
 const { createAllHandsInfo } = require('../shared/utils/handUtils');
 const { checkAndSendWarnings } = require('./warningSystem');
 const { startTurnTimer } = require('./turnTimer');

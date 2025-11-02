@@ -1,7 +1,7 @@
 // server/turnTimer.js
 // ターンタイマー機能
 
-const { TURN_TIME_LIMIT } = require('../shared/config');
+const { TURN_TIME_LIMIT } = require('../shared/config/config');
 
 /**
  * ターンタイマー開始
