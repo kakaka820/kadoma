@@ -1,8 +1,21 @@
 // server/server.js
 // WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
-process.chdir(__dirname + '/..');
+const currentDir = process.cwd();
 console.log('Changed working directory to:', process.cwd());
+// /opt/render/project/src にいる場合は親ディレクトリに移動
+if (currentDir.endsWith('/src')) {
+  process.chdir('..');
+  console.log('Changed working directory to:', process.cwd());
+} else if (__dirname.includes('/src/server')) {
+  // __dirname が /opt/render/project/src/server の場合
+  process.chdir(__dirname + '/../..');
+  console.log('Changed working directory to:', process.cwd());
+} else {
+  // それ以外の場合（通常のケース）
+  process.chdir(__dirname + '/..');
+  console.log('Changed working directory to:', process.cwd());
+}
 
 const fs = require('fs');
 const path = require('path');
