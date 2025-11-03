@@ -1,7 +1,7 @@
 // server/utils/multiRoomHandler.js
 // マルチルーム参加処理
 
-const { MULTI_ROOMS, BOT_WAIT_TIME_MS } = require('../../shared/config/config');
+const { MULTI_ROOMS, BOT_WAIT_TIME_MS } = require('../../shared/config');
 const { checkSufficientCurrency } = require('../authHandler');
 const { deductRoomFee } = require('./currencyHelper');
 const { createBotPlayer, BOT_STRATEGIES } = require('../bot/botPlayer');
@@ -113,17 +113,9 @@ async function handleMultiRoomJoin(socket, io, rooms, games, data, callback) {
       // Bot追加
       while (currentRoom.players.length < 3) {
         const botNumber = currentRoom.players.length + 1;
-         const usedNames = currentRoom.players.map(p => p.name);
-  
-         const bot = createBotPlayer(
-            `bot_${roomId}_${botNumber}`, 
-            botNumber, 
-            BOT_STRATEGIES.RANDOM, 
-            false,
-            usedNames
-          );
-         currentRoom.players.push(bot);
-        }
+        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber, BOT_STRATEGIES.RANDOM, false);
+        currentRoom.players.push(bot);
+      }
 
       io.to(actualRoomId).emit('room_update', {
         roomId: actualRoomId,
