@@ -3,7 +3,7 @@
 
 
 const { handleRoundEnd } = require('../gameManager');
-const { TURN_TIME_LIMIT } = require('../../shared/config/config');
+const { TURN_TIME_LIMIT } = require('../../shared/config');
 
 function setupReconnectEvents(socket, io, rooms, games) {
 
