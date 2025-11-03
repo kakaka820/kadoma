@@ -20,8 +20,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-app-rewired start",
-    "server": "node server.js",
+    "start": "node server/server.js",
+    "server": "node server/server.js",
     "build": "react-app-rewired build && node fix-manifest.js",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
