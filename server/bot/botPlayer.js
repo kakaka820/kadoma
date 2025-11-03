@@ -1,13 +1,12 @@
 // server/botPlayer.js
 // Bot プレイヤーのAI処理
 
-const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../../shared/config/config');
+const { TURN_TIME_LIMIT, BOT_MIN_DELAY_MS, BOT_MAX_DELAY_MS } = require('../../shared/config');
 const { rankToValue } = require('../../shared/core/cardValue');
 const randomStrategy = require('./strategies/randomStrategy');
 const aggressiveStrategy = require('./strategies/aggressiveStrategy');
 const passiveStrategy = require('./strategies/passiveStrategy');
 const adaptiveStrategy = require('./strategies/adaptiveStrategy');
-const { getRandomBotName } = require('../../shared/config/botNames');
 
 // Bot戦略の定義
 const BOT_STRATEGIES = {
@@ -16,7 +15,6 @@ const BOT_STRATEGIES = {
   PASSIVE: 'passive',    // 弱気（小さい順）
   ADAPTIVE: 'adaptive'   // 適応型（毎セット変更）
 };
-
 
 // 戦略マッピング
 const STRATEGY_MAP = {
@@ -163,7 +161,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
  * @returns {Object} Botプレイヤー情報
  *  @param {boolean} isProxy - 代理Botかどうか
  */
-function createBotPlayer(socketId, botNumber, strategy = BOT_STRATEGIES.RANDOM, isProxy = false, usedNames = []) {
+function createBotPlayer(socketId, botNumber, strategy = BOT_STRATEGIES.RANDOM, isProxy = false) {
   const strategyNames = {
     [BOT_STRATEGIES.RANDOM]: 'ランダム',
     [BOT_STRATEGIES.AGGRESSIVE]: '強気',
@@ -171,14 +169,9 @@ function createBotPlayer(socketId, botNumber, strategy = BOT_STRATEGIES.RANDOM, 
     [BOT_STRATEGIES.ADAPTIVE]: '適応型'
   };
 
-  const botName = isProxy 
-    ? `代理Bot ${botNumber}` 
-    : `${getRandomBotName(usedNames)} (${strategyNames[strategy]})`;
-
-
   return {
     id: socketId,
-    name: botName,
+    name: isProxy ? `代理Bot ${botNumber}` : `Bot ${botNumber} (${strategyNames[strategy]})`,
     isBot: true,
     isProxy: isProxy,
     botStrategy: strategy
