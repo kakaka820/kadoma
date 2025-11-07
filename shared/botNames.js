@@ -1,4 +1,4 @@
-// shared/config/botNames.js
+// shared/botNames.js
 // Bot の名前リスト
 
 const BOT_NAMES = [
@@ -47,4 +47,5 @@ if (typeof window !== 'undefined') {
     BOT_NAMES,
     getRandomBotName,
   };
+
 }
