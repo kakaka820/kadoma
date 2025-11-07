@@ -20,14 +20,13 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "node server/server.js",
-    "server": "node server/server.js",
+    "start": "react-app-rewired start",
+    "server": "node server.js",
     "build": "react-app-rewired build && node fix-manifest.js",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
-    "postinstall": "echo '=== POST INSTALL ===' && pwd && ls -la"
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
