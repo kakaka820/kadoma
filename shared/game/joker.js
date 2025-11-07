@@ -2,7 +2,7 @@
 // ジョーカー判定と関連ロジック
 // ⚠️ このファイルはフロント・サーバー両方で使用
 
-const { MAX_JOKER_COUNT, MIN_POINTS } = require('../config/config');
+const { MAX_JOKER_COUNT, MIN_POINTS } = require('../config');
 
 /**
  * ジョーカーかどうかを判定するユーティリティ関数
