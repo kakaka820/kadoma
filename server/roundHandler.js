@@ -77,9 +77,12 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 
 // ★ Step 5: 場代を計算・徴収
   if (previousTurnResult) {
-    const fees = calculateAllTableFees(previousTurnResult, nextState.hands.length);
+    console.log('[DEBUG] state.roomConfig:', state.roomConfig);
+    const ante = state.roomConfig?.ante || ANTE;
+    console.log('[DEBUG] ante:', ante);
+    const fees = calculateAllTableFees(previousTurnResult, nextState.hands.length, ante);
     nextState.scores = nextState.scores.map((score, idx) => score - fees[idx]);
-    console.log('[場代] 新ターン開始時徴収:', fees, '結果:', nextState.scores);
+    console.log('[場代] 新ターン開始時徴収:', fees, 'ante:', ante, '結果:', nextState.scores);
   }
   
   // ★ Step 6: 選択状態をリセット

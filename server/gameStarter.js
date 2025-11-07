@@ -29,7 +29,7 @@ function startGame(io, games, roomId, room, handleRoundEndCallback) {
   });
 
   //ゲーム初期化
-  const gameState = initializeGame(3, anteMultiplier);
+  const gameState = initializeGame(3, anteMultiplier, ante);
   gameState.roomId = roomId;
   gameState.players = room.players;
   gameState.playerSelections = [false, false, false];
