@@ -16,7 +16,7 @@ const { ANTE, MAX_JOKER_COUNT } = require('../config');
 /**
  * ゲーム初期化
  */
-function initializeGame(playerCount = 3, anteMultiplier = 200) {
+function initializeGame(playerCount = 3, anteMultiplier = 200, ante = ANTE) {
   const deck = shuffleDeck(createDeck());
   
   // 各プレイヤーに5枚配布
@@ -28,11 +28,11 @@ function initializeGame(playerCount = 3, anteMultiplier = 200) {
   const remainingDeck = deck.slice(playerCount * 5);
 
    // 初期持ち点 = ANTE * anteMultiplier
-  const initialPoints = ANTE * anteMultiplier;
-  console.log(`[Init] 初期持ち点: ${ANTE} × ${anteMultiplier} = ${initialPoints}`);
+  const initialPoints = ante * anteMultiplier;
+  console.log(`[Init] 初期持ち点: ${ante} × ${anteMultiplier} = ${initialPoints}`);
   
   // 初期場代徴収
-  const tableFees = calculateAllTableFees(null, playerCount);
+  const tableFees = calculateAllTableFees(null, playerCount, ante);
   const scores = Array(playerCount).fill(initialPoints).map((score, idx) => score - tableFees[idx]);
   
   // 初期JOKER判定
@@ -65,7 +65,7 @@ function initializeGame(playerCount = 3, anteMultiplier = 200) {
  * ラウンド処理（勝敗判定 + 得点計算）
  */
 function processRound(gameState, playerNames = null) {
-  const { fieldCards, scores, wins, currentMultiplier, previousTurnResult } = gameState;
+  const { fieldCards, scores, wins, currentMultiplier, previousTurnResult, roomConfig } = gameState;
   
   // 1. 勝敗判定
   const cardsWithIndex = fieldCards.map((card, idx) => ({
@@ -98,8 +98,9 @@ function processRound(gameState, playerNames = null) {
       const { winnerIndex, loserIndex, winnerCard, loserCard } = battleResult;
       winnerIdx = winnerIndex;
       loserIdx = loserIndex;
+      const ante = roomConfig?.ante || ANTE;
       
-      scoreChange = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse);
+      scoreChange = calculateScore(winnerCard, loserCard, currentMultiplier, isReverse, ante);
       
       newScores[winnerIdx] += scoreChange;
       newScores[loserIdx] -= scoreChange;
@@ -159,6 +160,7 @@ function prepareNextTurn(gameState, newPreviousTurnResult) {
     setTurnIndex,
     jokerCount,
     jokerDealtThisSet,
+    roomConfig,
   } = gameState;
 
   
@@ -242,7 +244,8 @@ const maxJokerCount = gameState.roomConfig?.maxJokerCount || MAX_JOKER_COUNT;
     jokerDealtThisSet: newJokerDealtThisSet,
     previousTurnResult: newPreviousTurnResult,
     isGameOver: gameEndCheck.shouldEnd,
-    gameOverReason: gameEndCheck.reason
+    gameOverReason: gameEndCheck.reason,
+    roomConfig: roomConfig
   };
 }
 
