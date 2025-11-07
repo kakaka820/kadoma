@@ -1,56 +1,17 @@
 // server/server.js
 // WebSocketサーバーの立ち上げ、イベントハンドラーの登録、サーバー起動
 
-const currentDir = process.cwd();
-console.log('Changed working directory to:', process.cwd());
-// /opt/render/project/src にいる場合は親ディレクトリに移動
-if (currentDir.endsWith('/src')) {
-  process.chdir('..');
-  console.log('Changed working directory to:', process.cwd());
-} else if (__dirname.includes('/src/server')) {
-  // __dirname が /opt/render/project/src/server の場合
-  process.chdir(__dirname + '/../..');
-  console.log('Changed working directory to:', process.cwd());
-} else {
-  // それ以外の場合（通常のケース）
-  process.chdir(__dirname + '/..');
-  console.log('Changed working directory to:', process.cwd());
-}
-
-const path = require('path');
-let projectRoot = path.resolve(__dirname, '../..');
-if (projectRoot.endsWith('/src')) {
-  projectRoot = path.resolve(projectRoot, '..');
-}
-process.chdir(projectRoot);
-console.log('Project root:', projectRoot);
-console.log('Current directory:', process.cwd());
-console.log('__dirname:', __dirname);
-const fs = require('fs');
-
-console.log('Server directory exists:', fs.existsSync(path.join(projectRoot, 'server')));
-console.log('Shared directory exists:', fs.existsSync(path.join(projectRoot, 'shared')));
-console.log('Config directory exists:', fs.existsSync(path.join(projectRoot, 'shared/config')));
-
-// shared/config の中身を全て表示
-if (fs.existsSync(path.join(process.cwd(), 'shared/config'))) {
-  console.log('Files in shared/config:', fs.readdirSync(path.join(process.cwd(), 'shared/config')));
-}
-
-
-
-
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { setupAuthEvents } = require(path.join(projectRoot, 'server/events/authEvents'));
-const { setupRoomEvents } = require(path.join(projectRoot, 'server/events/roomEvents'));
-const { setupGameEvents } = require(path.join(projectRoot, 'server/events/gameEvents'));
-const { setupReconnectEvents } = require(path.join(projectRoot, 'server/events/reconnectEvents'));
-const { checkMaintenance } = require(path.join(projectRoot, 'server/middleware/maintenanceCheck'));
-const { handleDisconnect } = require(path.join(projectRoot, 'server/roomManager'));
-const { supabase } = require(path.join(projectRoot, 'server/supabaseClient'));
+const { setupAuthEvents } = require('./events/authEvents');
+const { setupRoomEvents } = require('./events/roomEvents');
+const { setupGameEvents } = require('./events/gameEvents');
+const { setupReconnectEvents } = require('./events/reconnectEvents');
+const { checkMaintenance } = require('./middleware/maintenanceCheck');
+const { handleDisconnect } = require('./roomManager');
+const { supabase } = require('./supabaseClient');
 
 
 // Expressアプリケーションのセットアップ
