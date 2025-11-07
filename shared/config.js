@@ -164,4 +164,5 @@ if (typeof window !== 'undefined') {
     // マルチ部屋
     MULTI_ROOMS,
   };
+
 }
