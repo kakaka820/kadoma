@@ -2,7 +2,7 @@
 // 切断・復帰処理の管理
 
 const { createBotPlayer, BOT_STRATEGIES, botAutoPlay } = require('./bot/botPlayer');
-const { RECONNECT_WAIT_TIME } = require('../shared/config/config');
+const { RECONNECT_WAIT_TIME } = require('../shared/config');
 
 /**
  * プレイヤー切断時の処理（ゲーム中）
@@ -31,14 +31,12 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
     const disconnectedPlayer = room.players[playerIndex];
     
     //代理Botに切り替え
-    const usedNames = room.players.map(p => p.name);
-const botReplacement = createBotPlayer(
-  `bot_replacement_${socket.id}`,
-  playerIndex + 1,
-  BOT_STRATEGIES.RANDOM,
-  true,
-  usedNames
-);
+    const botReplacement = createBotPlayer(
+      `bot_replacement_${socket.id}`,
+      playerIndex + 1,
+      BOT_STRATEGIES.RANDOM,
+      true
+    );
 
     //追加情報
     botReplacement.isReplacement = true; // ← 代替Bot フラグ

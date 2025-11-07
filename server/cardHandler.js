@@ -2,7 +2,7 @@
 // カード出す処理、JOKER制限チェック、カード選択の管理担当
 
 const { botAutoPlay } = require('./bot/botPlayer');
-const { CARD_REVEAL_DELAY_MS } = require('../shared/config/config');
+const { CARD_REVEAL_DELAY_MS } = require('../shared/config');
 
 /**
  * カード出す処理（同時プレイ版）

@@ -2,7 +2,7 @@
 // 警告システム（JOKER配布・デッキ残量警告）
 
 const { checkJokerInHands } = require('../shared/game/joker');
-const { LOW_DECK_THRESHOLD } = require('../shared/config/config');
+const { LOW_DECK_THRESHOLD } = require('../shared/config');
 
 /**
  * JOKER・デッキ残量の警告チェック＆送信
