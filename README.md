@@ -1,3 +1,8 @@
+# このゲームについて
+
+トランプを使ったゲームです。元々身内で遊んでいたものを、オンラインでも遊べるように作りました。今後の開発予定としては、フレンド機能とフレンドルームの実装、カスタム部屋(ジョーカーの数や基本値を自分達でカスタマイズ出来るように)の実装、イベント部屋の実装などを予定しています。また、シナリオの実装も考えていますが、開発者が絵が掛けないことを理由に企画が止まっている状態です。ゲーム画面のデザイン等も含め、ストーリーなどの絵を担当してくれる方がいらしたら是非連絡ください。
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -68,3 +73,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
