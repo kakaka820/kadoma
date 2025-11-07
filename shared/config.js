@@ -1,4 +1,4 @@
-// shared/config/config.js
+// shared/config.js
 // ゲーム設定定数（フロント・サーバー共通）
 // ⚠️ このファイルはフロント・サーバー両方で使用
 
@@ -81,9 +81,9 @@ const MULTI_ROOMS = [
     id: 'room_6',
     name: '部屋6',
     ante: 20,
-    anteMultiplier: 1400,
+    anteMultiplier: 1300,
     maxJokerCount: 10,
-    requiredChips: 20 * 1400  // 28000チップ
+    requiredChips: 20 * 1300  // 26000チップ
   }
 ];
 
@@ -164,5 +164,4 @@ if (typeof window !== 'undefined') {
     // マルチ部屋
     MULTI_ROOMS,
   };
-
 }
