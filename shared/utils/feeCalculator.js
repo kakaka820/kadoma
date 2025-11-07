@@ -8,15 +8,15 @@ const { ANTE } = require('../config');
 /**
  * プレイヤーごとの場代を計算
  */
-function calculateTableFee(playerIndex, previousResult, playerCount = 3) {
+function calculateTableFee(playerIndex, previousResult, playerCount = 3, ante = ANTE) {
   if (previousResult === null) {
-    console.log(`[場代] 1ターン目 - Player ${playerIndex + 1}: ANTE * 1`);
-    return ANTE * 1;
+    console.log(`[場代] 1ターン目 - Player ${playerIndex + 1}: ante * 1`);
+    return ante * 1;
   }
 
   if (previousResult.isDraw) {
-    console.log(`[場代] 引き分け - Player ${playerIndex + 1}: ANTE * 1`);
-    return ANTE * 1;
+    console.log(`[場代] 引き分け - Player ${playerIndex + 1}: ante * 1`);
+    return ante * 1;
   }
 
   if (previousResult.winnerIndex === playerIndex) {
@@ -25,22 +25,22 @@ function calculateTableFee(playerIndex, previousResult, playerCount = 3) {
   }
 
   if (previousResult.loserIndex === playerIndex) {
-    console.log(`[場代] 敗者 - Player ${playerIndex + 1}: ANTE * 2`);
-    return ANTE * 2;
+    console.log(`[場代] 敗者 - Player ${playerIndex + 1}: ante * 2`);
+    return ante * 2;
   }
 
-  console.log(`[場代] その他 - Player ${playerIndex + 1}: ANTE * 1`);
-  return ANTE * 1;
+  console.log(`[場代] その他 - Player ${playerIndex + 1}: ante * 1`);
+  return ante * 1;
 }
 
 /**
  * 全プレイヤーの場代を一括計算
  */
-function calculateAllTableFees(previousResult, playerCount = 3) {
-  console.log('[場代計算] 開始:', previousResult);
+function calculateAllTableFees(previousResult, playerCount = 3, ante = ANTE) {
+  console.log('[場代計算] 開始:', previousResult, 'ante:', ante);
   
   const fees = Array.from({ length: playerCount }, (_, i) => 
-    calculateTableFee(i, previousResult, playerCount)
+    calculateTableFee(i, previousResult, playerCount, ante)
   );
   
   console.log('[場代計算] 結果:', fees);
