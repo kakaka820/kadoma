@@ -108,7 +108,8 @@ function handleJoinRoom(io, rooms, games, socket, data, startGameCallback) {
       while (currentRoom.players.length < 3) {
         const botNumber = currentRoom.players.length + 1;
         const strategy = botStrategies[Math.floor(Math.random() * botStrategies.length)];
-        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber, strategy, false);
+        const usedNames = currentRoom.players.map(p => p.name);
+        const bot = createBotPlayer(`bot_${roomId}_${botNumber}`, botNumber, strategy, false, usedNames);
         currentRoom.players.push(bot);
         console.log(`[Bot] Added ${bot.name} to ${roomId}`);
       }
