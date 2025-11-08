@@ -1,12 +1,7 @@
 // server/utils/questManager.js
 // クエスト管理ロジック
 
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const { supabase } = require('../supabaseClient');
 
 const RESET_HOUR = 12; // 毎日12時にリセット
 
