@@ -11,6 +11,7 @@ const { startTurnTimer } = require('./turnTimer');
 const { botAutoPlay } = require('./bot/botPlayer');
 const { distributeGameReward } = require('./utils/currencyHelper');
 const { supabase } = require('./supabaseClient');
+const { updateQuestProgress } = require('./utils/questManager');
 
 
 
@@ -152,6 +153,35 @@ console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
       console.error('[game_over] 履歴保存失敗:', err);
     });
 
+
+    // クエスト進捗を更新
+    for (const ranking of rankings) {
+      const player = nextState.players[ranking.playerIndex];
+      
+      // Bot または切断済みプレイヤーはスキップ
+      if (player.isBot || !player.userId) {
+        continue;
+      }
+      
+      const userId = player.userId;
+      
+      // 1. プレイ回数更新
+      await updateQuestProgress(userId, 'play_games', 1);
+      console.log(`[Quest] User ${userId}: play_games +1`);
+      
+      // 2. 勝利判定（profit >= 0）
+      if (ranking.profit >= 0) {
+        await updateQuestProgress(userId, 'win_games', 1);
+        console.log(`[Quest] User ${userId}: win_games +1`);
+      }
+      
+      // 3. チップ獲得量更新
+      if (ranking.profit > 0) {
+        await updateQuestProgress(userId, 'earn_chips', ranking.profit);
+        console.log(`[Quest] User ${userId}: earn_chips +${ranking.profit}`);
+      }
+    }
+  
     //ゲーム終了通知
     io.to(roomId).emit('game_over', {
       reason: nextState.gameOverReason,
