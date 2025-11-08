@@ -47,5 +47,4 @@ if (typeof window !== 'undefined') {
     BOT_NAMES,
     getRandomBotName,
   };
-
 }
