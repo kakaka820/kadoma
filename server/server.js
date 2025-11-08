@@ -12,6 +12,7 @@ const { setupReconnectEvents } = require('./events/reconnectEvents');
 const { checkMaintenance } = require('./middleware/maintenanceCheck');
 const { handleDisconnect } = require('./roomManager');
 const { supabase } = require('./supabaseClient');
+const questRoutes = require('./routes/questRoutes');
 
 
 // Expressアプリケーションのセットアップ
@@ -26,6 +27,9 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
+
+// ルート登録
+app.use('/api', questRoutes);
 
 // httpサーバーの作成
 const server = http.createServer(app);
