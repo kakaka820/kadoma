@@ -7,6 +7,7 @@ const randomStrategy = require('./strategies/randomStrategy');
 const aggressiveStrategy = require('./strategies/aggressiveStrategy');
 const passiveStrategy = require('./strategies/passiveStrategy');
 const adaptiveStrategy = require('./strategies/adaptiveStrategy');
+const { getRandomBotName } = require('../../shared/botNames');
 
 // Bot戦略の定義
 const BOT_STRATEGIES = {
@@ -161,7 +162,7 @@ function botAutoPlay(io, games, roomId, botIndex, handleRoundEndCallback, isProx
  * @returns {Object} Botプレイヤー情報
  *  @param {boolean} isProxy - 代理Botかどうか
  */
-function createBotPlayer(socketId, botNumber, strategy = BOT_STRATEGIES.RANDOM, isProxy = false) {
+function createBotPlayer(socketId, botNumber, strategy = BOT_STRATEGIES.RANDOM, isProxy = false, usedNames = []) {
   const strategyNames = {
     [BOT_STRATEGIES.RANDOM]: 'ランダム',
     [BOT_STRATEGIES.AGGRESSIVE]: '強気',
@@ -169,14 +170,19 @@ function createBotPlayer(socketId, botNumber, strategy = BOT_STRATEGIES.RANDOM, 
     [BOT_STRATEGIES.ADAPTIVE]: '適応型'
   };
 
+  const botName = isProxy 
+    ? `代理Bot` 
+    : `${getRandomBotName(usedNames)}`;
   return {
     id: socketId,
-    name: isProxy ? `代理Bot ${botNumber}` : `Bot ${botNumber} (${strategyNames[strategy]})`,
+    name: botName,
     isBot: true,
     isProxy: isProxy,
     botStrategy: strategy
   };
 }
+
+  
 
 module.exports = {
   selectCardByStrategy,
