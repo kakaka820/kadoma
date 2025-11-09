@@ -18,8 +18,9 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { RoomSelection } from '../screens/RoomSelection';
 import { ResultScreen } from '../screens/ResultScreen';
 import { StatsScreen } from '../screens/StatsScreen';
+import { QuestScreen } from '../screens/QuestScreen';
 
-type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats';
+type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests';
 
 
 interface OnlineGameProps {
@@ -83,7 +84,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const { notification } = useDisconnectNotification({ socket });
 
   // 画面遷移ハンドラー
-  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats') => {
+  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests') => {
     if (type === 'multi') {
       setScreen('room-selection');
     } else if (type === 'custom') {
@@ -94,6 +95,9 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
       if (onSwitchToLocal) {
         onSwitchToLocal();
       }
+    }
+     else if (type === 'quests') {
+    setScreen('quests');
     }
     else if (type === 'stats') { 
       setScreen('stats');
@@ -204,6 +208,10 @@ useEffect(() => {
   if (!isConnected) {
     return <ConnectionStatus />;
   }
+  // クエスト画面
+if (screen === 'quests') {
+  return <QuestScreen onClose={handleBackToHome} />;
+}
   // 戦績画面
   if (screen === 'stats') {
     return <StatsScreen onBack={handleBackToHome} />;
