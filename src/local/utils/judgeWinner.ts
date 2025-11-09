@@ -34,6 +34,8 @@ export function judgeWinner(cards:CardWithIndex[]): JudgeResult {
   }));
 
   const maxValue = Math.max(...cardValues.map(c => c.value));
+  const minValue = Math.min(...cardValues.map(c => c.value));
+  const originalLoser = cardValues.find(c => c.value === minValue);
   let winnerIndexes = cardValues
     .filter(c => c.value === maxValue)
     .map(c => c.playerIndex);
@@ -49,35 +51,28 @@ export function judgeWinner(cards:CardWithIndex[]): JudgeResult {
 
   // 絵札（J、Q、K）またはJOKERの場合
   if (
-    winnerCard &&
+    winnerCard && originalLoser !== undefined &&
     (['J', 'Q', 'K', 'JOKER1', 'JOKER2'].includes(winnerCard.card))
   ) {
     // 逆転判定（カードに対応する逆転条件）
      // 逆転条件のカードを探す（複数ある場合は最も強いものを選ぶ）
-     let reverseCards: typeof cardValues = []; 
+     let canReverse = false;
 
-    if (winnerCard.card === 'J') {
-      // J: 1, 5 で逆転
-      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [1, 5].includes(c.value));
+if (winnerCard.card === 'J') {
+  canReverse = [1, 5].includes(originalLoser.value);
 } else if (winnerCard.card === 'Q') {
-      // Q: 2, 6 で逆転
-      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [2, 6].includes(c.value));
+  canReverse = [2, 6].includes(originalLoser.value);
 } else if (winnerCard.card === 'K') {
-      // K: 3, 7 で逆転
-      reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && [3, 7].includes(c.value));
+  canReverse = [3, 7].includes(originalLoser.value);
 } else if (winnerCard.card.startsWith('JOKER')) {
-      // JOKER: 4 で逆転
-       reverseCards = cardValues.filter(c => c.playerIndex !== winnerIndexes[0] && c.value === 4);
+  canReverse = originalLoser.value === 4;
 }
 
-       
-  if (reverseCards.length > 0) {
-  const minReverseCard = reverseCards.reduce((min, card) => 
-    card.value < min.value ? card : min
-  );
-  winnerIndexes = [minReverseCard.playerIndex];
+if (canReverse) {
+  winnerIndexes = [originalLoser.playerIndex];
   isReverse = true;
 }
+      
 
   
     }
