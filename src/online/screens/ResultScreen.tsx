@@ -9,6 +9,7 @@ interface ResultScreenProps {
   winner: number;
   players: string[];
   reason: string;
+  buyIn?: number;
   onReturnHome: () => void;
   onRematch: () => void;
 }
@@ -19,6 +20,7 @@ export function ResultScreen({
   winner,
   players,
   reason,
+  buyIn,
   onReturnHome,
   onRematch,
 }: ResultScreenProps) {
@@ -33,8 +35,10 @@ export function ResultScreen({
   }, []);
 
 
-  const isWinner = playerIndex === winner;
+  
   const myScore = playerIndex !== null ? finalScores[playerIndex] : 0;
+  const actualBuyIn = buyIn || 1000;
+  const isWinner = myScore >= actualBuyIn;
 
    const handleRematchClick = () => {
     if (isRematchClicked) return;
@@ -52,7 +56,7 @@ export function ResultScreen({
 
 if (response.success) {
         console.log('[WaitingRoom] マッチングキャンセル成功');
-        setIsRematchClicked(false);  // ✅ マッチング状態を解除
+        setIsRematchClicked(false);  // マッチング状態を解除
       } else {
         console.error('[ResultScreen] キャンセル失敗:', response.error);
         alert(response.error || 'キャンセルに失敗しました');
