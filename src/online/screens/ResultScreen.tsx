@@ -79,13 +79,19 @@ if (response.success) {
         {/* スコア表示 */}
         <div className="bg-gray-700 rounded-lg p-4 mb-6">
           <h3 className="text-white text-lg font-bold mb-3">最終スコア</h3>
-          {players.map((playerName, idx) => (
+          {players.map((playerName, idx) => {
+          
+          const isMe = idx === playerIndex;
+          const playerScore = finalScores[idx];
+          const playerWon = playerScore >= actualBuyIn;
+          
+          return (
             <div
               key={idx}
               className={`flex justify-between items-center py-2 ${
-                idx === playerIndex ? 'text-yellow-400 font-bold' : 'text-gray-300'
-              } ${idx === winner ? 'text-yellow-400' : ''}`}
-            >
+               playerWon ? 'text-yellow-400' : 'text-gray-300'
+               } ${isMe ? 'font-bold' : ''}`}
+              >
               <span>
                 {idx === winner && '👑 '}
                 {playerName}
@@ -93,7 +99,8 @@ if (response.success) {
               </span>
               <span className="font-mono">{finalScores[idx].toLocaleString()}</span>
             </div>
-          ))}
+          );
+         })}
         </div>
 
         {/* あなたのスコア */}
