@@ -125,6 +125,7 @@ function getNextMonday12PM(now) {
  */
 async function getUserQuestProgress(userId) {
   try {
+    console.log('[QuestManager] getUserQuestProgress called for user:', userId);
     // 全クエスト取得
     const { data: quests, error: questsError } = await supabase
       .from('quests')
@@ -132,8 +133,9 @@ async function getUserQuestProgress(userId) {
       .eq('is_active', true)
       .order('category', { ascending: true })
       .order('sort_order', { ascending: true });
-    
+    console.log('[QuestManager] Quests query result:', { quests, error: questsError });
     if (questsError) throw questsError;
+    console.log('[QuestManager] Found quests:', quests?.length || 0);
     
     // ユーザーの進捗取得
     const { data: progress, error: progressError } = await supabase
