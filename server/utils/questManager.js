@@ -21,34 +21,48 @@ function shouldResetQuest(resetPeriod, lastResetAt) {
   const nowJST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
   const lastResetJST = new Date(lastReset.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
   
-  // 今日の12時
-  const todayReset = new Date(nowJST);
-  todayReset.setHours(RESET_HOUR, 0, 0, 0);
-  
-  switch (resetPeriod) {
+switch (resetPeriod) {
     case 'daily':
-      // 最後のリセットが今日の12時より前 & 現在時刻が12時以降
-      if (lastResetJST < todayReset && nowJST >= todayReset) {
-        return true;
+      // 日付が異なる && 現在時刻が12時以降
+      const nowDate = nowJST.toISOString().split('T')[0];  // 2025-11-09
+      const lastResetDate = lastResetJST.toISOString().split('T')[0]; 
+
+       if (nowDate !== lastResetDate) {
+        // 今日の12時（日本時間）
+        const todayNoon = new Date(nowJST);
+        todayNoon.setHours(RESET_HOUR, 0, 0, 0);
+        
+        // 現在時刻が12時以降ならリセット
+        if (nowJST >= todayNoon) {
+          return true;
+        }
       }
-      break;
+      break; 
       
     case 'weekly':
-      // 月曜日12時にリセット
-      const lastMonday = getLastMonday12PM(nowJST);
-      if (lastResetJST < lastMonday && nowJST >= lastMonday) {
-        return true;
+      // 前回リセットから7日以上経過
+      const daysDiff = Math.floor((nowJST - lastResetJST) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff >= 7) {
+        // 月曜日12時にリセット
+        const dayOfWeek = nowJST.getDay();
+        const hour = nowJST.getHours();
+        
+        if (dayOfWeek === 1 && hour >= RESET_HOUR) {
+          return true;
+        }
       }
       break;
       
     case 'monthly':
-      // 毎月1日12時にリセット
-      const firstOfMonth = new Date(nowJST);
-      firstOfMonth.setDate(1);
-      firstOfMonth.setHours(RESET_HOUR, 0, 0, 0);
-      
-      if (lastResetJST < firstOfMonth && nowJST >= firstOfMonth) {
-        return true;
+      // 月が異なる
+      if (nowJST.getMonth() !== lastResetJST.getMonth() || 
+      nowJST.getFullYear() !== lastResetJST.getFullYear()) {
+        
+        // 1日の12時以降ならリセット
+        if (nowJST.getDate() >= 1 && nowJST.getHours() >= RESET_HOUR) {
+          return true;
+        }
       }
       break;
   }
