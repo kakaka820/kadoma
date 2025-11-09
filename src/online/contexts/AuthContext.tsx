@@ -18,6 +18,7 @@ interface AuthContextType {
   logout: () => void;
   register: (username: string) => Promise<{ success: boolean; error?: string }>;
   loginWithCode: (code: string) => Promise<{ success: boolean; error?: string }>;
+  updateCurrency: (newCurrency: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -187,10 +188,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [socket, user?.id]);
 
+  const updateCurrency = (newCurrency: number) => {
+    if (user) {
+      setUser({ ...user, currency: newCurrency });
+      console.log('[AuthContext] Currency updated:', newCurrency);
+    }
+  };
+
   
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isMaintenanceMode, login, logout, register, loginWithCode }}>
+    <AuthContext.Provider value={{ user, isLoading, isMaintenanceMode, login, logout, register, loginWithCode, updateCurrency }}>
       {children}
     </AuthContext.Provider>
   );
