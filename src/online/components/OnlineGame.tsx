@@ -233,6 +233,7 @@ useEffect(() => {
         winner={gameOverData.winner}
         players={players}
         reason={gameOverData.reason}
+        buyIn={gameOverData.roomConfig?.requiredChips}
         onReturnHome={handleReturnHome}
         onRematch={handleRematch}
       />
