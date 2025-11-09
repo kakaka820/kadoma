@@ -92,7 +92,7 @@ function checkGameEnd(allHandsEmpty, jokerCount, players, maxJokerCount = MAX_JO
   // 条件1: 誰かの得点が0以下
   if (hasPlayerBelowMinPoints(players)) {
     const bankruptPlayer = players.find(p => p.points <= MIN_POINTS);
-    const playerName = bankruptPlayer?.username || 'プレイヤー';
+    const playerName = bankruptPlayer?.username || 'プレイヤー';  //また後でBotNameを表示させるようにする
     return {
       shouldEnd: true,
       reason: `${playerName}の得点が${MIN_POINTS}以下になりました`

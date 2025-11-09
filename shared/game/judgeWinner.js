@@ -43,6 +43,11 @@ function judgeWinner(cards) {
   }));
 
   const maxValue = Math.max(...cardValues.map(c => c.value));
+  const minValue = Math.min(...cardValues.map(c => c.value));
+  
+  const originalWinner = cardValues.find(c => c.value === maxValue);
+  const originalLoser = cardValues.find(c => c.value === minValue);
+
   let winnerIndexes = cardValues
     .filter(c => c.value === maxValue)
     .map(c => c.playerIndex);
@@ -59,35 +64,26 @@ function judgeWinner(cards) {
     winnerCard &&
     ['J', 'Q', 'K', 'JOKER1', 'JOKER2'].includes(winnerCard.card)
   ) {
-    let reverseCards = [];
+    let canReverse = false;
 
     if (winnerCard.card === 'J') {
-      // J: 1, 5 で逆転
-      reverseCards = cardValues.filter(
-        c => c.playerIndex !== winnerIndexes[0] && [1, 5].includes(c.value)
-      );
+      // J: 敗者が 1 or 5 なら逆転
+      canReverse = [1, 5].includes(originalLoser.value);
     } else if (winnerCard.card === 'Q') {
-      // Q: 2, 6 で逆転
-      reverseCards = cardValues.filter(
-        c => c.playerIndex !== winnerIndexes[0] && [2, 6].includes(c.value)
-      );
+      // Q: 敗者が 2 or 6 なら逆転
+      canReverse = [2, 6].includes(originalLoser.value);
     } else if (winnerCard.card === 'K') {
-      // K: 3, 7 で逆転
-      reverseCards = cardValues.filter(
-        c => c.playerIndex !== winnerIndexes[0] && [3, 7].includes(c.value)
-      );
+      // K: 敗者が 3 or 7 なら逆転
+      canReverse = [3, 7].includes(originalLoser.value);
     } else if (winnerCard.card.startsWith('JOKER')) {
-      // JOKER: 4 で逆転
-      reverseCards = cardValues.filter(
-        c => c.playerIndex !== winnerIndexes[0] && c.value === 4
-      );
+      // JOKER: 敗者が 4 なら逆転
+      canReverse = originalLoser.value === 4;
     }
 
-    if (reverseCards.length > 0) {
-      const minReverseCard = reverseCards.reduce((min, card) =>
-        card.value < min.value ? card : min
-      );
-      winnerIndexes = [minReverseCard.playerIndex];
+
+    if (canReverse) {
+      // 逆転：敗者（最小値）が勝者になる
+      winnerIndexes = [originalLoser.playerIndex];
       isReverse = true;
     }
   }
