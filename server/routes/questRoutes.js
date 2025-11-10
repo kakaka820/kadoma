@@ -118,7 +118,7 @@ router.post('/quests/claim', async (req, res) => {
     // 報酬を付与
     const { data: currentUser, error: getUserError } = await supabase
   .from('users')
-  .select('chips')
+  .select('currency')
   .eq('id', userId)
   .single();
 if (getUserError || !currentUser) {
@@ -128,9 +128,12 @@ if (getUserError || !currentUser) {
     error: 'User not found'
   });
 }
+
+const newCurrency = currentUser.currency + quest.reward_amount;
+
 const { error: rewardError } = await supabase
   .from('users')
-  .update({ chips: currentUser.chips + quest.reward_amount })
+  .update({ currency: newCurrency })
   .eq('id', userId);
 if (rewardError) {
   console.error('[QuestAPI] Error adding reward:', rewardError);
