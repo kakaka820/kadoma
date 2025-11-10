@@ -1,8 +1,9 @@
 // src/online/screens/HomeScreen.tsx
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { QuestScreen } from './QuestScreen';
 
-type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats';
+type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests';
 
 interface HomeScreenProps {
   onNavigate: (type: NavigationType) => void;
@@ -85,6 +86,14 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         >
           ローカル対戦
         </button>
+
+        <button
+        onClick={() => onNavigate('quests')}
+        className="w-full py-4 bg-purple-500 hover:bg-purple-600 text-white font-bold text-xl rounded-lg transition mb-4"
+      >
+          クエスト
+      </button>
+
         <button 
         onClick={() => onNavigate('stats')}
         className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xl rounded-lg transition mb-4"
