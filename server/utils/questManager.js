@@ -285,7 +285,14 @@ async function updateQuestProgress(userId, questType, amount = 1) {
       if (currentProgress.completed) continue;
       
       // 進捗を更新
-      const newProgress = Math.min(currentProgress.progress + amount, quest.target_value);
+      let newProgress;
+      if (questType.endsWith('_single')) {
+      // 単発系: 現在の値と比較して、大きい方を保存
+        newProgress = Math.max(currentProgress.progress, amount);
+         } else {
+      // 累計系: 加算
+        newProgress = Math.min(currentProgress.progress + amount, quest.target_value);
+         }
       const isCompleted = newProgress >= quest.target_value;
       
       await supabase
