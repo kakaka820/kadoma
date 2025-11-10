@@ -95,25 +95,35 @@ function getLastMonday12PM(now) {
  */
 function getNextResetTime(resetPeriod) {
   const now = new Date();
-  const nowJST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
   
   switch (resetPeriod) {
     case 'daily':
+      // 日本時間で明日の12時を計算
+      const nowJST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
       const tomorrow = new Date(nowJST);
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(RESET_HOUR, 0, 0, 0);
-      return tomorrow;
+      
+      // UTC に戻す（JST は UTC+9）
+      const tomorrowUTC = new Date(tomorrow.getTime() - 9 * 60 * 60 * 1000);
+      return tomorrowUTC;
       
     case 'weekly':
-      const nextMonday = getNextMonday12PM(nowJST);
-      return nextMonday;
+      // 日本時間で次の月曜日12時を計算
+      const nextMondayJST = getNextMonday12PM(new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })));
+      const nextMondayUTC = new Date(nextMondayJST.getTime() - 9 * 60 * 60 * 1000);
+      return nextMondayUTC;
       
     case 'monthly':
-      const nextMonth = new Date(nowJST);
+      // 日本時間で来月1日12時を計算
+      const nowJSTMonthly = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+      const nextMonth = new Date(nowJSTMonthly);
       nextMonth.setMonth(nextMonth.getMonth() + 1);
       nextMonth.setDate(1);
       nextMonth.setHours(RESET_HOUR, 0, 0, 0);
-      return nextMonth;
+      
+      const nextMonthUTC = new Date(nextMonth.getTime() - 9 * 60 * 60 * 1000);
+      return nextMonthUTC;
       
     default:
       return null; // アチーブメントはリセットなし
