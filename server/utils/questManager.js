@@ -3,7 +3,7 @@
 
 const { supabase } = require('../supabaseClient');
 
-const RESET_HOUR = 12; // 毎日12時にリセット
+const RESET_HOUR = 0; // 毎日12時にリセット
 
 /**
  * クエストがリセットされるべきかチェック
@@ -28,14 +28,14 @@ switch (resetPeriod) {
       const lastResetDate = lastResetJST.toISOString().split('T')[0]; 
 
        if (nowDate !== lastResetDate) {
-        // 今日の12時（日本時間）
-        const todayNoon = new Date(nowJST);
-        todayNoon.setHours(RESET_HOUR, 0, 0, 0);
-        
-        // 現在時刻が12時以降ならリセット
-        if (nowJST >= todayNoon) {
-          return true;
-        }
+      // 今日の0時（日本時間）
+      const todayMidnight = new Date(nowJST);
+      todayMidnight.setHours(RESET_HOUR, 0, 0, 0);
+  
+      // 現在時刻が0時以降ならリセット（常にtrueになる）
+      if (nowJST >= todayMidnight) {
+      return true;
+       }
       }
       break; 
       
@@ -100,11 +100,12 @@ function getNextResetTime(resetPeriod) {
   
   switch (resetPeriod) {
     case 'daily':
-      // 現在のUTC時刻から、次の日本時間12時（UTC 3時）を計算
+      // 現在のUTC時刻から、次の日本時間0時（UTC 15時）を計算
+      // JST 0時 = UTC 15時（前日）
       const nextReset = new Date(now);
-      nextReset.setUTCHours(3, 0, 0, 0); // UTC 3時 = JST 12時
+      nextReset.setUTCHours(15, 0, 0, 0); // UTC 15時 = JST 0時（翌日）
       
-      // もし既に今日のUTC 3時を過ぎていたら、明日にする
+      // もし既に今日のUTC 15時を過ぎていたら、明日にする
       if (now >= nextReset) {
         nextReset.setUTCDate(nextReset.getUTCDate() + 1);
       }
@@ -112,22 +113,22 @@ function getNextResetTime(resetPeriod) {
       return nextReset;
       
     case 'weekly':
-      // 次の月曜日 UTC 3時（JST 12時）
+      // 次の月曜日 UTC 15時（JST 0時）
       const nextMonday = new Date(now);
       const dayOfWeek = nextMonday.getUTCDay(); // 0=日曜, 1=月曜
       const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7 || 7;
       
       nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
-      nextMonday.setUTCHours(3, 0, 0, 0);
+      nextMonday.setUTCHours(15, 0, 0, 0); // UTC 15時 = JST 0時（月曜）
       
       return nextMonday;
       
     case 'monthly':
-      // 来月1日 UTC 3時（JST 12時）
+      // 来月1日 UTC 15時（JST 0時）
       const nextMonth = new Date(now);
       nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
       nextMonth.setUTCDate(1);
-      nextMonth.setUTCHours(3, 0, 0, 0);
+      nextMonth.setUTCHours(15, 0, 0, 0); // UTC 15時 = JST 0時（1日）
       
       return nextMonth;
       
