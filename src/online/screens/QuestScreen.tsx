@@ -65,7 +65,7 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
 
     try {
       const response = await fetch(
-         `https://kadoma.onrender.com/api/quests?userId=${user.id}`,
+         `https://kadoma.onrender.com/api/quests/claim`,
       {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
