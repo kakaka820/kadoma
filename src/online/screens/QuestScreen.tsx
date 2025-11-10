@@ -33,6 +33,29 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
 
+  // リセットまでの時間を計算
+  const getResetTimeText = (category: string, nextReset: string | null): string => {
+    if (!nextReset) return '';
+    
+    const now = new Date();
+    const resetDate = new Date(nextReset);
+    const diffMs = resetDate.getTime() - now.getTime();
+    
+    if (diffMs <= 0) return '';
+    
+    if (category === 'daily') {
+      // デイリー: n時間後
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      return ` (${hours}時間後に更新)`;
+    } else {
+      // ウィークリー・マンスリー: n日後
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return ` (${days}日後に更新)`;
+    }
+  };
+
+
+
   // クエスト一覧を取得
   const fetchQuests = async () => {
     if (!user) return;
@@ -179,7 +202,9 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
               {/* デイリークエスト */}
               {dailyQuests.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-white mb-3">📅 デイリークエスト</h3>
+                  <h3 className="text-xl font-bold text-white mb-3">📅 デイリークエスト<span className="text-sm text-gray-400 font-normal">
+                    {dailyQuests[0]?.next_reset && getResetTimeText('daily', dailyQuests[0].next_reset)}
+                  </span></h3>
                   {dailyQuests.map(quest => (
                     <QuestCard key={quest.id} quest={quest} />
                   ))}
@@ -189,7 +214,11 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
               {/* ウィークリークエスト */}
               {weeklyQuests.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-white mb-3">📆 ウィークリークエスト</h3>
+                  <h3 className="text-xl font-bold text-white mb-3">📆 ウィークリークエスト
+                    <span className="text-sm text-gray-400 font-normal">
+                    {weeklyQuests[0]?.next_reset && getResetTimeText('weekly', weeklyQuests[0].next_reset)}
+                  </span>
+                  </h3>
                   {weeklyQuests.map(quest => (
                     <QuestCard key={quest.id} quest={quest} />
                   ))}
@@ -199,7 +228,11 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
               {/* マンスリークエスト */}
               {monthlyQuests.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="text-xl font-bold text-white mb-3">📊 マンスリークエスト</h3>
+                  <h3 className="text-xl font-bold text-white mb-3">📊 マンスリークエスト
+                    <span className="text-sm text-gray-400 font-normal">
+                    {monthlyQuests[0]?.next_reset && getResetTimeText('monthly', monthlyQuests[0].next_reset)}
+                    </span>
+                  </h3>
                   {monthlyQuests.map(quest => (
                     <QuestCard key={quest.id} quest={quest} />
                   ))}
