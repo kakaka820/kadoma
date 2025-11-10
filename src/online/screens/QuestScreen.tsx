@@ -32,6 +32,23 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [serverTime, setServerTime] = useState<string>('');
+
+
+  // サーバー時刻を取得
+  const fetchServerTime = async () => {
+    try {
+      const response = await fetch('https://kadoma.onrender.com/api/server-time');
+      const data = await response.json();
+      setServerTime(`サーバー時刻(UTC): ${data.utc} | JST: ${data.jst}`);
+    } catch (error) {
+      console.error('[QuestScreen] Error fetching server time:', error);
+    }
+  };
+  useEffect(() => {
+    fetchQuests();
+    fetchServerTime();
+  }, [user]);
 
   // リセットまでの時間を計算
 const getResetTimeText = (category: string, nextReset: string | null): string => {
@@ -146,6 +163,14 @@ const getResetTimeText = (category: string, nextReset: string | null): string =>
         <div>
           <h4 className="text-white font-bold">{quest.name}</h4>
           <p className="text-gray-400 text-sm">{quest.description}</p>
+
+          {/* デバッグ用: next_reset を表示 */}
+        {quest.next_reset && (
+          <p className="text-xs text-gray-600 mt-1">
+            Reset: {new Date(quest.next_reset).toISOString()}
+          </p>
+        )}
+        
         </div>
         <div className="text-right">
           <p className="text-yellow-400 font-bold">{quest.reward_amount} チップ</p>
@@ -193,6 +218,13 @@ const getResetTimeText = (category: string, nextReset: string | null): string =>
             ×
           </button>
         </div>
+
+        {/* サーバー時刻表示（デバッグ用） */}
+        {serverTime && (
+          <div className="px-6 pt-4">
+            <p className="text-xs text-gray-500">{serverTime}</p>
+          </div>
+        )}
 
         {/* コンテンツ */}
         <div className="p-6 max-h-[70vh] overflow-y-auto">
