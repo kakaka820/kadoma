@@ -34,34 +34,24 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
   const [claiming, setClaiming] = useState<string | null>(null);
 
   // リセットまでの時間を計算
-  const getResetTimeText = (category: string, nextReset: string | null): string => {
+const getResetTimeText = (category: string, nextReset: string | null): string => {
   if (!nextReset) return '';
   
   const now = new Date();
   const resetDate = new Date(nextReset);
   
-  console.log('[Debug] Category:', category);
-  console.log('[Debug] Now:', now.toISOString());
-  console.log('[Debug] Reset:', resetDate.toISOString());
-  console.log('[Debug] Now (JST):', now.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }));
-  console.log('[Debug] Reset (JST):', resetDate.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }));
-  
   // ミリ秒の差分を計算
   const diffMs = resetDate.getTime() - now.getTime();
-  console.log('[Debug] Diff ms:', diffMs);
-  console.log('[Debug] Diff hours:', diffMs / (1000 * 60 * 60));
   
   if (diffMs <= 0) return '';
   
   if (category === 'daily') {
     // デイリー: n時間後
     const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    console.log('[Debug] Calculated hours:', hours);
     return ` (${hours}時間後に更新)`;
   } else {
     // ウィークリー・マンスリー: n日後
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    console.log('[Debug] Calculated days:', days);
     return ` (${days}日後に更新)`;
   }
 };
