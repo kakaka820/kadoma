@@ -163,17 +163,11 @@ if (rewardError) {
     
     console.log(`[QuestAPI] Rewarded ${quest.reward_amount} chips to user ${userId}`);
     
-    // 更新後のユーザー情報を取得
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('chips')
-      .eq('id', userId)
-      .single();
     
     res.json({
       success: true,
       reward: quest.reward_amount,
-      newChipBalance: user?.chips || 0,
+      newCurrency: newCurrency,
       quest: {
         id: quest.id,
         name: quest.name,
