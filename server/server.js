@@ -22,9 +22,26 @@ const app = express();
 app.use(express.json());
 // CORS設定
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', process.env.CLIENT_URL || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  const allowedOrigins = [
+    process.env.CLIENT_URL,
+    'https://kakaka820.github.io',
+    'http://localhost:3000'
+  ].filter(Boolean);
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // OPTIONS リクエスト（プリフライト）への対応
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  
   next();
 });
 
