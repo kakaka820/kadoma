@@ -37,9 +37,9 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
   const getResetTimeText = (category: string, nextReset: string | null): string => {
     if (!nextReset) return '';
     
-    const now = new Date();
-    const resetDate = new Date(nextReset);
-    const diffMs = resetDate.getTime() - now.getTime();
+    const nowJST = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+    const resetDateJST = new Date(new Date(nextReset).toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
+    const diffMs = resetDateJST.getTime() - nowJST.getTime();
     
     if (diffMs <= 0) return '';
     
