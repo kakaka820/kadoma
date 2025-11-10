@@ -175,9 +175,11 @@ console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
         console.log(`[Quest] User ${userId}: win_games +1`);
       }
       
-      // 3. チップ獲得量更新
+      // 3. チップ獲得量更新（累計）
       if (ranking.profit > 0) {
         await updateQuestProgress(userId, 'earn_chips', ranking.profit);
+        // 4. 1戦でのチップ獲得（単発）← 追加
+        await updateQuestProgress(userId, 'earn_chips_single', ranking.profit);
         console.log(`[Quest] User ${userId}: earn_chips +${ranking.profit}`);
       }
     }
