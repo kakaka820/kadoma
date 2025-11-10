@@ -98,44 +98,38 @@ function getNextResetTime(resetPeriod) {
   
   const now = new Date();
   
-  // UTC+9時間 = 日本時間のオフセット
-  const JST_OFFSET = 9 * 60 * 60 * 1000;
-  
-  // 現在時刻を日本時間に変換
-  const nowJST = new Date(now.getTime() + JST_OFFSET);
-  
   switch (resetPeriod) {
     case 'daily':
-      // 明日の12時（JST）
-      const tomorrowJST = new Date(nowJST);
-      tomorrowJST.setUTCDate(tomorrowJST.getUTCDate() + 1);
-      tomorrowJST.setUTCHours(RESET_HOUR, 0, 0, 0);
+      // 現在のUTC時刻から、次の日本時間12時（UTC 3時）を計算
+      const nextReset = new Date(now);
+      nextReset.setUTCHours(3, 0, 0, 0); // UTC 3時 = JST 12時
       
-      // UTC に戻す
-      const tomorrowUTC = new Date(tomorrowJST.getTime() - JST_OFFSET);
-      return tomorrowUTC;
+      // もし既に今日のUTC 3時を過ぎていたら、明日にする
+      if (now >= nextReset) {
+        nextReset.setUTCDate(nextReset.getUTCDate() + 1);
+      }
+      
+      return nextReset;
       
     case 'weekly':
-      // 次の月曜日12時（JST）
-      const dayOfWeek = nowJST.getUTCDay(); // 0=日曜, 1=月曜
-      const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+      // 次の月曜日 UTC 3時（JST 12時）
+      const nextMonday = new Date(now);
+      const dayOfWeek = nextMonday.getUTCDay(); // 0=日曜, 1=月曜
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7 || 7;
       
-      const nextMondayJST = new Date(nowJST);
-      nextMondayJST.setUTCDate(nextMondayJST.getUTCDate() + daysUntilMonday);
-      nextMondayJST.setUTCHours(RESET_HOUR, 0, 0, 0);
+      nextMonday.setUTCDate(nextMonday.getUTCDate() + daysUntilMonday);
+      nextMonday.setUTCHours(3, 0, 0, 0);
       
-      const nextMondayUTC = new Date(nextMondayJST.getTime() - JST_OFFSET);
-      return nextMondayUTC;
+      return nextMonday;
       
     case 'monthly':
-      // 来月1日12時（JST）
-      const nextMonthJST = new Date(nowJST);
-      nextMonthJST.setUTCMonth(nextMonthJST.getUTCMonth() + 1);
-      nextMonthJST.setUTCDate(1);
-      nextMonthJST.setUTCHours(RESET_HOUR, 0, 0, 0);
+      // 来月1日 UTC 3時（JST 12時）
+      const nextMonth = new Date(now);
+      nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+      nextMonth.setUTCDate(1);
+      nextMonth.setUTCHours(3, 0, 0, 0);
       
-      const nextMonthUTC = new Date(nextMonthJST.getTime() - JST_OFFSET);
-      return nextMonthUTC;
+      return nextMonth;
       
     default:
       return null;
