@@ -116,18 +116,29 @@ router.post('/quests/claim', async (req, res) => {
     }
     
     // 報酬を付与
-    const { error: rewardError } = await supabase.rpc('add_chips', {
-      p_user_id: userId,
-      p_amount: quest.reward_amount
-    });
-    
-    if (rewardError) {
-      console.error('[QuestAPI] Error adding reward:', rewardError);
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to add reward'
-      });
-    }
+    const { data: currentUser, error: getUserError } = await supabase
+  .from('users')
+  .select('chips')
+  .eq('id', userId)
+  .single();
+if (getUserError || !currentUser) {
+  console.error('[QuestAPI] Error getting user:', getUserError);
+  return res.status(500).json({
+    success: false,
+    error: 'User not found'
+  });
+}
+const { error: rewardError } = await supabase
+  .from('users')
+  .update({ chips: currentUser.chips + quest.reward_amount })
+  .eq('id', userId);
+if (rewardError) {
+  console.error('[QuestAPI] Error adding reward:', rewardError);
+  return res.status(500).json({
+    success: false,
+    error: 'Failed to add reward'
+  });
+}
     
     // 受け取りフラグを更新
     const { error: updateError } = await supabase
