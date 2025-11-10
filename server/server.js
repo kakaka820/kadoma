@@ -48,6 +48,19 @@ app.use((req, res, next) => {
 // ルート登録
 app.use('/api', questRoutes);
 
+// サーバー時刻取得エンドポイント（デバッグ用）
+app.get('/api/server-time', (req, res) => {
+  const now = new Date();
+  const nowUTC = now.toISOString();
+  const nowJST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })).toISOString();
+  
+  res.json({
+    utc: nowUTC,
+    jst: nowJST,
+    timestamp: now.getTime()
+  });
+});
+
 // httpサーバーの作成
 const server = http.createServer(app);
 
