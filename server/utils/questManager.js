@@ -94,39 +94,51 @@ function getLastMonday12PM(now) {
  * 次のリセット時刻を取得（UI表示用）
  */
 function getNextResetTime(resetPeriod) {
+  if (!resetPeriod) return null;
+  
   const now = new Date();
+  
+  // UTC+9時間 = 日本時間のオフセット
+  const JST_OFFSET = 9 * 60 * 60 * 1000;
+  
+  // 現在時刻を日本時間に変換
+  const nowJST = new Date(now.getTime() + JST_OFFSET);
   
   switch (resetPeriod) {
     case 'daily':
-      // 日本時間で明日の12時を計算
-      const nowJST = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const tomorrow = new Date(nowJST);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(RESET_HOUR, 0, 0, 0);
+      // 明日の12時（JST）
+      const tomorrowJST = new Date(nowJST);
+      tomorrowJST.setUTCDate(tomorrowJST.getUTCDate() + 1);
+      tomorrowJST.setUTCHours(RESET_HOUR, 0, 0, 0);
       
-      // UTC に戻す（JST は UTC+9）
-      const tomorrowUTC = new Date(tomorrow.getTime() - 9 * 60 * 60 * 1000);
+      // UTC に戻す
+      const tomorrowUTC = new Date(tomorrowJST.getTime() - JST_OFFSET);
       return tomorrowUTC;
       
     case 'weekly':
-      // 日本時間で次の月曜日12時を計算
-      const nextMondayJST = getNextMonday12PM(new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' })));
-      const nextMondayUTC = new Date(nextMondayJST.getTime() - 9 * 60 * 60 * 1000);
+      // 次の月曜日12時（JST）
+      const dayOfWeek = nowJST.getUTCDay(); // 0=日曜, 1=月曜
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+      
+      const nextMondayJST = new Date(nowJST);
+      nextMondayJST.setUTCDate(nextMondayJST.getUTCDate() + daysUntilMonday);
+      nextMondayJST.setUTCHours(RESET_HOUR, 0, 0, 0);
+      
+      const nextMondayUTC = new Date(nextMondayJST.getTime() - JST_OFFSET);
       return nextMondayUTC;
       
     case 'monthly':
-      // 日本時間で来月1日12時を計算
-      const nowJSTMonthly = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Tokyo' }));
-      const nextMonth = new Date(nowJSTMonthly);
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      nextMonth.setDate(1);
-      nextMonth.setHours(RESET_HOUR, 0, 0, 0);
+      // 来月1日12時（JST）
+      const nextMonthJST = new Date(nowJST);
+      nextMonthJST.setUTCMonth(nextMonthJST.getUTCMonth() + 1);
+      nextMonthJST.setUTCDate(1);
+      nextMonthJST.setUTCHours(RESET_HOUR, 0, 0, 0);
       
-      const nextMonthUTC = new Date(nextMonth.getTime() - 9 * 60 * 60 * 1000);
+      const nextMonthUTC = new Date(nextMonthJST.getTime() - JST_OFFSET);
       return nextMonthUTC;
       
     default:
-      return null; // アチーブメントはリセットなし
+      return null;
   }
 }
 
