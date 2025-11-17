@@ -101,17 +101,17 @@ function BasicRules() {
     <div className="space-y-4 text-gray-300">
       <h3 className="text-xl font-bold text-white mb-4">ゲームの進行について</h3>
       
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">大まかな目的</h4>
         <p>勝つ。できるだけ負けない。負けるときは負けを最小限に抑える。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">プレイ人数</h4>
         <p>現段階では三人固定。将来的に4人、6人で遊べるゲームモードも作成します。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">ゲームの進行について</h4>
         <ol className="list-decimal list-inside space-y-2 ml-2">
           <li>各プレイヤーに手札が配られます。</li>
@@ -120,7 +120,7 @@ function BasicRules() {
           <li>これを繰り返し、最終的な得点を争います。</li>
         </ol>
       </section>
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">終了条件について</h4>
         <ol className="list-decimal list-inside space-y-2 ml-2">
           <li>JOKERが規定枚数配られる</li>
@@ -138,12 +138,12 @@ function CardRules() {
     <div className="space-y-4 text-gray-300">
       <h3 className="text-xl font-bold text-white mb-4">カードの出し方</h3>
       
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">基本</h4>
         <p>毎ターン手札から1枚選んでカードを出します。時間切れとなると手札から自動で選ばれます。一度出すと決めると決めなおしはできません。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">基本的なカードの強さ</h4>
         <p className="mb-2">基本的には数字が大きいほど強いです。</p>
         <div className="bg-gray-900 p-3 rounded">
@@ -153,12 +153,12 @@ function CardRules() {
         <p className="mb-2">1デックはJOKERを2枚含んで54枚です。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">JOKERについて</h4>
         <p>JOKERは各セットの最初に出すことはできません(配られてすぐのターンにJOKERを使うことはできません)。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">相手のカードについて</h4>
         <p>相手の手札にあるカードのうち、JOKERを含む絵札をみることができます。また、自分の手札にある絵札も同様に対戦相手に見えています。</p>
       </section>
@@ -174,13 +174,13 @@ function JudgeRules() {
     <div className="space-y-4 text-gray-300">
       <h3 className="text-xl font-bold text-white mb-4">勝敗判定について</h3>
       
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">引き分けについて</h4>
         <p>場に出た三枚のカードのうち、同じ数字が2枚以上出ていればそのターンは「引き分け」となります。</p>
       </section>
 
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">返し札について</h4>
         <p>基本的には、「最も強いカードを出した人間が勝ち」となります。ですが、特定の状況下で絵札に対して、弱いカードでも勝てるようになる「返し札」というルールがあります。Jに対しては1と5が、Qに対しては2と6が、Kに対してjは3と7が、JOKERに対しては4が「返し札」に相当します。但し、「返し札」が場に出たカードのうち、最弱のカードである事が条件です。</p>
         <p>この後折りたためる例と表を追加</p>
@@ -196,12 +196,12 @@ function ScoringRules() {
     <div className="space-y-4 text-gray-300">
       <h3 className="text-xl font-bold text-white mb-4">得点について</h3>
       
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">お金について</h4>
         <p>部屋ごとにアンティとJOKERの枚数が決められており、この2つの要素により最初の持ち込み金が決定されます。これは「必要チップ」として明記されており、所持金が足りない場合該当する部屋に入室することはできません。ゲーム終了時、自身の得点が所持金に反映されます。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">場代について</h4>
         <ol className="list-decimal list-inside space-y-2 ml-2">
           <li>前のターンで勝敗がついていた場合、敗者からは「アンティ*2」分のポイントを徴収します。勝敗に関わらなかったプレイヤーからは「アンティ*1」分のポイントを徴収し、勝者からは徴収しません。</li>
@@ -209,7 +209,7 @@ function ScoringRules() {
         </ol>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">基本的な得点について</h4>
         <p>後述する「倍率について」も併せてお読みください。ポイントは敗者から勝者へ支払われます。</p>
         <ol className="list-decimal list-inside space-y-2 ml-2">
@@ -221,7 +221,7 @@ function ScoringRules() {
         </ol>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">倍率について</h4>
         <p>基本的には1倍ですが、特殊なシチュエーションが起こった時、次のターンの倍率が増加します。但し、新たなセットが開始されるとき(手札が配られるとき)には、倍率は必ずリセットされて1倍から始まります。</p>
         <ol className="list-decimal list-inside space-y-2 ml-2">
@@ -244,17 +244,12 @@ function ScoringRules() {
     <div className="space-y-4 text-gray-300">
       <h3 className="text-xl font-bold text-white mb-4">その他</h3>
       
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">切断への対処について</h4>
         <p>故意であるかどうかに関わらず、切断するとその時点でbotに切り替わります。botに切り替わると、即時選択、即時開示となり、他プレイヤーからどのカードを選んだのかわかるようになっています。また、切断したままゲームを終了した場合(復帰できなかった場合も含みます)、ゲーム終了後の得点は所持金に反映されません。</p>
       </section>
 
-      <section>
-        <h4 className="font-bold text-white mb-2">プレイ人数</h4>
-        <p>現段階では三人固定。将来的に4人、6人で遊べるゲームモードも作成します。</p>
-      </section>
-
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">注意事項など</h4>
         <p>このゲームの結果に基づいてなにか勝負事をするのは厳禁です。（罰ゲームなども含む）←ここまで面倒見る必要あるかな</p>
         <p>配信及び動画化okです。その際の収益化についても問題ありません。（ストーリー追加したらまた考える）</p>
@@ -262,7 +257,7 @@ function ScoringRules() {
         <p>感想などはXにて#（後で決める）をつけてポストしていただけると励みになります。</p>
       </section>
 
-      <section>
+      <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">生成AIの使用について</h4>
         <p>ゲームを作成するにあたり、以下の部分に生成AIを使用しています。</p>
         <p>-一部コーディングに生成AIを使用しています。</p>
