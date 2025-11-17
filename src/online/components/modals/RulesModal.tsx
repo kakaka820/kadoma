@@ -182,7 +182,49 @@ function JudgeRules() {
       <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">返し札について</h4>
         <p>基本的には、「最も強いカードを出した人間が勝ち」となります。ですが、特定の状況下で絵札に対して、弱いカードでも勝てるようになる「返し札」というルールがあります。Jに対しては1と5が、Qに対しては2と6が、Kに対してjは3と7が、JOKERに対しては4が「返し札」に相当します。但し、「返し札」が場に出たカードのうち、最弱のカードである事が条件です。</p>
-        <p>この後折りたためる例と表を追加</p>
+        <CollapsibleSection title="例：返し札の成立条件">
+        <ul className="list-none ml-6 mt-2 space-y-1 text-sm"></ul>
+          <li className="text-sm">例：J, A, 7→Aを出した人が勝利。</li>
+          <li className="text-sm">例：Q, 6, 10→6を出した人が勝利。</li>
+          <li className="text-sm">例：K, 3, 7→3を出した人が勝利。</li>
+          <li className="text-sm">例：K, 3, A→Kを出した人が勝利。</li>
+          <li className="text-sm">例：JOKER, 9, 4→4を出した人が勝利。</li>
+        </CollapsibleSection>
+        <CollapsibleSection title='返し札対応表'>
+<div className="overflow-x-auto mt-4">
+  <table className="w-full border-collapse bg-gray-900 rounded">
+    <thead>
+      <tr className="border-b border-gray-700">
+        <th className="px-4 py-2 text-left text-white font-bold">絵札</th>
+        <th className="px-4 py-2 text-left text-white font-bold">返し札（小）</th>
+        <th className="px-4 py-2 text-left text-white font-bold">返し札（大）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-b border-gray-800">
+        <td className="px-4 py-2 text-gray-300">J (11)</td>
+        <td className="px-4 py-2 text-purple-400">A (1)</td>
+        <td className="px-4 py-2 text-purple-400">5</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="px-4 py-2 text-gray-300">Q (12)</td>
+        <td className="px-4 py-2 text-purple-400">2</td>
+        <td className="px-4 py-2 text-purple-400">6</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="px-4 py-2 text-gray-300">K (13)</td>
+        <td className="px-4 py-2 text-purple-400">3</td>
+        <td className="px-4 py-2 text-purple-400">7</td>
+      </tr>
+      <tr>
+        <td className="px-4 py-2 text-yellow-400 font-bold">JOKER</td>
+        <td className="px-4 py-2 text-purple-400">4</td>
+        <td className="px-4 py-2 text-gray-600">-</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</CollapsibleSection>
       </section>
     </div>
   );
@@ -194,7 +236,7 @@ function ScoringRules() {
   return (
     <div className="space-y-4 text-gray-300">
       <h3 className="text-xl font-bold text-white mb-4">得点について</h3>
-      
+
       <p>「ローカル対戦」で実際に自分でプレイしながら細かいルールの確認ができます。</p>
       
       <section className='mt-6'>
@@ -213,12 +255,23 @@ function ScoringRules() {
       <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">基本的な得点について</h4>
         <p>後述する「倍率について」も併せてお読みください。ポイントは敗者から勝者へ支払われます。</p>
-        <ol className="list-decimal list-inside space-y-2 ml-2">
-          <li>通常の勝負なら、「[( 大きいカードの数 ) - ( 小さいカードの数 )] * 2 * 倍率 * アンティ」分のポイントが移動します。</li>
-          <br /><p>-JOKERで勝利した場合は「50 * アンティ * 倍率」分のポイントが移動します。</p>
-          <li>返し札で勝利した場合、より小さい値(Jに対して1、Qに対して2、Kに対して3)で勝利した場合は「30 * アンティ * 倍率」分のポイントが移動します。</li>
-          <br /><p>-より大きい値(Jに対して5、Qに対して6、Kに対して7)で勝利した場合は「25 * アンティ * 倍率」分のポイントが移動します。</p>
-          <br /><p>-JOKERに対して4で勝利した場合は「100 * アンティ * 倍率」分のポイントが移動します。</p>
+        <ol className="list-decimal list-inside space-y-3 ml-2">
+          <li>
+            <span className="font-semibold">通常の勝負の場合</span>
+            <ul className="list-none ml-6 mt-2 space-y-1 text-sm">
+                <li>• 「[( 大きいカードの数 ) - ( 小さいカードの数 )] × 2 × 倍率 × アンティ」分のポイントが移動します。</li>
+              <li>• JOKERで勝利した場合は「50 × アンティ × 倍率」分のポイントが移動します。</li>
+            </ul>
+          </li>
+
+          <li>
+            <span className="font-semibold">返し札で勝利した場合</span>
+            <ul className="list-none ml-6 mt-2 space-y-1 text-sm">
+              <li>• より小さい値(Jに対して1、Qに対して2、Kに対して3)で勝利した場合は「30 × アンティ × 倍率」分のポイントが移動します。</li>
+              <li>• より大きい値(Jに対して5、Qに対して6、Kに対して7)で勝利した場合は「25 × アンティ × 倍率」分のポイントが移動します。</li>
+              <li>• JOKERに対して4で勝利した場合は「100 × アンティ × 倍率」分のポイントが移動します。</li>
+            </ul>
+          </li>
         </ol>
       </section>
 
@@ -229,8 +282,12 @@ function ScoringRules() {
           <li>場にでたカードの数字が重複していた時、次のターンに倍率が増加します。2枚重複で+1、3枚重複で+2です。</li>
           <li>場に出たカードのスートが一致していた時、次のターンに倍率が+1されます。</li>
           <li>場に出たカードが階段状になっていた時、次のターンに倍率が+1されます。なお、Q, K,Aのような循環は成立しません。</li>
-          <li>倍率は重複して加算されます。(折りたたんで例を挙げる)</li>
-          <li>ターンを超えて倍率を加算することもできます。(折りたたんで例を挙げる)場率が加算されない状態になると、次のターンの倍率はまたリセットされて1倍になります。</li>
+          <li>倍率は重複して加算されます。<CollapsibleSection title='例えば'>
+          <p>あるターンで出たカードが♦7, ♦8, ♦9だった場合、階段で+1、スート一致で+1となり合計+2。したがって、次のターンでの倍率は3倍となります。</p>
+          </CollapsibleSection></li>
+          <li>ターンを超えて倍率を加算することもできます。<CollapsibleSection title='例えば'>
+          <p>先の例によって、今のターンの倍率が3倍になっているとします。ところが、場にでたカードは8, 8, K。この場合、さらに倍率が+1されて、次のターンの倍率は4倍となります。</p>
+          </CollapsibleSection>場率が加算されない状態になると、次のターンの倍率はまたリセットされて1倍になります。</li>
         </ol>
       </section>
     </div>
