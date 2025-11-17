@@ -258,7 +258,7 @@ function ScoringRules() {
         <ol className="list-decimal list-inside space-y-3 ml-2">
           <li>
             <span className="font-semibold">通常の勝負の場合</span>
-            <ul className="list-none ml-6 mt-2 space-y-1 text-sm">
+            <ul className="list-none ml-6 mt-2 space-y-1">
                 <li>• 「[( 大きいカードの数 ) - ( 小さいカードの数 )] × 2 × 倍率 × アンティ」分のポイントが移動します。</li>
               <li>• JOKERで勝利した場合は「50 × アンティ × 倍率」分のポイントが移動します。</li>
             </ul>
@@ -266,7 +266,7 @@ function ScoringRules() {
 
           <li>
             <span className="font-semibold">返し札で勝利した場合</span>
-            <ul className="list-none ml-6 mt-2 space-y-1 text-sm">
+            <ul className="list-none ml-6 mt-2 space-y-1">
               <li>• より小さい値(Jに対して1、Qに対して2、Kに対して3)で勝利した場合は「30 × アンティ × 倍率」分のポイントが移動します。</li>
               <li>• より大きい値(Jに対して5、Qに対して6、Kに対して7)で勝利した場合は「25 × アンティ × 倍率」分のポイントが移動します。</li>
               <li>• JOKERに対して4で勝利した場合は「100 × アンティ × 倍率」分のポイントが移動します。</li>
