@@ -31,7 +31,7 @@ export default function App() {
               
                <hr className="border-gray-700 my-6" />
               
-              <h3 className="text-xl font-bold text-white mb-2">↓ ローカル対戦（デバッグ用）</h3>
+              <h3 className="text-xl font-bold text-white mb-2">↓ ローカル対戦 ↓</h3>
 
               <p className="text-gray-400 mb-6">
                 オフラインで動作や挙動の確認ができます
