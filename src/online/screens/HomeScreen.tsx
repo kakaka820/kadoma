@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { QuestScreen } from './QuestScreen';
+import { RulesModal } from '../components/modals/RulesModal';
 
 type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests';
 
@@ -12,8 +13,10 @@ interface HomeScreenProps {
 export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { user, logout } = useAuth();
   const [showTransferCode, setShowTransferCode] = React.useState(false);
+  const [showRules, setShowRules] = React.useState(false);
 
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 flex items-center justify-center overflow-y-auto">
       <div className="max-w-md w-full mx-auto">
         {/* ヘッダー */}
@@ -101,6 +104,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         戦績・履歴
         </button>
 
+        <button
+            onClick={() => setShowRules(true)}
+            className="w-full py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xl rounded-lg transition mb-4"
+          >
+            📖 ルール説明
+          </button>
+
         {/* ログアウトボタン */}
         <button
           onClick={logout}
@@ -111,5 +121,9 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
         </button>
       </div>
     </div>
+
+    <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
+    </>
+
   );
 }
