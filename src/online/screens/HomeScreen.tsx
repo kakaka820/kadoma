@@ -108,7 +108,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             onClick={() => setShowRules(true)}
             className="w-full py-4 bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-xl rounded-lg transition mb-4"
           >
-            📖 ルール説明
+          ルール説明
           </button>
 
         {/* ログアウトボタン */}
