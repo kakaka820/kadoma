@@ -43,6 +43,7 @@ interface UseCardPlayProps {
 interface UseCardPlayReturn {
   playCard: (cardIndex: number) => void;
   selectedCardIndex: number | null;
+  jokerError: string | null;
 }
 
 export function useCardPlay({
@@ -56,6 +57,7 @@ export function useCardPlay({
 
   //選択したカードのインデックスを保存
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+  const [jokerError, setJokerError] = useState<string | null>(null);
 
   const playCard = (cardIndex: number) => {
     if (!socket || playerIndex === null || !roomId) return;
@@ -72,7 +74,8 @@ export function useCardPlay({
     
     if (jokerModule && !jokerModule.canPlayJoker(card, setTurnIndex)) {
       console.log('[useCardPlay] JOKERはセットの1ターン目に出せません');
-      alert('🃏 JOKERはセットの1ターン目には出せません！');
+       setJokerError('🃏 JOKERはセットの1ターン目には出せません！');
+      setTimeout(() => setJokerError(null), 3000);
       return;
     }
 
@@ -101,5 +104,5 @@ useEffect(() => {
   };
 }, [socket]);
 
-  return { playCard, selectedCardIndex };
+  return { playCard, selectedCardIndex, jokerError };
 }
