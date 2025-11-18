@@ -32,6 +32,7 @@ interface GameBoardProps {
   } | null;
   selectedCardIndex?: number | null;
   isShowdown?: boolean;
+  jokerError?: string | null;
 }
 
 export function GameBoard(props: GameBoardProps) {
@@ -54,6 +55,7 @@ export function GameBoard(props: GameBoardProps) {
     disconnectNotification,
     selectedCardIndex,
     isShowdown,
+    jokerError,
   } = props;
 
   // 自分以外のプレイヤー（対戦相手2人）
@@ -63,6 +65,16 @@ export function GameBoard(props: GameBoardProps) {
 
   return (
     <>
+
+     
+      {/* JOKERエラー通知 */}
+      {jokerError && (
+        <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50">
+          {jokerError}
+        </div>
+      )}
+
+
       {/* 通知パネル（右上固定） */}
       <NotificationPanel
         warnings={warnings}
