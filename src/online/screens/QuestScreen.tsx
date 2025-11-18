@@ -33,6 +33,7 @@ export function QuestScreen({ onClose }: { onClose: () => void }) {
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
   const [serverTime, setServerTime] = useState<string>('');
+  const [notification, setNotification] = useState<string | null>(null);
 
 
   // サーバー時刻を取得
@@ -124,7 +125,8 @@ const getResetTimeText = (category: string, nextReset: string | null): string =>
         await fetchQuests();
         
         // 成功メッセージ
-        alert(`${data.reward} チップを獲得しました！`);
+        setNotification(`${data.reward} チップを獲得しました！`);
+        setTimeout(() => setNotification(null), 3000);
       } else {
         alert(data.error || '報酬の受け取りに失敗しました');
       }
@@ -218,6 +220,12 @@ const getResetTimeText = (category: string, nextReset: string | null): string =>
             ×
           </button>
         </div>
+
+        {notification && (
+          <div className="absolute top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50">
+            {notification}
+          </div>
+        )}
 
         {/* サーバー時刻表示（デバッグ用） */}
         {serverTime && (
