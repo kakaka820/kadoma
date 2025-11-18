@@ -32,6 +32,31 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const { user } = useAuth();
   const [isInRoom, setIsInRoom] = useState(false);
   const [screen, setScreen] = useState<ScreenType>('home');
+  const [dailyBonusResult, setDailyBonusResult] = useState<any>(null);
+
+
+  useEffect(() => {
+    if (!socket || !user) return;
+    
+    const handleGameOver = (data: any) => {
+      console.log('[OnlineGame] game_over with dailyBonus:', data.dailyBonusResults);
+      
+      // 自分のボーナス結果を取得
+      if (data.dailyBonusResults && data.dailyBonusResults[user.id]) {
+        setDailyBonusResult(data.dailyBonusResults[user.id]);
+      }
+    };
+    
+    socket.on('game_over', handleGameOver);
+    
+    return () => {
+      socket.off('game_over', handleGameOver);
+    };
+  }, [socket, user?.id]);  
+
+
+
+
 
 
 
@@ -244,6 +269,7 @@ if (screen === 'quests') {
         buyIn={gameOverData.roomConfig?.requiredChips}
         onReturnHome={handleReturnHome}
         onRematch={handleRematch}
+        dailyBonusResult={dailyBonusResult}
       />
     );
   }
