@@ -12,6 +12,11 @@ interface ResultScreenProps {
   buyIn?: number;
   onReturnHome: () => void;
   onRematch: () => void;
+  dailyBonusResult?: {
+    bonusGranted: boolean;
+    bonusAmount: number;
+    remainingPlays: number;
+  };
 }
 
 export function ResultScreen({
@@ -23,6 +28,7 @@ export function ResultScreen({
   buyIn,
   onReturnHome,
   onRematch,
+  dailyBonusResult,
 }: ResultScreenProps) {
   const [isRematchClicked, setIsRematchClicked] = useState(false);
   const { socket } = useSocket();
@@ -75,6 +81,24 @@ if (response.success) {
           </h2>
           <p className="text-gray-500 text-sm">{reason}</p>
         </div>
+
+      {dailyBonusResult && dailyBonusResult.bonusGranted && (
+          <div className="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-lg p-4 mb-6 animate-pulse">
+            <p className="text-white text-center font-bold text-lg">
+              🎁 デイリーボーナス！
+            </p>
+            <p className="text-yellow-200 text-center text-2xl font-bold mt-1">
+              +{dailyBonusResult.bonusAmount.toLocaleString()} G
+            </p>
+            <p className="text-yellow-100 text-center text-sm mt-2">
+              残り {dailyBonusResult.remainingPlays} 回
+            </p>
+          </div>
+        )}
+
+
+
+
 
         {/* スコア表示 */}
         <div className="bg-gray-700 rounded-lg p-4 mb-6">
