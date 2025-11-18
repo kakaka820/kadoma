@@ -12,6 +12,7 @@ const { botAutoPlay } = require('./bot/botPlayer');
 const { distributeGameReward } = require('./utils/currencyHelper');
 const { supabase } = require('./supabaseClient');
 const { updateQuestProgress } = require('./utils/questManager');
+const { checkAndGrantDailyBonus } = require('./utils/dailyBonus');
 
 
 
@@ -128,6 +129,8 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 
     //チップ配分
     const chipResults = await distributeChips(nextState);
+    const dailyBonusResults = await processDailyBonuses(nextState);
+
     const updatedCurrencies = {};
 if (chipResults) {
   for (const result of chipResults) {
@@ -148,6 +151,34 @@ if (chipResults) {
     }
   }
 }
+
+async function processDailyBonuses(gameState) {
+  const bonusResults = {};
+  
+  for (let i = 0; i < gameState.players.length; i++) {
+    const player = gameState.players[i];
+    
+    // Botまたは切断済みプレイヤーはスキップ
+    if (player.isBot || !player.userId) {
+      continue;
+    }
+    
+    // デイリーボーナスをチェック・付与
+    const bonusResult = await checkAndGrantDailyBonus(player.userId);
+    bonusResults[player.userId] = bonusResult;
+    
+    console.log(`[DailyBonus] User ${player.userId}:`, bonusResult);
+  }
+  
+  return bonusResults;
+}
+
+
+
+
+
+
+
 console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
     saveGameHistory(roomId, nextState, rankings).catch(err => {
       console.error('[game_over] 履歴保存失敗:', err);
@@ -191,7 +222,8 @@ console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
       winner: nextState.scores.indexOf(Math.max(...nextState.scores)),
       chipResults: chipResults,
       roomConfig: nextState.roomConfig,
-      updatedCurrencies: updatedCurrencies
+      updatedCurrencies: updatedCurrencies,
+      dailyBonusResults: dailyBonusResults
     });
      games.delete(roomId);
      rooms.delete(roomId);
