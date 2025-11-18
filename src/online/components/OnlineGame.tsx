@@ -96,7 +96,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   } = useTurnFlow({ socket });
 
   //カードを出す処理でついでにselectedCardIndex を取得
-  const { playCard, selectedCardIndex } = useCardPlay({
+  const { playCard, selectedCardIndex, jokerError } = useCardPlay({
     socket,
     roomId,
     playerIndex,
@@ -298,6 +298,7 @@ if (screen === 'quests') {
       timeRemaining={timeRemaining}
       timeLimit={timeLimit}
       disconnectNotification={notification}
+      jokerError={jokerError}
     />
   );
 }
