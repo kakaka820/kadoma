@@ -1,5 +1,5 @@
 // src/online/components/ui/RulesModal.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface RulesModalProps {
   isOpen: boolean;
@@ -35,6 +35,13 @@ type RuleTab = 'basic' | 'card' | 'scoring' | 'judge' | 'others';
 
 export function RulesModal({ isOpen, onClose }: RulesModalProps) {
   const [activeTab, setActiveTab] = useState<RuleTab>('basic');
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
 
   if (!isOpen) return null;
 
@@ -81,7 +88,7 @@ export function RulesModal({ isOpen, onClose }: RulesModalProps) {
         </div>
 
         {/* コンテンツ */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6">
           {activeTab === 'basic' && <BasicRules />}
           {activeTab === 'card' && <CardRules />}
           {activeTab === 'judge' && <JudgeRules />}
@@ -181,7 +188,7 @@ function JudgeRules() {
 
       <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">返し札について</h4>
-        <p>基本的には、「最も強いカードを出した人間が勝ち」となります。ですが、特定の状況下で絵札に対して、弱いカードでも勝てるようになる「返し札」というルールがあります。Jに対しては1と5が、Qに対しては2と6が、Kに対してjは3と7が、JOKERに対しては4が「返し札」に相当します。但し、「返し札」が場に出たカードのうち、最弱のカードである事が条件です。</p>
+        <p>基本的には、「最も強いカードを出した人間が勝ち」となります。ですが、特定の状況下で絵札に対して、弱いカードでも勝てるようになる「返し札」というルールがあります。Jに対しては1と5が、Qに対しては2と6が、Kに対しては3と7が、JOKERに対しては4が「返し札」に相当します。但し、「返し札」が場に出たカードのうち、最弱のカードである事が条件です。</p>
         <CollapsibleSection title="例：返し札の成立条件">
         <ul className="list-none ml-6 mt-2 space-y-1 text-sm"></ul>
           <li className="text-sm">例：J, A, 7→Aを出した人が勝利。</li>
@@ -247,8 +254,8 @@ function ScoringRules() {
       <section className='mt-6'>
         <h4 className="font-bold text-white mb-2">場代について</h4>
         <ol className="list-decimal list-inside space-y-2 ml-2">
-          <li>前のターンで勝敗がついていた場合、敗者からは「アンティ*2」分のポイントを徴収します。勝敗に関わらなかったプレイヤーからは「アンティ*1」分のポイントを徴収し、勝者からは徴収しません。</li>
-          <li>前のターンが引き分けだった場合、全員から「アンティ*1」分徴収します。</li>
+          <li>前のターンで勝敗がついていた場合、敗者からは「アンティ * 2」分のポイントを徴収します。勝敗に関わらなかったプレイヤーからは「アンティ * 1」分のポイントを徴収し、勝者からは徴収しません。</li>
+          <li>前のターンが引き分けだった場合、全員から「アンティ * 1」分徴収します。</li>
         </ol>
       </section>
 
