@@ -13,6 +13,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  updateUserCurrency: (amount: number) => void;
   isMaintenanceMode: boolean;
   login: (user: User) => void;
   logout: () => void;
@@ -168,7 +169,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
 
-    //追加: game_over イベントで currency を更新
+    //game_over イベントで currency を更新
   useEffect(() => {
     if (!socket || !user) return;
     const handleGameOver = (data: any) => {
@@ -195,10 +196,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+
+  // ユーザーの通貨を更新（ギフトコード使用時など）
+  const updateUserCurrency = (amount: number) => {
+    if (!user) return;
+    
+    setUser({
+      ...user,
+      currency: user.currency + amount
+    });
+    
+    // localStorageも更新
+    const updatedUser = {
+      ...user,
+      currency: user.currency + amount
+    };
+    localStorage.setItem('kadoma_user', JSON.stringify(updatedUser));
+  };
+
   
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isMaintenanceMode, login, logout, register, loginWithCode, updateCurrency }}>
+    <AuthContext.Provider value={{ user, isLoading, isMaintenanceMode, login, logout, register, loginWithCode, updateCurrency, updateUserCurrency }}>
       {children}
     </AuthContext.Provider>
   );
