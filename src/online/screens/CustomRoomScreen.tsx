@@ -18,6 +18,16 @@ interface CustomRoomScreenProps {
   onRoomJoined: () => void;
 }
 
+
+
+
+  const JOKER_MULTIPLIER_MAP: Record<number, number> = {
+  3: 300,
+  5: 700,
+  8: 1000,
+  10: 1300,
+};
+
 export function CustomRoomScreen({ onBack, onRoomJoined }: CustomRoomScreenProps) {
   const { socket } = useSocket();
   const { user } = useAuth();
@@ -30,7 +40,8 @@ export function CustomRoomScreen({ onBack, onRoomJoined }: CustomRoomScreenProps
   const [ante, setAnte] = useState(10);
   const [maxJokerCount, setMaxJokerCount] = useState(3);
   const [timeLimit, setTimeLimit] = useState(8);
-  const [anteMultiplier, setAnteMultiplier] = useState(300);
+
+  const anteMultiplier = JOKER_MULTIPLIER_MAP[maxJokerCount] || 300;
 
   // 必要チップを計算
   const requiredChips = ante * anteMultiplier;
@@ -258,10 +269,10 @@ export function CustomRoomScreen({ onBack, onRoomJoined }: CustomRoomScreenProps
               onChange={(e) => setAnte(Number(e.target.value))}
               className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
+              <option value={1}>1 G</option>
+              <option value={5}>5 G</option>
               <option value={10}>10 G</option>
               <option value={20}>20 G</option>
-              <option value={50}>50 G</option>
-              <option value={100}>100 G</option>
             </select>
           </div>
 
@@ -273,7 +284,6 @@ export function CustomRoomScreen({ onBack, onRoomJoined }: CustomRoomScreenProps
               onChange={(e) => setMaxJokerCount(Number(e.target.value))}
               className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value={2}>2回</option>
               <option value={3}>3回</option>
               <option value={5}>5回</option>
               <option value={8}>8回</option>
@@ -284,20 +294,12 @@ export function CustomRoomScreen({ onBack, onRoomJoined }: CustomRoomScreenProps
           {/* 倍率選択 */}
           <div>
             <label className="block text-white font-bold mb-2">初期持ち点倍率</label>
-            <select
-              value={anteMultiplier}
-              onChange={(e) => setAnteMultiplier(Number(e.target.value))}
-              className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value={100}>×100</option>
-              <option value={200}>×200</option>
-              <option value={300}>×300</option>
-              <option value={500}>×500</option>
-              <option value={700}>×700</option>
-              <option value={1000}>×1000</option>
-              <option value={1300}>×1300</option>
-            </select>
+            <div className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border-2 border-gray-600">
+              ×{anteMultiplier}
+            </div>
+            <p className="text-gray-500 text-xs mt-1">※ JOKER回数によって自動設定されます</p>
           </div>
+
 
           {/* 時間制限選択 */}
           <div>
