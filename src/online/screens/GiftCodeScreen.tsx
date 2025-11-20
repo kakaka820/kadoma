@@ -178,9 +178,6 @@ export function GiftCodeScreen({ onBack }: GiftCodeScreenProps) {
                   </div>
                   
                   <div className="text-xs text-gray-400">
-                    {item.gift_codes.created_by && (
-                      <div className="mb-1">{item.gift_codes.created_by}</div>
-                    )}
                     <div>{new Date(item.used_at).toLocaleString('ja-JP')}</div>
                   </div>
                 </div>
