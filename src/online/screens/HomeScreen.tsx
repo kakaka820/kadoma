@@ -115,7 +115,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           onClick={() => onNavigate('giftcode')}
           className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xl rounded-lg transition mb-4"
         >
-          🎁 ギフトコード
+        ギフトコード
         </button>
 
         {/* ログアウトボタン */}
