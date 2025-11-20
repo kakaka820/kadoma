@@ -124,7 +124,6 @@ export function GiftCodeScreen({ onBack }: GiftCodeScreenProps) {
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="WELCOME2025"
             className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4 text-center text-lg font-mono"
             disabled={isLoading}
             onKeyPress={(e) => {
