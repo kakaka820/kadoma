@@ -33,7 +33,7 @@ export function GiftCodeScreen({ onBack }: GiftCodeScreenProps) {
     setIsLoadingHistory(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/gift-code-history/${user.id}`,
+        `${process.env.REACT_APP_API_URL}/api/gift-code-history/${user.id}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -67,7 +67,7 @@ export function GiftCodeScreen({ onBack }: GiftCodeScreenProps) {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/use-gift-code`,
+        `${process.env.REACT_APP_API_URL}/api/use-gift-code`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
