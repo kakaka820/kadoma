@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { QuestScreen } from './QuestScreen';
 import { RulesModal } from '../components/modals/RulesModal';
 
-type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests';
+type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests' |'giftcode';
 
 interface HomeScreenProps {
   onNavigate: (type: NavigationType) => void;
@@ -110,6 +110,13 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           >
           ルール説明
           </button>
+
+           <button
+          onClick={() => onNavigate('giftcode')}
+          className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xl rounded-lg transition mb-4"
+        >
+          🎁 ギフトコード
+        </button>
 
         {/* ログアウトボタン */}
         <button
