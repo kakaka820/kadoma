@@ -20,8 +20,9 @@ import { ResultScreen } from '../screens/ResultScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { QuestScreen } from '../screens/QuestScreen';
 import { CustomRoomScreen } from '../screens/CustomRoomScreen';
+import { GiftCodeScreen } from '../screens/GiftCodeScreen'; 
 
-type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom';
+type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom' | 'giftcode';
 
 
 interface OnlineGameProps {
@@ -110,7 +111,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const { notification } = useDisconnectNotification({ socket });
 
   // 画面遷移ハンドラー
-  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests') => {
+  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests' | 'giftcode') => {
     if (type === 'multi') {
       setScreen('room-selection');
     } else if (type === 'custom') {
@@ -128,6 +129,9 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
     else if (type === 'stats') { 
       setScreen('stats');
     }
+     else if (type === 'giftcode') {
+    setScreen('giftcode');
+  }
   };
 
 
@@ -234,6 +238,11 @@ useEffect(() => {
   if (!isConnected) {
     return <ConnectionStatus />;
   }
+
+  // ギフトコード画面
+if (screen === 'giftcode') {
+  return <GiftCodeScreen onBack={handleBackToHome} />;
+}
   // クエスト画面
 if (screen === 'quests') {
   return <QuestScreen onClose={handleBackToHome} />;
