@@ -19,8 +19,9 @@ import { RoomSelection } from '../screens/RoomSelection';
 import { ResultScreen } from '../screens/ResultScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { QuestScreen } from '../screens/QuestScreen';
+import { CustomRoomScreen } from '../screens/CustomRoomScreen';
 
-type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests';
+type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom';
 
 
 interface OnlineGameProps {
@@ -113,7 +114,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
     if (type === 'multi') {
       setScreen('room-selection');
     } else if (type === 'custom') {
-      alert('カスタム戦は準備中です');
+      setScreen('custom');
     } else if (type === 'friend') {
       alert('フレンド戦は準備中です');
     } else if (type === 'local') {
@@ -242,7 +243,7 @@ if (screen === 'quests') {
     return <StatsScreen onBack={handleBackToHome} />;
   }
 
-    // 部屋選択画面
+    // 部屋選択画面（マルチ）
   if (screen === 'room-selection') {
     return (
       <RoomSelection 
@@ -251,6 +252,16 @@ if (screen === 'quests') {
       />
     );
   }
+
+  // カスタム戦画面
+if (screen === 'custom') {
+  return (
+    <CustomRoomScreen
+      onBack={handleBackToHome}
+      onRoomJoined={handleRoomJoined}
+    />
+  );
+}
   
   //ルームに入ってない → ホーム画面
   if (!isInRoom) {
