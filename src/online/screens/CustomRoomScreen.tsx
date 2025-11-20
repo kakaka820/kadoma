@@ -313,6 +313,7 @@ export function CustomRoomScreen({ onBack, onRoomJoined }: CustomRoomScreenProps
               <option value={8}>8秒</option>
               <option value={15}>15秒</option>
               <option value={30}>30秒</option>
+              <option value={60}>60秒</option>
             </select>
           </div>
 
