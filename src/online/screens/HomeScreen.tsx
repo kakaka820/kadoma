@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { QuestScreen } from './QuestScreen';
 import { RulesModal } from '../components/modals/RulesModal';
 
-type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests' |'giftcode';
+type NavigationType = 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests' |'giftcode' | 'friendbattle';
 
 interface HomeScreenProps {
   onNavigate: (type: NavigationType) => void;
@@ -79,6 +79,14 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
           >
             フレンド
           </button>
+          <button
+            onClick={() => onNavigate('friendbattle')}
+            className="w-full py-4 bg-pink-600 hover:bg-pink-700 text-white font-bold text-xl rounded-lg transition"
+            data-testid="button-friend-battle"
+          >
+            フレンド戦
+          </button>
+
         </div>
 
         
