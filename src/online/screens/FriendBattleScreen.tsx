@@ -31,6 +31,13 @@ interface FriendBattleScreenProps {
   onRoomJoined: () => void;
 }
 
+const JOKER_MULTIPLIER_MAP: Record<number, number> = {
+  3: 300,
+  5: 700,
+  8: 1000,
+  10: 1300,
+};
+
 export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'create' | 'invited'>('create');
@@ -40,11 +47,13 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // 部屋設定
-  const [roomName, setRoomName] = useState('');
   const [ante, setAnte] = useState(1000);
   const [jokerCount, setJokerCount] = useState(2);
   const [timeLimit, setTimeLimit] = useState(30);
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+  const anteMultiplier = JOKER_MULTIPLIER_MAP[jokerCount] || 100;
+
+
 
   // フレンドリスト取得
   const fetchFriends = async () => {
@@ -134,10 +143,11 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
           body: JSON.stringify({
             userId: user.id,
             config: {
-              roomName: roomName || `${user.username}の部屋`,
+              roomName: `${user.username}の部屋`,
               ante,
               jokerCount,
               timeLimit,
+              anteMultiplier,
               invitedFriends: selectedFriends
             }
           })
@@ -150,7 +160,6 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
         showMessage('success', '部屋を作成しました！');
         
         // リセット
-        setRoomName('');
         setSelectedFriends([]);
         
         // 部屋一覧を更新
@@ -266,17 +275,6 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
               <h2 className="text-white font-bold mb-4">部屋設定</h2>
               
               <div className="space-y-4">
-                {/* 部屋名 */}
-                <div>
-                  <label className="block text-gray-400 text-sm mb-2">部屋名</label>
-                  <input
-                    type="text"
-                    value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
-                    placeholder={`${user?.username}の部屋`}
-                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  />
-                </div>
 
                 {/* アンティ */}
                 <div>
@@ -309,6 +307,17 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
                     className="w-full"
                   />
                 </div>
+
+                 {/* 倍率表示（読み取り専用） */}
+                <div>
+                  <label className="block text-gray-400 text-sm mb-2">初期持ち点倍率</label>
+                  <div className="w-full px-4 py-3 bg-gray-700 text-white text-xl font-bold rounded-lg border-2 border-gray-600">
+                    ×{anteMultiplier}
+                  </div>
+                  <p className="text-gray-500 text-xs mt-1">※ JOKER枚数によって自動設定されます</p>
+                </div>
+
+                
 
                 {/* 制限時間 */}
                 <div>
