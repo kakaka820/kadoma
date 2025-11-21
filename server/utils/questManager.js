@@ -24,7 +24,7 @@ function shouldResetQuest(resetPeriod, lastResetAt) {
 switch (resetPeriod) {
     case 'daily':
       // 日付が異なる && 現在時刻が12時以降
-      const nowDate = nowJST.toISOString().split('T')[0];  // 2025-11-09
+      const nowDate = nowJST.toISOString().split('T')[0];
       const lastResetDate = lastResetJST.toISOString().split('T')[0]; 
 
        if (nowDate !== lastResetDate) {
