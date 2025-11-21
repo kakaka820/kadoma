@@ -23,6 +23,7 @@ import { CustomRoomScreen } from '../screens/CustomRoomScreen';
 import { GiftCodeScreen } from '../screens/GiftCodeScreen'; 
 import { FriendScreen } from '../screens/FriendScreen';
 import { FriendBattleScreen } from '../screens/FriendBattleScreen';
+import { FriendWaitingRoom } from './ui/FriendWaitingRoom';
 
 type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom' | 'giftcode' | 'friend' | 'friendbattle';
 
@@ -37,6 +38,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const [isInRoom, setIsInRoom] = useState(false);
   const [screen, setScreen] = useState<ScreenType>('home');
   const [dailyBonusResult, setDailyBonusResult] = useState<any>(null);
+  const [isFriendBattle, setIsFriendBattle] = useState(false);
 
 
   useEffect(() => {
@@ -141,10 +143,11 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
 
 
 // マルチ対戦の部屋参加成功
-  const handleRoomJoined = () => {
-    setIsInRoom(true);
-    setScreen('waiting');
-  };
+  const handleRoomJoined = (isFriend = false) => {
+  setIsInRoom(true);
+  setIsFriendBattle(isFriend);
+  setScreen('waiting');
+};
 
   // ホームへ戻る
   const handleBackToHome = () => {
@@ -250,7 +253,7 @@ useEffect(() => {
 
 // フレンド戦画面
 if (screen === 'friendbattle') {
-  return <FriendBattleScreen onBack={handleBackToHome} onRoomJoined={handleRoomJoined} />;
+  return <FriendBattleScreen onBack={handleBackToHome} onRoomJoined={() => handleRoomJoined(true)} />;
 }
 
   // ギフトコード画面
@@ -337,8 +340,16 @@ if (screen === 'custom') {
   );
 }
 
-if (gameStatus === 'waiting') {
+  // 待機中
+  if (gameStatus === 'waiting') {
+    // フレンド戦の場合
+    if (isFriendBattle) {
+      return <FriendWaitingRoom onCancel={handleBackToHome} />;
+    }
+    // 通常のマルチ戦
+    return <WaitingRoom onCancel={handleBackToHome} />;
+  }
+  
+  // デフォルトで待機室
   return <WaitingRoom onCancel={handleBackToHome} />;
-}
-return <WaitingRoom onCancel={handleBackToHome} />;
 }
