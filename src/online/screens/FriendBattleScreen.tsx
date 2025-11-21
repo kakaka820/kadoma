@@ -292,21 +292,20 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
                   />
                 </div>
 
-                {/* JOKER枚数 */}
-                <div>
-                  <label className="block text-gray-400 text-sm mb-2">
-                    JOKER枚数: {jokerCount}枚
-                  </label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="4"
-                    step="1"
-                    value={jokerCount}
-                    onChange={(e) => setJokerCount(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
+                {/* JOKER回数選択 */}
+          <div>
+            <label className="block text-white font-bold mb-2">JOKER回数</label>
+            <select
+              value={jokerCount}
+              onChange={(e) => setJokerCount(Number(e.target.value))}
+              className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value={3}>3回</option>
+              <option value={5}>5回</option>
+              <option value={8}>8回</option>
+              <option value={10}>10回</option>
+            </select>
+          </div>
 
                  {/* 倍率表示（読み取り専用） */}
                 <div>
@@ -317,7 +316,7 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
                   <p className="text-gray-500 text-xs mt-1">※ JOKER枚数によって自動設定されます</p>
                 </div>
 
-                
+
 
                 {/* 制限時間 */}
                 <div>
