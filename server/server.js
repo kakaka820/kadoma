@@ -27,7 +27,10 @@ const {
   getInvitedRooms,
   getMyCreatedRooms,
   deleteFriendRoom,
-  getFriendRoom
+  getFriendRoom,
+  handleJoinFriendRoom,
+  handleLeaveFriendRoom,
+  activeFriendRooms
 } = require('./friendRoomHandler');
 
 
@@ -456,9 +459,25 @@ io.on('connection', (socket) => {
   setupRoomEvents(socket, io, rooms, games);
   setupGameEvents(socket, io, rooms, games);
   setupReconnectEvents(socket, io, rooms, games);
+
+  // フレンド部屋イベント
+  socket.on('join_friend_room', (data, callback) => {
+    handleJoinFriendRoom(io, socket, data, callback);
+  });
+  socket.on('leave_friend_room', (roomId) => {
+    handleLeaveFriendRoom(io, socket, roomId);
+  });
   
   // 切断処理
   socket.on('disconnect', () => {
+    // フレンド部屋から自動退出
+    for (const [roomId, room] of activeFriendRooms.entries()) {
+      const player = room.players.find(p => p.socketId === socket.id);
+      if (player) {
+        handleLeaveFriendRoom(io, socket, roomId);
+      }
+    }
+    
     handleDisconnect(io, rooms, games, socket);
   });
 });
