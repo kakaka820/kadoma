@@ -77,7 +77,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             className="w-full py-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xl rounded-lg transition"
             data-testid="button-friend-match"
           >
-            フレンド戦
+            フレンド
           </button>
         </div>
 
