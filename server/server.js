@@ -22,6 +22,13 @@ const {
   getPendingRequests
 } = require('./friendSystem');
 const { assignPlayerIdsToExistingUsers } = require('./utils/playerIdManager');
+const {
+  createFriendRoom,
+  getInvitedRooms,
+  getMyCreatedRooms,
+  deleteFriendRoom,
+  getFriendRoom
+} = require('./friendRoomHandler');
 
 
 // ========================================
@@ -241,6 +248,112 @@ app.get('/api/friend/requests/:userId', async (req, res) => {
     requests: result.requests 
   });
 });
+
+
+
+// ========================================
+// フレンド部屋 REST API エンドポイント
+// ========================================
+
+/**
+ * POST /api/friend-room/create
+ * フレンド部屋を作成
+ */
+app.post('/api/friend-room/create', async (req, res) => {
+  const { userId, config } = req.body;
+
+  if (!userId || !config) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'ユーザーIDと設定が必要です' 
+    });
+  }
+
+  const result = await createFriendRoom(userId, config);
+  
+  if (result.success) {
+    return res.json({ 
+      success: true, 
+      room: result.room 
+    });
+  } else {
+    return res.status(400).json({ success: false, error: result.error });
+  }
+});
+
+/**
+ * GET /api/friend-room/invited/:userId
+ * 招待されているフレンド部屋一覧を取得
+ */
+app.get('/api/friend-room/invited/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  const result = await getInvitedRooms(userId);
+  
+  res.json({ 
+    success: result.success, 
+    rooms: result.rooms 
+  });
+});
+
+/**
+ * GET /api/friend-room/created/:userId
+ * 自分が作成したフレンド部屋一覧を取得
+ */
+app.get('/api/friend-room/created/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  const result = await getMyCreatedRooms(userId);
+  
+  res.json({ 
+    success: result.success, 
+    rooms: result.rooms 
+  });
+});
+
+/**
+ * DELETE /api/friend-room/:roomId
+ * フレンド部屋を削除
+ */
+app.delete('/api/friend-room/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ 
+      success: false, 
+      error: 'ユーザーIDが必要です' 
+    });
+  }
+
+  const result = await deleteFriendRoom(userId, roomId);
+  
+  if (result.success) {
+    return res.json({ success: true });
+  } else {
+    return res.status(400).json({ success: false, error: result.error });
+  }
+});
+
+/**
+ * GET /api/friend-room/:roomId
+ * フレンド部屋情報を取得
+ */
+app.get('/api/friend-room/:roomId', async (req, res) => {
+  const { roomId } = req.params;
+
+  const result = await getFriendRoom(roomId);
+  
+  if (result.success) {
+    return res.json({ success: true, room: result.room });
+  } else {
+    return res.status(400).json({ success: false, error: result.error });
+  }
+});
+
+
+
+
 
 
 
