@@ -1,6 +1,7 @@
 // src/online/screens/FriendBattleScreen.tsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSocket } from '../contexts/SocketContext';
 
 interface Friend {
   id: string;
@@ -40,6 +41,7 @@ const JOKER_MULTIPLIER_MAP: Record<number, number> = {
 
 export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenProps) {
   const { user } = useAuth();
+  const { socket } = useSocket();
   const [activeTab, setActiveTab] = useState<'create' | 'invited'>('create');
   const [friends, setFriends] = useState<Friend[]>([]);
   const [invitedRooms, setInvitedRooms] = useState<FriendRoom[]>([]);
@@ -165,16 +167,31 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
         // 部屋一覧を更新
         fetchMyRooms();
         
-        // TODO: Socket.io で部屋に参加
-        // この後、Socket.io のイベントを実装します
-      } else {
-        showMessage('error', data.error || '部屋作成に失敗しました');
-      }
-    } catch (error) {
-      showMessage('error', 'ネットワークエラーが発生しました');
-      console.error('[FriendBattle] Create room error:', error);
-    }
-  };
+         // Socket.io で部屋に参加
+        if (socket) {
+          socket.emit('join_friend_room', {
+            roomId: data.room.id,
+            userId: user.id,
+            username: user.username
+          }, (response: any) => {
+            console.log('[FriendBattle] Join response:', response);
+            
+            if (response.success) {
+              // 待機室に移動
+              onRoomJoined();
+            } else {
+              showMessage('error', response.error || '部屋参加に失敗しました');
+            }
+            });
+          }
+          } else {
+              showMessage('error', data.error || '部屋作成に失敗しました');
+          }
+          } catch (error) {
+              showMessage('error', 'ネットワークエラーが発生しました');
+              console.error('[FriendBattle] Create room error:', error);
+          }
+          };
 
   // 部屋削除
   const handleDeleteRoom = async (roomId: string) => {
@@ -209,6 +226,28 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 3000);
   };
+
+
+  // 招待された部屋に参加
+  const handleJoinInvitedRoom = (roomId: string) => {
+    if (!user || !socket) return;
+    socket.emit('join_friend_room', {
+      roomId,
+      userId: user.id,
+      username: user.username
+    }, (response: any) => {
+      console.log('[FriendBattle] Join invited room response:', response);
+      
+      if (response.success) {
+        // 待機室に移動
+        onRoomJoined();
+      } else {
+        showMessage('error', response.error || '部屋参加に失敗しました');
+      }
+    });
+  };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
@@ -415,41 +454,60 @@ export function FriendBattleScreen({ onBack, onRoomJoined }: FriendBattleScreenP
           </div>
         )}
 
-        {/* 招待された部屋タブ */}
+                {/* 招待された部屋タブ */}
         {activeTab === 'invited' && (
-          <div className="space-y-3">
+          <div className="space-y-6">
             {invitedRooms.length === 0 ? (
-              <div className="bg-gray-800 rounded-lg p-8 text-center text-gray-400">
-                招待された部屋はありません
+              <div className="bg-gray-800 rounded-lg p-12 text-center">
+                <p className="text-gray-400 text-lg">招待されている部屋がありません</p>
               </div>
             ) : (
-              invitedRooms.map((room) => (
-                <div
-                  key={room.id}
-                  className="bg-gray-800 rounded-lg p-4"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-white font-bold">{room.config.roomName}</p>
-                    <p className="text-gray-400 text-sm">
-                      作成者: {room.creatorUsername}
-                    </p>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-400 mb-3">
-                    <span>アンティ: {room.config.ante.toLocaleString()} G</span>
-                    <span>JOKER: {room.config.jokerCount}枚</span>
-                    <span>制限: {room.config.timeLimit}秒</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      // TODO: Socket.io で部屋に参加
-                      showMessage('success', '部屋に参加しました');
-                    }}
-                    className="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition"
+              <div className="space-y-3">
+                {invitedRooms.map((room) => (
+                  <div
+                    key={room.id}
+                    className="bg-gray-800 rounded-lg p-6"
                   >
-                    参加する
-                  </button>
-                </div>
-              ))
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <h3 className="text-white font-bold text-lg">
+                          {room.config.roomName}
+                        </h3>
+                        <p className="text-gray-400 text-sm">
+                          作成者: {room.creatorUsername} (ID: {room.creatorPlayerId})
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gray-400 text-xs">ルームコード</p>
+                        <p className="text-white font-mono text-xl">{room.roomCode}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-4 text-sm">
+                      <div>
+                        <p className="text-gray-400">アンティ</p>
+                        <p className="text-white font-bold">{room.config.ante?.toLocaleString()} G</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">JOKER枚数</p>
+                        <p className="text-white font-bold">{room.config.jokerCount}枚</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">制限時間</p>
+                        <p className="text-white font-bold">{room.config.timeLimit}秒</p>
+                      </div>
+                    </div>
+
+                    {/* ← 参加ボタンを追加 */}
+                    <button
+                      onClick={() => handleJoinInvitedRoom(room.id)}
+                      className="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-lg transition"
+                    >
+                      この部屋に参加
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
