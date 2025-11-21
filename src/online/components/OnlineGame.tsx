@@ -21,8 +21,9 @@ import { StatsScreen } from '../screens/StatsScreen';
 import { QuestScreen } from '../screens/QuestScreen';
 import { CustomRoomScreen } from '../screens/CustomRoomScreen';
 import { GiftCodeScreen } from '../screens/GiftCodeScreen'; 
+import { FriendScreen } from '../screens/FriendScreen';
 
-type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom' | 'giftcode';
+type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom' | 'giftcode' | 'friend';
 
 
 interface OnlineGameProps {
@@ -117,7 +118,7 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
     } else if (type === 'custom') {
       setScreen('custom');
     } else if (type === 'friend') {
-      alert('フレンド戦は準備中です');
+      setScreen('friend');
     } else if (type === 'local') {
       if (onSwitchToLocal) {
         onSwitchToLocal();
@@ -237,6 +238,11 @@ useEffect(() => {
   // UI分岐
   if (!isConnected) {
     return <ConnectionStatus />;
+  }
+
+  // フレンド画面
+  if (screen === 'friend') {
+    return <FriendScreen onBack={handleBackToHome} />;
   }
 
   // ギフトコード画面
