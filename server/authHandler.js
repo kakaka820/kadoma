@@ -1,6 +1,7 @@
 // server/authHandler.js
 const { supabase } = require('./supabaseClient');
 const { v4: uuidv4 } = require('uuid');
+const { getNextPlayerId } = require('./utils/playerIdManager');
 
 /**
  * 引継ぎコード生成（8文字: ABCD1234）
@@ -53,6 +54,9 @@ async function registerUser(username) {
       .single();
     codeExists = data !== null;
   }
+
+  // プレイヤーID生成
+  const playerId = await getNextPlayerId();
   
   // ユーザー作成
   const { data, error } = await supabase
@@ -61,6 +65,7 @@ async function registerUser(username) {
       username: username,
       currency: 10000,
       transfer_code: transferCode,
+      player_id: playerId,
       last_login_at: new Date().toISOString()
     })
     .select()
@@ -79,7 +84,8 @@ async function registerUser(username) {
       username: data.username,
       currency: data.currency,
       chips: data.chips || 10000,
-      transferCode: data.transfer_code
+      transferCode: data.transfer_code,
+      playerId: data.player_id
     }
   };
 }
