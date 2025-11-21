@@ -120,7 +120,8 @@ async function loginWithTransferCode(transferCode) {
       id: data.id,
       username: data.username,
       currency: data.currency,
-      transferCode: data.transfer_code
+      transferCode: data.transfer_code,
+      playerId: data.player_id
     }
   };
 }
@@ -155,7 +156,8 @@ async function loginWithUserId(userId) {
       id: data.id,
       username: data.username,
       currency: data.currency,
-      transferCode: data.transfer_code
+      transferCode: data.transfer_code,
+      playerId: data.player_id
     }
   };
 }
