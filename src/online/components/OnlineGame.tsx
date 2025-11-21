@@ -22,8 +22,9 @@ import { QuestScreen } from '../screens/QuestScreen';
 import { CustomRoomScreen } from '../screens/CustomRoomScreen';
 import { GiftCodeScreen } from '../screens/GiftCodeScreen'; 
 import { FriendScreen } from '../screens/FriendScreen';
+import { FriendBattleScreen } from '../screens/FriendBattleScreen';
 
-type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom' | 'giftcode' | 'friend';
+type ScreenType = 'home' | 'room-selection' | 'waiting' | 'playing' | 'result' | 'stats' | 'quests' |'custom' | 'giftcode' | 'friend' | 'friendbattle';
 
 
 interface OnlineGameProps {
@@ -112,13 +113,15 @@ export function OnlineGame({ onSwitchToLocal }: OnlineGameProps) {
   const { notification } = useDisconnectNotification({ socket });
 
   // 画面遷移ハンドラー
-  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests' | 'giftcode') => {
+  const handleNavigate = (type: 'local' | 'multi' | 'custom' | 'friend' | 'stats' | 'quests' | 'giftcode' | 'friendbattle') => {
     if (type === 'multi') {
       setScreen('room-selection');
     } else if (type === 'custom') {
       setScreen('custom');
     } else if (type === 'friend') {
       setScreen('friend');
+    } else if (type === 'friendbattle') {
+    setScreen('friendbattle');
     } else if (type === 'local') {
       if (onSwitchToLocal) {
         onSwitchToLocal();
@@ -244,6 +247,11 @@ useEffect(() => {
   if (screen === 'friend') {
     return <FriendScreen onBack={handleBackToHome} />;
   }
+
+// フレンド戦画面
+if (screen === 'friendbattle') {
+  return <FriendBattleScreen onBack={handleBackToHome} onRoomJoined={handleRoomJoined} />;
+}
 
   // ギフトコード画面
 if (screen === 'giftcode') {
