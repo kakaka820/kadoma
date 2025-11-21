@@ -8,6 +8,7 @@ interface User {
   username: string;
   currency: number;
   transferCode: string;
+  playerId?:number;
 }
 
 interface AuthContextType {
