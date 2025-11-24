@@ -7,7 +7,7 @@ const {
   rejectFriendRequest,
   getFriendList,
   getPendingRequests
-} = require('../friendSystem');
+} = require('../friendship');
 
 /**
  * POST /api/friend/request
