@@ -17,6 +17,17 @@ function generateRoomCode() {
  * フレンド部屋を作成
  */
 async function createFriendRoom(userId, config) {
+   const { data: existingRooms } = await supabase
+    .from('friend_rooms')
+    .select('id')
+    .eq('creator_id', userId)
+    .eq('status', 'waiting');
+  if (existingRooms && existingRooms.length > 0) {
+    return { 
+      success: false, 
+      error: '既に待機中の部屋があります。先に削除してください。' 
+    };
+  }
   const { roomName, ante, jokerCount, timeLimit, invitedFriends } = config;
 
   // ルームコード生成（重複チェック）
