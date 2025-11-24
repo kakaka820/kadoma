@@ -62,8 +62,8 @@ function handlePlayerDisconnect(io, rooms, games, socket) {
       // handleRoundEnd を取得
       //handleRoundEnd を wrapper 関数でラップ
       const handleRoundEndWrapper = (io, games, roomId, gameState) => {
-        const { handleRoundEnd } = require('./roundHandler');
-        handleRoundEnd(io, games, roomId, gameState);
+        const { handleRoundEnd } = require('./round');
+        handleRoundEnd(io, games, roomId, gameState, rooms);
       };
       
       botAutoPlay(

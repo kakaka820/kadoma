@@ -2,7 +2,7 @@
 // ゲーム管理の統括（エントリーポイント）
 
 const { startGame: startGameCore } = require('./gameStarter');
-const { handleRoundEnd } = require('./roundHandler');
+const { handleRoundEnd } = require('./round');
 
 /**
  * ゲーム開始（handleRoundEndを自動注入）

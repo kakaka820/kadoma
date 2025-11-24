@@ -1,5 +1,6 @@
 // server/roundHandler.js
 // ラウンド終了処理
+//server/round\に全部移植したのでもう削除してもいいはず（2025/11/24）
 
 const { saveGameHistory } = require('./gameHistory');
 const { processRound, prepareNextTurn } = require('../shared/core/gameFlow');
