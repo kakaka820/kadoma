@@ -118,6 +118,24 @@ export function useOnlineGameState({ socket }: UseOnlineGameStateProps): UseOnli
       console.log('[useOnlineGameState] gameStatus set to playing');
     });
 
+
+     // フレンド戦専用のゲーム開始イベント
+  socket.on('friend_game_start', (data) => {
+    console.log('[GameState] Friend game start:', data);
+    setRoomId(data.roomId);
+    setPlayerIndex(data.playerIndex);
+    setMyHand(data.hand);
+    setPlayers(data.players);
+    setGameStatus('playing');
+    
+    // フレンド戦フラグを保存
+    localStorage.setItem('kadoma_active_room', data.roomId);
+    localStorage.setItem('kadoma_active_room_status', 'playing');
+    localStorage.setItem('kadoma_is_friend_battle', 'true');
+  });
+
+
+
     //rejoin_success
   socket.on('rejoin_success', (data) => {
     console.log('[useOnlineGameState] rejoin_success received:', data);
@@ -207,6 +225,7 @@ socket.on('cards_revealed', (data) => {
     return () => {
       console.log('[useOnlineGameState] Cleaning up event listeners');
       socket.off('game_start');
+      socket.off('friend_game_start');
       socket.off('rejoin_success');
       socket.off('cards_revealed');
       socket.off('hand_update');
