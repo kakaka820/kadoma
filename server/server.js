@@ -462,7 +462,7 @@ io.on('connection', (socket) => {
 
   // フレンド部屋イベント
   socket.on('join_friend_room', (data, callback) => {
-    handleJoinFriendRoom(io, socket, data, callback);
+    handleJoinFriendRoom(io, socket, data, callback, games);
   });
   socket.on('leave_friend_room', (roomId) => {
     handleLeaveFriendRoom(io, socket, roomId);

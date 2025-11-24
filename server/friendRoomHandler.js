@@ -213,7 +213,7 @@ const activeFriendRooms = new Map(); // roomId -> { players: [], config: {}, sta
 /**
  * フレンド部屋に参加（Socket.io）
  */
-async function handleJoinFriendRoom(io, socket, data, callback) {
+async function handleJoinFriendRoom(io, socket, data, callback, games) {
   const { roomId, userId, username } = data;
 
   console.log('[FriendRoom] Join request:', { roomId, userId, username });
@@ -302,7 +302,7 @@ async function handleJoinFriendRoom(io, socket, data, callback) {
     // 3人揃ったらゲーム開始
     if (friendRoom.players.length === 3) {
       setTimeout(() => {
-        startFriendGame(io, roomId);
+        startFriendGame(io, roomId, games);
       }, 2000); // 2秒後に開始
     }
 
@@ -353,7 +353,7 @@ function handleLeaveFriendRoom(io, socket, roomId) {
 /**
  * フレンド部屋のゲームを開始
  */
-function startFriendGame(io, roomId) {
+function startFriendGame(io, roomId, games) {
   const friendRoom = activeFriendRooms.get(roomId);
   if (!friendRoom || friendRoom.players.length !== 3) {
     console.log('[FriendRoom] Cannot start game: not enough players');
@@ -394,10 +394,11 @@ function startFriendGame(io, roomId) {
     maxJokerCount: jokerCount,
     requiredChips: 0 // ← フレンド戦は buy_in なし
   };
+  
 
+   gameState.playerSelections = [false, false, false];
 
-  // ゲーム状態を保存（既存の games Map を利用）
-  const { games } = require('../roomManager');
+  // ゲーム状態を保存（既存の games Map を利用
   games.set(roomId, gameState);
   // ゲーム開始通知（プレイヤーごとに手札を送信）
   friendRoom.players.forEach((player, index) => {
@@ -430,5 +431,6 @@ module.exports = {
   generateRoomCode,
   handleJoinFriendRoom,
   handleLeaveFriendRoom,
-  activeFriendRooms
+  activeFriendRooms,
+  startFriendGame
 };
