@@ -5,7 +5,7 @@ const {
   handleJoinFriendRoom,
   handleLeaveFriendRoom,
   activeFriendRooms
-} = require('../friendRoomHandler');
+} = require('../friendRoom');
 const { handleDisconnect } = require('../roomManager');
 
 function setupFriendRoomEvents(socket, io, rooms, games) {
