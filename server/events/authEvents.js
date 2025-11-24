@@ -5,7 +5,7 @@ const {
   registerUser, 
   loginWithTransferCode, 
   loginWithUserId 
-} = require('../authHandler');
+} = require('../auth');
 
 function setupAuthEvents(socket) {
   // ユーザー登録
