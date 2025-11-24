@@ -1,6 +1,6 @@
 // server/utils/customRoomHandler.js
 const { supabase } = require('../supabaseClient');
-const { checkSufficientCurrency } = require('../authHandler');
+const { checkSufficientCurrency } = require('../auth');
 const { deductRoomFee } = require('./currencyHelper');
 const { startGame } = require('../gameManager');
 

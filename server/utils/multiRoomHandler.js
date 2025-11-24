@@ -2,7 +2,7 @@
 // マルチルーム参加処理
 
 const { MULTI_ROOMS, BOT_WAIT_TIME_MS } = require('../../shared/config');
-const { checkSufficientCurrency } = require('../authHandler');
+const { checkSufficientCurrency } = require('../auth');
 const { deductRoomFee } = require('./currencyHelper');
 const { createBotPlayer, BOT_STRATEGIES } = require('../bot/botPlayer');
 const { startGame } = require('../gameManager');

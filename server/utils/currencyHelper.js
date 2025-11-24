@@ -1,6 +1,6 @@
 // server//utils/currencyManager.js
 
-const { updateUserCurrency } = require('../authHandler');
+const { updateUserCurrency } = require('../auth');
 
 /**
  * チップ更新の種類
