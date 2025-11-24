@@ -307,6 +307,7 @@ if (screen === 'custom') {
         onReturnHome={handleReturnHome}
         onRematch={handleRematch}
         dailyBonusResult={dailyBonusResult}
+        isFriendBattle={isFriendBattle}
       />
     );
   }
