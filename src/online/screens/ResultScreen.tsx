@@ -17,6 +17,7 @@ interface ResultScreenProps {
     bonusAmount: number;
     remainingPlays: number;
   };
+  isFriendBattle?:boolean;
 }
 
 export function ResultScreen({
@@ -29,6 +30,7 @@ export function ResultScreen({
   onReturnHome,
   onRematch,
   dailyBonusResult,
+  isFriendBattle = false,
 }: ResultScreenProps) {
   const [isRematchClicked, setIsRematchClicked] = useState(false);
   const { socket } = useSocket();
@@ -82,7 +84,7 @@ if (response.success) {
           <p className="text-gray-500 text-sm">{reason}</p>
         </div>
 
-      {dailyBonusResult && dailyBonusResult.bonusGranted && (
+      {!isFriendBattle && dailyBonusResult && dailyBonusResult.bonusGranted && (
           <div className="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-lg p-4 mb-6 animate-pulse">
             <p className="text-white text-center font-bold text-lg">
               🎁 デイリーボーナス！
