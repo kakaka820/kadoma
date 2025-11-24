@@ -7,7 +7,7 @@ const {
   getMyCreatedRooms,
   deleteFriendRoom,
   getFriendRoom
-} = require('../friendRoomHandler');
+} = require('../friendRoom');
 
 /**
  * POST /api/friend-room/create
