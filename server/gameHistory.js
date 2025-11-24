@@ -70,7 +70,7 @@ async function updateUserStats(userId, buyIn, finalScore, rank, profit) {
 /**
  * ゲーム履歴を保存
  */
-async function saveGameHistory(roomId, gameState, rankings) {
+async function saveGameHistory(roomId, gameState, rankings, isFriendBattle = false) {
   
   console.log('[履歴保存] 開始:', roomId);
   
@@ -94,7 +94,8 @@ async function saveGameHistory(roomId, gameState, rankings) {
           buy_in: ranking.buyIn,
           final_score: ranking.finalScore,
           profit: ranking.profit,
-          rank: ranking.rank
+          rank: ranking.rank,
+          is_friend_battle: isFriendBattle
         });
       
       if (error) {
@@ -104,6 +105,9 @@ async function saveGameHistory(roomId, gameState, rankings) {
           finalScore: ranking.finalScore,
           rank: ranking.rank
         });
+
+        //フレンド戦の場合はuser_statsを更新しない
+        if (!isFriendBattle) {
        // user_stats を更新
         await updateUserStats(
           player.userId,
@@ -112,7 +116,9 @@ async function saveGameHistory(roomId, gameState, rankings) {
           ranking.rank,
           ranking.profit
         );
-
+        } else {
+         console.log('[統計更新] フレンド戦のためスキップ:', player.userId);
+       }
 
       }
     } catch (err) {

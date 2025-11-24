@@ -107,6 +107,10 @@ async function performNextTurn(io, games, roomId, state, rooms) {
     gameOverReason: nextState.gameOverReason
   }));
 
+   // フレンド戦フラグをチェック
+  const isFriendBattle = nextState.config?.isFriendBattle || false;
+  console.log('[GameOver] isFriendBattle:', isFriendBattle);
+
     // ゲーム終了処理
 
     // ランキングを計算
@@ -127,32 +131,15 @@ async function performNextTurn(io, games, roomId, state, rooms) {
 
     console.log('[GameOver] rankings:', rankings);
 
-    //チップ配分
-    const chipResults = await distributeChips(nextState);
-    const dailyBonusResults = await processDailyBonuses(nextState);
+    // フレンド戦の場合は通貨処理をスキップ
+  let chipResults = null;
+  let dailyBonusResults = null;
+  let updatedCurrencies = {};
 
-    const updatedCurrencies = {};
-if (chipResults) {
-  for (const result of chipResults) {
-    if (result.userId) {
-      // DBから最新の currency を取得
-      const { data, error } = await supabase
-        .from('users')
-        .select('currency')
-        .eq('id', result.userId)
-        .single();
-      
-      if (data && !error) {
-        updatedCurrencies[result.userId] = data.currency;
-        console.log(`[GameOver] Updated currency for ${result.userId}: ${data.currency}`);
-      } else {
-        console.error(`[GameOver] Failed to get currency for ${result.userId}:`, error);
-      }
-    }
-  }
-}
 
-async function processDailyBonuses(gameState) {
+
+  // processDailyBonuses 関数を先に定義
+  async function processDailyBonuses(gameState) {
   const bonusResults = {};
   
   for (let i = 0; i < gameState.players.length; i++) {
@@ -173,11 +160,32 @@ async function processDailyBonuses(gameState) {
   return bonusResults;
 }
 
+    if (!isFriendBattle) {
+    // 通常戦のみチップ配分
+    chipResults = await distributeChips(nextState);
+    dailyBonusResults = await processDailyBonuses(nextState);
 
+if (chipResults) {
+  for (const result of chipResults) {
+    if (result.userId) {
+      // DBから最新の currency を取得
+      const { data, error } = await supabase
+        .from('users')
+        .select('currency')
+        .eq('id', result.userId)
+        .single();
+      
+      if (data && !error) {
+        updatedCurrencies[result.userId] = data.currency;
+        console.log(`[GameOver] Updated currency for ${result.userId}: ${data.currency}`);
+      } else {
+        console.error(`[GameOver] Failed to get currency for ${result.userId}:`, error);
+      }
+    }
+  }
+}
 
-
-
-
+console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
 
 console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
     saveGameHistory(roomId, nextState, rankings).catch(err => {
@@ -209,11 +217,31 @@ console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
       // 3. チップ獲得量更新（累計）
       if (ranking.profit > 0) {
         await updateQuestProgress(userId, 'earn_chips', ranking.profit);
-        // 4. 1戦でのチップ獲得（単発）← 追加
+        // 4. 1戦でのチップ獲得（単発）
         await updateQuestProgress(userId, 'earn_chips_single', ranking.profit);
         console.log(`[Quest] User ${userId}: earn_chips +${ranking.profit}`);
       }
     }
+
+    } else {
+    // フレンド戦の場合
+    console.log('[GameOver] Friend battle - skipping currency, daily bonus, and quest updates');
+    
+    // フレンド戦用の履歴を保存（isFriendBattle フラグ付き）
+    saveGameHistory(roomId, nextState, rankings, true).catch(err => { // ← 第4引数に true
+      console.error('[game_over] Friend battle history save failed:', err);
+    });
+  }
+
+
+
+
+
+
+
+
+
+
   
     //ゲーム終了通知
     io.to(roomId).emit('game_over', {
@@ -223,7 +251,8 @@ console.log('[GameOver] updatedCurrencies:', updatedCurrencies);
       chipResults: chipResults,
       roomConfig: nextState.roomConfig,
       updatedCurrencies: updatedCurrencies,
-      dailyBonusResults: dailyBonusResults
+      dailyBonusResults: dailyBonusResults,
+      isFriendBattle: isFriendBattle
     });
      games.delete(roomId);
      rooms.delete(roomId);

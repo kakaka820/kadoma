@@ -363,24 +363,62 @@ function startFriendGame(io, roomId) {
   console.log('[FriendRoom] Starting game for room:', roomId);
 
   const { config } = friendRoom;
-  const { jokerCount, anteMultiplier, timeLimit } = config;
+  const { jokerCount, anteMultiplier, timeLimit, ante } = config;
 
-  // ゲーム開始通知
-  io.to(roomId).emit('friend_game_start', {
-    roomId,
-    players: friendRoom.players.map(p => ({
-      username: p.username,
-      playerIndex: p.playerIndex
-    })),
-    config: {
-      maxJokerCount: jokerCount,
-      anteMultiplier,
-      timeLimit,
-      isFriendBattle: true // フレンド戦フラグ
-    }
+  // ← ゲーム初期化（既存のゲームロジックを再利用）
+  const { initializeGame } = require('../shared/core/gameFlow');
+  
+  const gameState = initializeGame(3, anteMultiplier, ante || 1000);
+  
+  // フレンド戦フラグを設定
+  gameState.config = {
+    isFriendBattle: true,
+    maxJokerCount: jokerCount,
+    timeLimit
+  };
+  
+  gameState.roomId = roomId;
+  gameState.players = friendRoom.players.map((p, idx) => ({
+    id: p.socketId,
+    name: p.username,
+    userId: p.userId,
+    isBot: false,
+    buyIn: 0 
+  }));
+
+  // roomConfig を設定（buy_in なし）
+  gameState.roomConfig = {
+    id: 'friend_battle',
+    ante: ante || 1000,
+    anteMultiplier,
+    maxJokerCount: jokerCount,
+    requiredChips: 0 // ← フレンド戦は buy_in なし
+  };
+
+
+  // ゲーム状態を保存（既存の games Map を利用）
+  const { games } = require('../roomManager');
+  games.set(roomId, gameState);
+  // ゲーム開始通知（プレイヤーごとに手札を送信）
+  friendRoom.players.forEach((player, index) => {
+    io.to(player.socketId).emit('friend_game_start', {
+      roomId,
+      playerIndex: index,
+      players: friendRoom.players.map(p => p.username),
+      hand: gameState.hands[index],
+      scores: gameState.scores,
+      config: {
+        maxJokerCount: jokerCount,
+        anteMultiplier,
+        timeLimit,
+        isFriendBattle: true
+      }
+    });
   });
-
+  
   friendRoom.status = 'playing';
+  
+  console.log('[FriendRoom] Game started for room:', roomId);
 }
 
 module.exports = {
