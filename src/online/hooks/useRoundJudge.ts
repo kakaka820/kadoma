@@ -8,15 +8,23 @@ interface UseRoundJudgeProps {
   socket: Socket | null;
 }
 
+export interface RoundResultData {
+  message: string;
+  winnerIndex: number;
+  loserIndex: number;
+  scoreChange: number;
+  isReverse: boolean;
+}
+
 interface UseRoundJudgeReturn {
-  roundResult: string | null;
+  roundResult: RoundResultData | null;
   scores: number[];
   wins: number[];
   isShowdown: boolean;
 }
 
 export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeReturn {
-  const [roundResult, setRoundResult] = useState<string | null>(null);
+  const [roundResult, setRoundResult] = useState<RoundResultData | null>(null);
   const [scores, setScores] = useState<number[]>([0, 0, 0]);
   const [wins, setWins] = useState<number[]>([0, 0, 0]);
   const [isShowdown, setIsShowdown] = useState(false);
@@ -45,11 +53,11 @@ export function useRoundJudge({ socket }: UseRoundJudgeProps): UseRoundJudgeRetu
     // ラウンド結果
     socket.on('round_result', (data) => {
       console.log('[useRoundJudge] round_result received:', data);
-      setRoundResult(data.message);
+      setRoundResult(data);
       setScores(data.scores);
       setWins(data.wins);
       
-      // 2秒後に結果クリア
+      // 2秒後に結果クリア；あとで修正するかも
       setTimeout(() => {
         setRoundResult(null);
         setIsShowdown(false);
