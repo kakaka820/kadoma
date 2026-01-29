@@ -53,3 +53,29 @@
   width: 6rem;
   height: 8rem;
 }
+
+/* 勝者のカード：輝きと拡大 */
+.winner-card {
+  border-color: #fbbf24 !important; /* gold-400 */
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 40px rgba(251, 191, 36, 0.4) !important;
+  transform: scale(1.1) translateY(-10px) !important;
+  z-index: 20;
+  animation: winner-pulse 1s infinite alternate;
+}
+
+/* 敗者のカード：暗転と縮小 */
+.loser-card {
+  filter: grayscale(80%) brightness(0.7);
+  /* transform: scale(0.9) !important; */ /*小さくする設定はいらんかな思ったので一旦コメントアウト*/
+  opacity: 0.8;
+  border-color: #4b5563 !important; /* gray-600 */
+}
+
+@keyframes winner-pulse {
+  from {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.9), 0 0 60px rgba(251, 191, 36, 0.6);
+  }
+}
