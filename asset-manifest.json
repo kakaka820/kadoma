@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/kadoma/static/css/main.b8c6f59d.css",
-    "main.js": "/kadoma/static/js/main.c5c55d0d.js",
+    "main.css": "/kadoma/static/css/main.f115f405.css",
+    "main.js": "/kadoma/static/js/main.037fcfbb.js",
     "static/js/453.ba2699ca.chunk.js": "/kadoma/static/js/453.ba2699ca.chunk.js",
     "index.html": "/kadoma/index.html",
-    "main.b8c6f59d.css.map": "/kadoma/static/css/main.b8c6f59d.css.map",
-    "main.c5c55d0d.js.map": "/kadoma/static/js/main.c5c55d0d.js.map",
+    "main.f115f405.css.map": "/kadoma/static/css/main.f115f405.css.map",
+    "main.037fcfbb.js.map": "/kadoma/static/js/main.037fcfbb.js.map",
     "453.ba2699ca.chunk.js.map": "/kadoma/static/js/453.ba2699ca.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.b8c6f59d.css",
-    "static/js/main.c5c55d0d.js"
+    "static/css/main.f115f405.css",
+    "static/js/main.037fcfbb.js"
   ]
 }
