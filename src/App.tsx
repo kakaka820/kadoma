@@ -4,6 +4,7 @@ import Game from './local/components/Game';
 import OnlineApp from './online/OnlineApp';
 import { SocketProvider } from './online/contexts/SocketContext';
 import { AuthProvider } from './online/contexts/AuthContext';
+import "./styles/components/card.css";
 
 export default function App() {
   const [mode, setMode] = useState<'local' | 'online'>('online');
