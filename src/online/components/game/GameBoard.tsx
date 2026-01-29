@@ -181,6 +181,7 @@ export function GameBoard(props: GameBoardProps) {
             fieldCards={fieldCards}
             playerNames={players}
             playerIndex={playerIndex ?? 0}
+            playerSelections={playerSelections}
             />
           </div>
         </div>
