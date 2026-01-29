@@ -6,6 +6,9 @@ import Field from './Field';
 import { NotificationPanel } from '../ui/NotificationPanel';
 import { Warning } from '../../hooks/useWarnings';
 import { OpponentCard } from '../../hooks/useOnlineGameState';
+import { RoundResultData } from '../../hooks/useRoundJudge';
+
+
 
 interface GameBoardProps {
   isConnected: boolean;
@@ -17,7 +20,7 @@ interface GameBoardProps {
   scores: number[];
   wins: number[];
   fieldCards: (any | null)[];
-  roundResult: string | null;
+  roundResult: RoundResultData | null;
   myHand: any[];
   playCard: (cardIndex: number) => void;
   warnings: Warning[];
@@ -171,7 +174,7 @@ export function GameBoard(props: GameBoardProps) {
           {/* ラウンド結果（場札の上にオーバーレイ） */}
           {roundResult && (
             <div className="absolute -top-20 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg z-10 whitespace-nowrap">
-              {roundResult}
+              {roundResult.message}
             </div>
           )}
 
@@ -182,6 +185,7 @@ export function GameBoard(props: GameBoardProps) {
             playerNames={players}
             playerIndex={playerIndex ?? 0}
             playerSelections={playerSelections}
+            roundResult={roundResult}
             />
           </div>
         </div>
