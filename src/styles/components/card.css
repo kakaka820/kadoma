@@ -63,7 +63,7 @@
   animation: winner-pulse 1s infinite alternate;
 }
 
-/* 敗者のカード：暗転と縮小 */
+/* 敗者のカード：暗転（と縮小） */
 .loser-card {
   filter: grayscale(80%) brightness(0.7);
   /* transform: scale(0.9) !important; */ /*小さくする設定はいらんかな思ったので一旦コメントアウト*/
@@ -77,5 +77,25 @@
   }
   to {
     box-shadow: 0 0 30px rgba(251, 191, 36, 0.9), 0 0 60px rgba(251, 191, 36, 0.6);
+  }
+}
+
+/*手札配るアニメーション*/
+.card-deal-animation {
+  animation: card-deal 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  opacity: 0;
+}
+@keyframes card-deal {
+  0% {
+    transform: translateY(-100vh) rotate(20deg); /* 画面上部から */
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(10%) rotate(-5deg); /* 少し行き過ぎる（バウンス感） */
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) rotate(0); /* 定位置へ */
+    opacity: 1;
   }
 }
