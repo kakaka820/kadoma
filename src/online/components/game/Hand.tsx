@@ -4,15 +4,17 @@
 import React from 'react';
 import { Card } from '../../types/game';
 
+
 interface HandProps {
   cards: Card[];
   onCardClick: (index: number) => void;
   disabled: boolean;
   selectedCardIndex?: number | null;
   isShowdown?: boolean;
+  isDealing?: boolean;
 }
 
-export default function Hand({ cards, onCardClick, disabled, selectedCardIndex, isShowdown = false }: HandProps) {
+export default function Hand({ cards, onCardClick, disabled, selectedCardIndex, isShowdown = false, isDealing = false }: HandProps) {
   return (
     <div>
       <div className="flex gap-3 justify-center">
@@ -31,7 +33,15 @@ export default function Hand({ cards, onCardClick, disabled, selectedCardIndex, 
               : 'border-gray-400 bg-white cursor-pointer hover:border-yellow-400 hover:-translate-y-2 hover:shadow-lg'
             }
             ${(isShowdown && selectedCardIndex === idx) ? 'invisible' : 'visible'}
+
+
+            ${isDealing ? 'card-deal-animation' : ''}
+
+
           `}
+          style={{
+              animationDelay: isDealing ? `${idx * 0.1}s` : '0s'}}
+
           >
             <span className="text-2xl font-bold text-gray-900">
             {card.suit ? (
